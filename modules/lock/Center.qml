@@ -154,6 +154,40 @@ ColumnLayout {
                 implicitWidth: implicitHeight
                 implicitHeight: fprintIcon.implicitHeight + Appearance.padding.small * 2
 
+                // Active scanning indicator circle
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: fprintIcon.implicitWidth + Appearance.padding.normal
+                    height: width
+                    radius: width / 2
+                    color: "transparent"
+                    border.width: 2
+                    border.color: Colours.palette.m3primary
+                    opacity: (root.lock.pam.fprint.active && !root.lock.pam.fprintState) ? 0.8 : 0
+                    
+                    Behavior on opacity {
+                        Anim {}
+                    }
+                    
+                    // Pulse animation
+                    SequentialAnimation on scale {
+                        running: root.lock.pam.fprint.active && !root.lock.pam.fprintState
+                        loops: Animation.Infinite
+                        NumberAnimation {
+                            from: 1.0
+                            to: 1.1
+                            duration: 800
+                            easing.type: Easing.InOutQuad
+                        }
+                        NumberAnimation {
+                            from: 1.1
+                            to: 1.0
+                            duration: 800
+                            easing.type: Easing.InOutQuad
+                        }
+                    }
+                }
+
                 MaterialIcon {
                     id: fprintIcon
 
@@ -212,6 +246,31 @@ ColumnLayout {
                     font.weight: 500
                 }
             }
+        }
+    }
+
+    // Fingerprint feedback text
+    Text {
+        id: fprintFeedback
+        
+        Layout.alignment: Qt.AlignHCenter
+        Layout.topMargin: Appearance.padding.small
+        
+        text: {
+            if (root.lock.pam.fprintState === "fail")
+                return `Fingerprint not recognized (${root.lock.pam.fprint.tries}/${Config.lock.maxFprintTries}). Try again or use password.`;
+            if (root.lock.pam.fprintState === "max")
+                return `Too many failed attempts (${Config.lock.maxFprintTries}/${Config.lock.maxFprintTries}). Please use password.`;
+            if (root.lock.pam.fprintState === "error")
+                return "Fingerprint scanner error. Please use password.";
+            return `Fingerprint not recognized (${root.lock.pam.fprint.tries}/${Config.lock.maxFprintTries}). Try again or use password.`; // Placeholder to maintain layout
+        }
+        color: Colours.palette.m3error
+        font.pixelSize: Appearance.text.sizes.small
+        opacity: root.lock.pam.fprintState ? 1 : 0
+        
+        Behavior on opacity {
+            Anim {}
         }
     }
 

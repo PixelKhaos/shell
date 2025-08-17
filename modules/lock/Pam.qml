@@ -46,8 +46,11 @@ Scope {
         }
 
         onCompleted: res => {
-            if (res === PamResult.Success)
+            if (res === PamResult.Success) {
+                // Reset fingerprint state on successful password login
+                root.fprintState = "";
                 return root.lock.unlock();
+            }
 
             if (res === PamResult.Error)
                 root.state = "error";
@@ -74,8 +77,11 @@ Scope {
             if (!available)
                 return;
 
-            if (res === PamResult.Success)
+            if (res === PamResult.Success) {
+                // Reset fingerprint state on successful fingerprint login
+                root.fprintState = "";
                 return root.lock.unlock();
+            }
 
             if (res === PamResult.Error) {
                 root.fprintState = "error";
@@ -89,16 +95,14 @@ Scope {
                 // when max tries is reached.
                 tries++;
                 if (tries < Config.lock.maxFprintTries) {
+                    // Show individual failure state before retrying
+                    root.fprintState = "fail";
                     // Restart if not actually real max tries
                     start();
                 } else {
                     root.fprintState = "max";
                     abort();
                 }
-            } else if (res === PamResult.Failed) {
-                root.fprintState = "fail";
-                abort();
-                start();
             }
 
             fprintStateReset.start();
@@ -133,7 +137,10 @@ Scope {
 
         interval: 4000
         onTriggered: {
-            root.fprintState = "";
+            // Don't reset state if we've reached maximum attempts
+            if (root.fprintState !== "max") {
+                root.fprintState = "";
+            }
             fprint.errorTries = 0;
         }
     }
