@@ -95,6 +95,11 @@ Item {
                         visibilities: root.visibilities
                     }
                 }
+                Pane {
+                    sourceComponent: Mixer {
+                        visibilities: root.visibilities
+                    }
+                }
 
                 Pane {
                     sourceComponent: Performance {}

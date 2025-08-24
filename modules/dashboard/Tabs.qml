@@ -41,6 +41,11 @@ Item {
         }
 
         Tab {
+            iconName: "volume_up"
+            text: qsTr("Mixer")
+        }
+
+        Tab {
             iconName: "speed"
             text: qsTr("Performance")
         }
