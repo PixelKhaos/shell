@@ -9,12 +9,24 @@ import Quickshell.Bluetooth
 import Quickshell.Services.UPower
 import QtQuick
 import QtQuick.Layouts
+import "../../../services"
 
 StyledRect {
     id: root
 
     property color colour: Colours.palette.m3secondary
     readonly property alias items: iconColumn
+    
+    // Timer to periodically check battery status, some other solution would be better?
+    Timer {
+        id: batteryCheckTimer
+        interval: 30000
+        running: Config.bar.status.showBattery
+        repeat: true
+        onTriggered: {
+            BatteryNotifier.checkBatteryStatus()
+        }
+    }
 
     color: Colours.tPalette.m3surfaceContainer
     radius: Appearance.rounding.full
@@ -129,7 +141,12 @@ StyledRect {
         // Battery icon
         WrappedLoader {
             name: "battery"
-            active: Config.bar.status.showBattery
+            active: Config.bar.status.showBattery            
+            Component.onCompleted: {
+                if (active) {
+                    BatteryNotifier.checkBatteryStatus();
+                }
+            }
 
             sourceComponent: MaterialIcon {
                 animate: true

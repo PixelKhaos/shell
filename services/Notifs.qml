@@ -50,6 +50,29 @@ Singleton {
             for (const notif of root.list)
                 notif.popup = false;
         }
+        
+        function clearByApp(appName: string): void {
+            for (const notif of root.list) {
+                if (notif.notification.appName === appName)
+                    notif.popup = false;
+            }
+        }
+        
+        function clearByTitle(titlePattern: string): void {
+            for (const notif of root.list) {
+                if (notif.notification.title && notif.notification.title.includes(titlePattern))
+                    notif.popup = false;
+            }
+        }
+        
+        function clearByAppAndTitle(appName: string, titlePattern: string): void {
+            for (const notif of root.list) {
+                if (notif.notification.appName === appName && 
+                    notif.notification.title && 
+                    notif.notification.title.includes(titlePattern))
+                    notif.popup = false;
+            }
+        }
     }
 
     component Notif: QtObject {
