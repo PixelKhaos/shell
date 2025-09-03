@@ -22,6 +22,7 @@ StyledRect {
     clip: true
     implicitWidth: Config.bar.sizes.innerWidth
     implicitHeight: iconColumn.implicitHeight + Appearance.padding.normal * 2 - (Config.bar.status.showLockStatus && !Hypr.capsLock && !Hypr.numLock ? iconColumn.spacing : 0)
+    implicitHeight: iconColumn.implicitHeight + Appearance.padding.normal * 2 - (Config.bar.status.showLockStatus && !Hypr.capsLock && !Hypr.numLock ? iconColumn.spacing : 0)
 
     ColumnLayout {
         id: iconColumn
@@ -31,7 +32,108 @@ StyledRect {
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Appearance.padding.normal
 
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: Appearance.padding.normal
+
         spacing: Appearance.spacing.smaller / 2
+
+        // Lock keys status
+        WrappedLoader {
+            name: "lockstatus"
+            active: Config.bar.status.showLockStatus
+
+            sourceComponent: ColumnLayout {
+                spacing: 0
+
+                Item {
+                    implicitWidth: capslockIcon.implicitWidth
+                    implicitHeight: Hypr.capsLock ? capslockIcon.implicitHeight : 0
+
+                    MaterialIcon {
+                        id: capslockIcon
+
+                        anchors.centerIn: parent
+
+                        scale: Hypr.capsLock ? 1 : 0.5
+                        opacity: Hypr.capsLock ? 1 : 0
+
+                        text: "keyboard_capslock_badge"
+                        color: root.colour
+
+                        Behavior on opacity {
+                            Anim {}
+                        }
+
+                        Behavior on scale {
+                            Anim {}
+                        }
+                    }
+
+                    Behavior on implicitHeight {
+                        Anim {}
+                    }
+                }
+
+                Item {
+                    Layout.topMargin: Hypr.capsLock && Hypr.numLock ? iconColumn.spacing : 0
+
+                    implicitWidth: numlockIcon.implicitWidth
+                    implicitHeight: Hypr.numLock ? numlockIcon.implicitHeight : 0
+
+                    MaterialIcon {
+                        id: numlockIcon
+
+                        anchors.centerIn: parent
+
+                        scale: Hypr.numLock ? 1 : 0.5
+                        opacity: Hypr.numLock ? 1 : 0
+
+                        text: "looks_one"
+                        color: root.colour
+
+                        Behavior on opacity {
+                            Anim {}
+                        }
+
+                        Behavior on scale {
+                            Anim {}
+                        }
+                    }
+
+                    Behavior on implicitHeight {
+                        Anim {}
+                    }
+                }
+            }
+        }
+
+        // Notifications icon
+        WrappedLoader {
+            name: "notifications"
+
+            asynchronous: true
+            active: Config.bar.status.showNotifications
+            visible: active
+
+            sourceComponent: MaterialIcon {
+                animate: true
+                text: {
+                    if (Notifs.dnd)
+                        return "notifications_off";
+                    if (Notifs.list.length > 0)
+                        return "notifications_active";
+                    return "notifications_none";
+                }
+                color: Notifs.dnd ? Colours.palette.m3error : root.colour
+
+                MouseArea {
+                    anchors.fill: parent
+                    onClicked: Notifs.toggleDnd()
+                }
+            }
+        }
 
         // Lock keys status
         WrappedLoader {
@@ -144,6 +246,8 @@ StyledRect {
         WrappedLoader {
             Layout.preferredHeight: implicitHeight
 
+            Layout.preferredHeight: implicitHeight
+
             name: "bluetooth"
             active: Config.bar.status.showBluetooth
 
@@ -199,6 +303,10 @@ StyledRect {
                         }
                     }
                 }
+            }
+
+            Behavior on Layout.preferredHeight {
+                Anim {}
             }
 
             Behavior on Layout.preferredHeight {

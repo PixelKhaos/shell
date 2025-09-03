@@ -68,6 +68,7 @@ or a devshell. The shell can then be run via `caelestia-shell`.
 > To enable the CLI, use the `with-cli` package.
 
 For home-manager, you can also use the Caelestia's home manager module (explained in [configuring](https://github.com/caelestia-dots/shell?tab=readme-ov-file#home-manager-module)) that installs and configures the shell and the CLI.
+For home-manager, you can also use the Caelestia's home manager module (explained in [configuring](https://github.com/caelestia-dots/shell?tab=readme-ov-file#home-manager-module)) that installs and configures the shell and the CLI.
 
 ### Manual installation
 
@@ -207,12 +208,14 @@ All configuration options should be put in `~/.config/caelestia/shell.json`. Thi
 default, you must create it manually.
 
 ### Example configuration
+### Example configuration
 
 > [!NOTE]
 > The example configuration only includes recommended configuration options. For more advanced customisation
 > such as modifying the size of individual items or changing constants in the code, there are some other
 > options which can be found in the source files in the `config` directory.
 
+<details><summary>Example</summary>
 <details><summary>Example</summary>
 
 ```json
@@ -268,7 +271,9 @@ default, you must create it manually.
     },
     "bar": {
         "clock": {
-            "showIcon": true
+            "showIcon": true,
+            "showCalendar": true,
+            "calendarStyle": "simple"
         },
         "dragThreshold": 20,
         "entries": [
@@ -392,6 +397,7 @@ default, you must create it manually.
         "defaultPlayer": "Spotify",
         "gpuType": "",
         "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
+        "playerAliases": [{ "from": "com.github.th_ch.youtube_music", "to": "YT Music" }],
         "weatherLocation": "",
         "useFahrenheit": false,
         "useTwelveHourClock": false,
@@ -410,6 +416,39 @@ default, you must create it manually.
     }
 }
 ```
+
+</details>
+
+### Home Manager Module
+
+For NixOS users, a home manager module is also available.
+
+<details><summary><code>home.nix</code></summary>
+
+```nix
+programs.caelestia = {
+  enable = true;
+  systemd = {
+    enable = false; # if you prefer starting from your compositor
+    target = "graphical-session.target";
+    environment = [];
+  };
+  settings = {
+    bar.status = {
+      showBattery = false;
+    };
+    paths.wallpaperDir = "~/Images";
+  };
+  cli = {
+    enable = true; # Also add caelestia-cli to path
+    settings = {
+      theme.enableGtk = false;
+    };
+  };
+};
+```
+
+The module automatically adds Caelestia shell to the path with **full functionality**. The CLI is not required, however you have the option to enable and configure it.
 
 </details>
 
@@ -501,6 +540,7 @@ which helped me a lot with learning how to use Quickshell.
 
 Finally another thank you to all the configs I took inspiration from (only one for now):
 
+-   [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
 -   [Axenide/Ax-Shell](https://github.com/Axenide/Ax-Shell)
 
 ## Stonks 📈

@@ -63,6 +63,27 @@ Item {
             source: "LockStatus.qml"
         }
 
+        Popout {
+            name: "calendar-advanced"
+            sourceComponent: Loader {
+                source: "Calendars/Advanced.qml"
+            }
+        }
+
+        Popout {
+            name: "calendar-simple"
+            sourceComponent: Loader {
+                source: "Calendars/Simple.qml"
+            }
+        }
+
+        Popout {
+            name: "notifications"
+            sourceComponent: Notifications {
+                wrapper: root.wrapper
+            }
+        }
+
         Repeater {
             model: ScriptModel {
                 values: [...SystemTray.items.values]
