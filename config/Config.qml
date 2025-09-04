@@ -25,7 +25,7 @@ Singleton {
     property alias battery: adapter.battery
 
     FileView {
-        path: `${Paths.stringify(Paths.config)}/shell.json`
+        path: `${Paths.config}/shell.json`
         watchChanges: true
         onFileChanged: reload()
 

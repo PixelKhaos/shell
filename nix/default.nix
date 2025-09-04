@@ -14,12 +14,8 @@
   swappy,
   wl-clipboard,
   libqalculate,
-  inotify-tools,
-  bluez,
   bash,
   hyprland,
-  coreutils,
-  file,
   material-symbols,
   rubik,
   nerd-fonts,
@@ -50,12 +46,8 @@
       swappy
       wl-clipboard
       libqalculate
-      inotify-tools
-      bluez
       bash
       hyprland
-      coreutils
-      file
     ]
     ++ extraRuntimeDeps
     ++ lib.optional withCli caelestia-cli;
@@ -95,8 +87,8 @@
       fileset = lib.fileset.union ./../CMakeLists.txt ./../plugin;
     };
 
-    nativeBuildInputs = [cmake ninja];
-    buildInputs = [qt6.qtbase qt6.qtdeclarative];
+    nativeBuildInputs = [cmake ninja pkg-config];
+    buildInputs = [qt6.qtbase qt6.qtdeclarative libqalculate];
 
     dontWrapQtApps = true;
     cmakeFlags =
