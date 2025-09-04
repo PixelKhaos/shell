@@ -317,7 +317,7 @@ StyledRect {
                 active: Config.notifs.timeoutCircle
                 asynchronous: true
                 anchors.centerIn: closeBtn
-                
+
                 sourceComponent: Shape {
                     id: progressCircle
                     width: closeBtn.implicitWidth + Appearance.padding.small
