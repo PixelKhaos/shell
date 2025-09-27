@@ -20,19 +20,7 @@ Item {
 
         IdleInhibit {}
 
-        Loader {
-            Layout.fillWidth: true
-            active: Config.utilities.showScreenshots
-            asynchronous: true
-            z: 1
-            
-            sourceComponent: Screenshot {
-                props: root.props
-                visibilities: root.visibilities
-            }
-        }
-
-        Record {
+        Capture {
             props: root.props
             visibilities: root.visibilities
             z: 1

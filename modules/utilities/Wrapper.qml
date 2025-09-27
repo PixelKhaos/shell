@@ -18,6 +18,7 @@ Item {
         property bool screenshotListExpanded: false
         property string screenshotConfirmDelete
         property string screenshotMode
+        property bool captureMode: true
 
         reloadableId: "utilities"
     }
