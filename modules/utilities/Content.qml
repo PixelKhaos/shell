@@ -20,10 +20,16 @@ Item {
 
         IdleInhibit {}
 
-        Screenshot {
-            props: root.props
-            visibilities: root.visibilities
+        Loader {
+            Layout.fillWidth: true
+            active: Config.utilities.showScreenshots
+            asynchronous: true
             z: 1
+            
+            sourceComponent: Screenshot {
+                props: root.props
+                visibilities: root.visibilities
+            }
         }
 
         Record {
@@ -43,5 +49,6 @@ Item {
 
     ScreenshotDeleteModal {
         props: root.props
+        visible: Config.utilities.showScreenshots
     }
 }
