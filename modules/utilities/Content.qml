@@ -20,7 +20,7 @@ Item {
 
         IdleInhibit {}
 
-        Record {
+        Capture {
             props: root.props
             visibilities: root.visibilities
             z: 1

@@ -14,7 +14,8 @@ Item {
     readonly property PersistentProperties props: PersistentProperties {
         property bool recordingListExpanded: false
         property string recordingConfirmDelete
-        property string recordingMode
+        property string screenshotMode
+        property bool captureMode: true
 
         reloadableId: "utilities"
     }
