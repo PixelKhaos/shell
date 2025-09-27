@@ -34,4 +34,8 @@ Item {
     RecordingDeleteModal {
         props: root.props
     }
+
+    ScreenshotDeleteModal {
+        props: root.props
+    }
 }

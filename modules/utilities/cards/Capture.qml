@@ -131,6 +131,7 @@ StyledRect {
                 Loader {
                     Layout.fillWidth: true
                     Layout.preferredHeight: implicitHeight
+                    asynchronous: false
                     sourceComponent: screenshotList
                 }
             }
@@ -194,7 +195,7 @@ StyledRect {
                 Loader {
                     Layout.fillWidth: true
                     active: !Recorder.running
-                    asynchronous: true
+                    asynchronous: false
                     
                     sourceComponent: recordingList
                 }
