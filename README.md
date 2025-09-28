@@ -582,7 +582,13 @@ default, you must create it manually.
             "configLoaded": true,
             "dndChanged": true,
             "gameModeChanged": true,
-            "numLockChanged": true
+            "numLockChanged": true,
+            "vpnChanged": true
+        },
+        "vpn": {
+            "enabled": false,
+            "provider": "wireguard",
+            "connectionName": "your-connection-name"
         }
     }
 }
