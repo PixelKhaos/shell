@@ -25,6 +25,7 @@ JsonObject {
         property bool numLockChanged: true
         property bool kbLayoutChanged: true
         property bool vpnChanged: true
+        property bool nowPlaying: true
     }
 
     component Vpn: JsonObject {
