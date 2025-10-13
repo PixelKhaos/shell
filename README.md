@@ -589,8 +589,13 @@ default, you must create it manually.
         },
         "vpn": {
             "enabled": false,
-            "provider": "wireguard",
-            "connectionName": "your-connection-name"
+            "provider": [
+                {
+                    "name": "wireguard",
+                    "interface": "your-connection-name",
+                    "displayName": "Wireguard (Your VPN)"
+                }
+            ]
         }
     }
 }
