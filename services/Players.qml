@@ -24,9 +24,9 @@ Singleton {
         target: active
 
         function onPostTrackChanged() {
-            if (!Config.utilities.toasts.nowPlaying)
+            if (!Config.utilities.toasts.nowPlaying) {
                 return;
-
+            }
             if (active.trackArtist != "" && active.trackTitle != "") {
                 Toaster.toast(qsTr("Now Playing"), qsTr("%1 - %2").arg(active.trackArtist).arg(active.trackTitle), "music_note");
             }
