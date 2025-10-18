@@ -20,15 +20,52 @@ Singleton {
         return alias?.to ?? player.identity;
     }
 
+    function shouldShowToast(): bool {
+        return active?.trackTitle && active?.playbackState === MprisPlayer.Playing;
+    }
+
     Connections {
-        target: active
+        target: root.active
 
         function onPostTrackChanged() {
-            if (!Config.utilities.toasts.nowPlaying) {
+            if (!Config.utilities.toasts.nowPlaying)
                 return;
+            
+            if (root.active.trackArtist != "" && root.active.trackTitle != "") {
+                const trackInfo = qsTr("%1 - %2").arg(root.active.trackArtist).arg(root.active.trackTitle);
+                
+                // Check if any window has YouTube in title (hover previews)
+                const windows = Hypr.toplevels.values;
+                let isYouTube = false;
+                
+                for (const w of windows) {
+                    if ((w.title || "").includes("YouTube")) {
+                        isYouTube = true;
+                        break;
+                    }
+                }
+                
+                if (isYouTube) {
+                    nowPlayingTimer.pendingTrack = trackInfo;
+                    nowPlayingTimer.restart();
+                } else {
+                    Toaster.toast(qsTr("Now Playing"), trackInfo, "music_note");
+                }
             }
-            if (active.trackArtist != "" && active.trackTitle != "") {
-                Toaster.toast(qsTr("Now Playing"), qsTr("%1 - %2").arg(active.trackArtist).arg(active.trackTitle), "music_note");
+        }
+    }
+
+    Timer {
+        id: nowPlayingTimer
+
+        property string pendingTrack: ""
+
+        interval: 1500
+        repeat: false
+
+        onTriggered: {
+            if (root.active?.playbackState === MprisPlayer.Playing && root.shouldShowToast()) {
+                Toaster.toast(qsTr("Now Playing"), pendingTrack, "music_note");
             }
         }
     }
