@@ -134,4 +134,16 @@ Item {
             return (vx >= x && vx <= x + implicitWidth) || (vex >= x && vex <= x + implicitWidth);
         })
     }
+
+    CalendarEventModal {
+        state: root.state
+        eventId: root.state.calendarEventModalEventId
+        prefilledDate: root.state.calendarEventModalDate
+    }
+
+    CalendarDeleteModal {
+        state: root.state
+        eventId: root.state.calendarDeleteEventId
+        eventTitle: root.state.calendarDeleteEventTitle
+    }
 }

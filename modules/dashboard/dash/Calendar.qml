@@ -8,38 +8,59 @@ import qs.config
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Quickshell
 
-CustomMouseArea {
+Item {
     id: root
 
     required property var state
 
     readonly property int currMonth: state.currentDate.getMonth()
     readonly property int currYear: state.currentDate.getFullYear()
+    
+    property date selectedDate: state.calendarSelectedDate ?? new Date()
+    property bool showDayView: state.calendarShowDayView ?? false
+
+    onSelectedDateChanged: state.calendarSelectedDate = selectedDate
+    onShowDayViewChanged: state.calendarShowDayView = showDayView
 
     anchors.left: parent.left
     anchors.right: parent.right
-    implicitHeight: inner.implicitHeight + inner.anchors.margins * 2
+    implicitHeight: monthView.implicitHeight
 
-    acceptedButtons: Qt.MiddleButton
-    onClicked: root.state.currentDate = new Date()
+    CustomMouseArea {
+        id: monthView
 
-    function onWheel(event: WheelEvent): void {
-        if (event.angleDelta.y > 0)
-            root.state.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
-        else if (event.angleDelta.y < 0)
-            root.state.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
-    }
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        implicitHeight: inner.implicitHeight + inner.anchors.margins * 2
+        visible: !root.showDayView
+        opacity: visible ? 1 : 0
 
-    ColumnLayout {
-        id: inner
+        acceptedButtons: Qt.MiddleButton
+        onClicked: root.state.currentDate = new Date()
 
-        anchors.fill: parent
-        anchors.margins: Appearance.padding.large
-        spacing: Appearance.spacing.small
+        function onWheel(event: WheelEvent): void {
+            if (event.angleDelta.y > 0)
+                root.state.currentDate = new Date(root.currYear, root.currMonth - 1, 1);
+            else if (event.angleDelta.y < 0)
+                root.state.currentDate = new Date(root.currYear, root.currMonth + 1, 1);
+        }
 
-        RowLayout {
-            id: monthNavigationRow
+        Behavior on opacity {
+            Anim {}
+        }
+
+        ColumnLayout {
+            id: inner
+
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.large
+            spacing: Appearance.spacing.small
+
+            RowLayout {
+                id: monthNavigationRow
 
             Layout.fillWidth: true
             spacing: Appearance.spacing.small
@@ -166,26 +187,51 @@ CustomMouseArea {
 
                     required property var model
 
+                    readonly property bool hasEvents: CalendarEvents.hasEventsOnDate(dayItem.model.date)
+
                     implicitWidth: implicitHeight
                     implicitHeight: text.implicitHeight + Appearance.padding.small * 2
 
-                    StyledText {
-                        id: text
+                    StateLayer {
+                        enabled: dayItem.model.month === grid.month
 
-                        anchors.centerIn: parent
-
-                        horizontalAlignment: Text.AlignHCenter
-                        text: grid.locale.toString(dayItem.model.day)
-                        color: {
-                            const dayOfWeek = dayItem.model.date.getUTCDay();
-                            if (dayOfWeek === 0 || dayOfWeek === 6)
-                                return Colours.palette.m3secondary;
-
-                            return Colours.palette.m3onSurfaceVariant;
+                        function onClicked(): void {
+                            root.selectedDate = dayItem.model.date;
+                            root.showDayView = true;
                         }
-                        opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
-                        font.pointSize: Appearance.font.size.normal
-                        font.weight: 500
+                    }
+
+                    ColumnLayout {
+                        anchors.centerIn: parent
+                        spacing: 2
+
+                        StyledText {
+                            id: text
+
+                            Layout.alignment: Qt.AlignHCenter
+                            horizontalAlignment: Text.AlignHCenter
+                            text: grid.locale.toString(dayItem.model.day)
+                            color: {
+                                const dayOfWeek = dayItem.model.date.getUTCDay();
+                                if (dayOfWeek === 0 || dayOfWeek === 6)
+                                    return Colours.palette.m3secondary;
+
+                                return Colours.palette.m3onSurfaceVariant;
+                            }
+                            opacity: dayItem.model.today || dayItem.model.month === grid.month ? 1 : 0.4
+                            font.pointSize: Appearance.font.size.normal
+                            font.weight: 500
+                        }
+
+                        Rectangle {
+                            Layout.alignment: Qt.AlignHCenter
+                            width: 4
+                            height: 4
+                            radius: 2
+                            color: Colours.palette.m3primary
+                            visible: dayItem.hasEvents && dayItem.model.month === grid.month
+                            opacity: text.opacity
+                        }
                     }
                 }
             }
@@ -248,6 +294,36 @@ CustomMouseArea {
                     }
                 }
             }
+        }
+        }
+    }
+
+    Loader {
+        id: dayViewLoader
+
+        anchors.fill: parent
+        active: root.showDayView
+        visible: active
+        opacity: visible ? 1 : 0
+
+        sourceComponent: CalendarDayView {
+            selectedDate: root.selectedDate
+
+            onBackToMonth: root.showDayView = false
+            onAddEvent: {
+                root.state.calendarEventModalOpen = true;
+                root.state.calendarEventModalEventId = "";
+                root.state.calendarEventModalDate = root.selectedDate;
+            }
+            onEditEvent: eventId => {
+                root.state.calendarEventModalOpen = true;
+                root.state.calendarEventModalEventId = eventId;
+                root.state.calendarEventModalDate = root.selectedDate;
+            }
+        }
+
+        Behavior on opacity {
+            Anim {}
         }
     }
 }

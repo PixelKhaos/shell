@@ -62,7 +62,7 @@ CustomMouseArea {
                 root.panels.osd.hovered = false;
             }
 
-            if (!dashboardShortcutActive)
+            if (!dashboardShortcutActive && !visibilities.calendarEventModalOpen)
                 visibilities.dashboard = false;
 
             if (!utilitiesShortcutActive)
@@ -172,8 +172,10 @@ CustomMouseArea {
         const showDashboard = Config.dashboard.showOnHover && inTopPanel(panels.dashboard, x, y);
 
         // Always update visibility based on hover if not in shortcut mode
+        // But keep dashboard open if modal is active
         if (!dashboardShortcutActive) {
-            visibilities.dashboard = showDashboard;
+            if (!visibilities.calendarEventModalOpen)
+                visibilities.dashboard = showDashboard;
         } else if (showDashboard) {
             // If hovering over dashboard area while in shortcut mode, transition to hover control
             dashboardShortcutActive = false;

@@ -15,8 +15,34 @@ Item {
     readonly property PersistentProperties dashState: PersistentProperties {
         property int currentTab
         property date currentDate: new Date()
+        property date calendarSelectedDate: new Date()
+        property bool calendarShowDayView: false
+        property bool calendarEventModalOpen: false
+        property string calendarEventModalEventId: ""
+        property date calendarEventModalDate: new Date()
+        property string calendarDeleteEventId: ""
+        property string calendarDeleteEventTitle: ""
 
         reloadableId: "dashboardState"
+    }
+
+    Binding {
+        target: root.visibilities
+        property: "calendarEventModalOpen"
+        value: root.dashState.calendarEventModalOpen
+    }
+
+    // Close modal when dashboard closes
+    Connections {
+        target: root.visibilities
+
+        function onDashboardChanged(): void {
+            if (!root.visibilities.dashboard) {
+                root.dashState.calendarEventModalOpen = false;
+                root.dashState.calendarDeleteEventId = "";
+                root.dashState.calendarDeleteEventTitle = "";
+            }
+        }
     }
     readonly property FileDialog facePicker: FileDialog {
         title: qsTr("Select a profile picture")
