@@ -32,7 +32,10 @@ Loader {
         readonly property bool isEdit: root.eventId !== ""
 
         hoverEnabled: true
-        onClicked: root.state.calendarEventModalOpen = false
+        onClicked: {
+            // Don't close modal if it's open - only close on explicit close button
+            // This prevents accidental closes when clicking outside dropdowns
+        }
 
         Item {
             anchors.fill: parent
@@ -48,15 +51,17 @@ Loader {
         StyledRect {
             id: dialog
 
-            anchors.centerIn: parent
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.top: parent.top
+            anchors.topMargin: Appearance.padding.large
             radius: Appearance.rounding.large
             color: Colours.palette.m3surfaceContainerHigh
 
             scale: 0
             Component.onCompleted: scale = Qt.binding(() => root.state.calendarEventModalOpen ? 1 : 0)
 
-            width: Math.min(parent.width - Appearance.padding.large * 2, 500)
-            implicitHeight: contentLayout.implicitHeight + Appearance.padding.large * 3
+            width: Math.min(parent.width - Appearance.padding.large * 2, 620)
+            implicitHeight: contentLayout.implicitHeight + Appearance.padding.large * 2
 
             MouseArea { anchors.fill: parent }
 
@@ -67,28 +72,45 @@ Loader {
 
                 anchors.fill: parent
                 anchors.margins: Appearance.padding.large * 1.5
-                spacing: Appearance.spacing.normal
+                spacing: Appearance.spacing.large
 
-                StyledText {
-                    text: modal.isEdit ? qsTr("Edit Event") : qsTr("Add Event")
-                    font.pointSize: Appearance.font.size.normal * 1.2
-                    font.weight: 600
-                }
-
-                ColumnLayout {
+                RowLayout {
                     Layout.fillWidth: true
-                    spacing: Appearance.spacing.small
+                    spacing: Appearance.spacing.normal
 
                     StyledText {
-                        text: qsTr("Title")
-                        font.pointSize: Appearance.font.size.normal * 0.9
-                        color: Colours.palette.m3onSurfaceVariant
+                        Layout.fillWidth: true
+                        text: modal.isEdit ? qsTr("Edit Event") : qsTr("Add Event")
+                        font.pointSize: Appearance.font.size.large
+                        font.weight: 600
                     }
+
+                    MouseArea {
+                        implicitWidth: 32
+                        implicitHeight: 32
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: root.state.calendarEventModalOpen = false
+
+                        MaterialIcon {
+                            anchors.centerIn: parent
+                            text: "close"
+                            color: Colours.palette.m3onSurface
+                            font.pointSize: Appearance.font.size.large
+                        }
+                    }
+                }
+
+                StyledRect {
+                    Layout.fillWidth: true
+                    implicitHeight: titleField.implicitHeight + Appearance.padding.normal * 2
+                    radius: Appearance.rounding.normal
+                    color: Colours.palette.m3surfaceContainer
 
                     StyledTextField {
                         id: titleField
 
-                        Layout.fillWidth: true
+                        anchors.fill: parent
+                        anchors.margins: Appearance.padding.normal
                         placeholderText: qsTr("Event title")
                         text: modal.event?.title ?? ""
 
@@ -96,9 +118,10 @@ Loader {
                     }
                 }
 
+                // Time pickers
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: Appearance.spacing.normal
+                    spacing: Appearance.spacing.extraLarge
 
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -110,14 +133,35 @@ Loader {
                             color: Colours.palette.m3onSurfaceVariant
                         }
 
-                        StyledTextField {
-                            id: startTimeField
+                        RowLayout {
+                            spacing: Appearance.spacing.normal
 
-                            Layout.fillWidth: true
-                            placeholderText: "HH:MM"
-                            text: {
-                                const date = modal.event ? new Date(modal.event.start) : new Date();
-                                return Qt.formatTime(date, "HH:mm");
+                            TimeSpinBox {
+                                id: startHour
+                                Layout.preferredWidth: 50
+                                max: 23
+                                value: {
+                                    const date = modal.event ? new Date(modal.event.start) : new Date();
+                                    return date.getHours();
+                                }
+                                onValueModified: value => startHour.value = value
+                            }
+
+                            StyledText {
+                                text: ":"
+                                font.pointSize: Appearance.font.size.large
+                                font.weight: 600
+                            }
+
+                            TimeSpinBox {
+                                id: startMinute
+                                Layout.preferredWidth: 50
+                                max: 59
+                                value: {
+                                    const date = modal.event ? new Date(modal.event.start) : new Date();
+                                    return date.getMinutes();
+                                }
+                                onValueModified: value => startMinute.value = value
                             }
                         }
                     }
@@ -132,53 +176,68 @@ Loader {
                             color: Colours.palette.m3onSurfaceVariant
                         }
 
-                        StyledTextField {
-                            id: endTimeField
+                        RowLayout {
+                            spacing: Appearance.spacing.normal
 
-                            Layout.fillWidth: true
-                            placeholderText: "HH:MM"
-                            text: {
-                                const date = modal.event ? new Date(modal.event.end) : new Date(new Date().getTime() + 3600000);
-                                return Qt.formatTime(date, "HH:mm");
+                            TimeSpinBox {
+                                id: endHour
+                                Layout.preferredWidth: 50
+                                max: 23
+                                value: {
+                                    const date = modal.event ? new Date(modal.event.end) : new Date(new Date().getTime() + 3600000);
+                                    return date.getHours();
+                                }
+                                onValueModified: value => endHour.value = value
+                            }
+
+                            StyledText {
+                                text: ":"
+                                font.pointSize: Appearance.font.size.large
+                                font.weight: 600
+                            }
+
+                            TimeSpinBox {
+                                id: endMinute
+                                Layout.preferredWidth: 50
+                                max: 59
+                                value: {
+                                    const date = modal.event ? new Date(modal.event.end) : new Date(new Date().getTime() + 3600000);
+                                    return date.getMinutes();
+                                }
+                                onValueModified: value => endMinute.value = value
                             }
                         }
                     }
                 }
 
-                ColumnLayout {
+                StyledRect {
                     Layout.fillWidth: true
-                    spacing: Appearance.spacing.small
-
-                    StyledText {
-                        text: qsTr("Location (optional)")
-                        font.pointSize: Appearance.font.size.normal * 0.9
-                        color: Colours.palette.m3onSurfaceVariant
-                    }
+                    implicitHeight: locationField.implicitHeight + Appearance.padding.normal * 2
+                    radius: Appearance.rounding.normal
+                    color: Colours.palette.m3surfaceContainer
 
                     StyledTextField {
                         id: locationField
 
-                        Layout.fillWidth: true
-                        placeholderText: qsTr("Add location")
+                        anchors.fill: parent
+                        anchors.margins: Appearance.padding.normal
+                        placeholderText: qsTr("Location (optional)")
                         text: modal.event?.location ?? ""
                     }
                 }
 
-                ColumnLayout {
+                StyledRect {
                     Layout.fillWidth: true
-                    spacing: Appearance.spacing.small
-
-                    StyledText {
-                        text: qsTr("Description (optional)")
-                        font.pointSize: Appearance.font.size.normal * 0.9
-                        color: Colours.palette.m3onSurfaceVariant
-                    }
+                    implicitHeight: descriptionField.implicitHeight + Appearance.padding.normal * 2
+                    radius: Appearance.rounding.normal
+                    color: Colours.palette.m3surfaceContainer
 
                     StyledTextField {
                         id: descriptionField
 
-                        Layout.fillWidth: true
-                        placeholderText: qsTr("Add description")
+                        anchors.fill: parent
+                        anchors.margins: Appearance.padding.normal
+                        placeholderText: qsTr("Description (optional)")
                         text: modal.event?.description ?? ""
                     }
                 }
@@ -188,31 +247,164 @@ Loader {
                     spacing: Appearance.spacing.small
 
                     StyledText {
-                        text: qsTr("Remind me")
+                        text: qsTr("Reminder")
                         font.pointSize: Appearance.font.size.normal * 0.9
                         color: Colours.palette.m3onSurfaceVariant
                     }
 
-                    ComboBox {
-                        id: reminderCombo
+                    ButtonGroup {
+                        id: reminderGroup
+                        buttons: [reminder0, reminder5, reminder15, reminder30, reminder60, reminder1440]
+                    }
 
+                    Flow {
+                        Layout.fillWidth: true
+                        spacing: Appearance.spacing.small
+
+                        StyledRadioButton {
+                            id: reminder0
+                            text: qsTr("None")
+                            property int value: 0
+                        }
+
+                        StyledRadioButton {
+                            id: reminder5
+                            text: qsTr("5 min")
+                            property int value: 300
+                        }
+
+                        StyledRadioButton {
+                            id: reminder15
+                            text: qsTr("15 min")
+                            property int value: 900
+                            checked: true
+                        }
+
+                        StyledRadioButton {
+                            id: reminder30
+                            text: qsTr("30 min")
+                            property int value: 1800
+                        }
+
+                        StyledRadioButton {
+                            id: reminder60
+                            text: qsTr("1 hour")
+                            property int value: 3600
+                        }
+
+                        StyledRadioButton {
+                            id: reminder1440
+                            text: qsTr("1 day")
+                            property int value: 86400
+                        }
+                    }
+
+                    Component.onCompleted: {
+                        if (modal.event?.reminders && modal.event.reminders.length > 0) {
+                            const savedValue = modal.event.reminders[0].offset;
+                            [reminder0, reminder5, reminder15, reminder30, reminder60, reminder1440].forEach(btn => {
+                                if (btn.value === savedValue) btn.checked = true;
+                            });
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Appearance.spacing.small
+
+                    StyledText {
+                        text: qsTr("Repeat")
+                        font.pointSize: Appearance.font.size.normal * 0.9
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+
+                    ButtonGroup {
+                        id: repeatGroup
+                        buttons: [repeatNever, repeatDaily, repeatWeekly, repeatBiweekly, repeatMonthly, repeatCustom]
+                    }
+
+                    Flow {
+                        Layout.fillWidth: true
+                        spacing: Appearance.spacing.small
+
+                        StyledRadioButton {
+                            id: repeatNever
+                            text: qsTr("Never")
+                            property string value: "never"
+                            checked: true
+                        }
+
+                        StyledRadioButton {
+                            id: repeatDaily
+                            text: qsTr("Daily")
+                            property string value: "daily"
+                        }
+
+                        StyledRadioButton {
+                            id: repeatWeekly
+                            text: qsTr("Weekly")
+                            property string value: "weekly"
+                        }
+
+                        StyledRadioButton {
+                            id: repeatBiweekly
+                            text: qsTr("Biweekly")
+                            property string value: "biweekly"
+                        }
+
+                        StyledRadioButton {
+                            id: repeatMonthly
+                            text: qsTr("Monthly")
+                            property string value: "monthly"
+                        }
+
+                        StyledRadioButton {
+                            id: repeatCustom
+                            text: qsTr("Custom...")
+                            property string value: "custom"
+                        }
+                    }
+                }
+
+                // Custom repeat options
+                RowLayout {
+                    Layout.fillWidth: true
+                    visible: repeatCustom.checked
+                    spacing: Appearance.spacing.normal
+
+                    StyledText {
+                        text: qsTr("Every")
+                        font.pointSize: Appearance.font.size.normal * 0.9
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+
+                    CustomSpinBox {
+                        id: customRepeatInterval
+                        Layout.preferredWidth: 150
+                        min: 1
+                        max: 365
+                        value: 1
+                        onValueModified: value => customRepeatInterval.value = value
+                    }
+
+                    ComboBox {
+                        id: customRepeatUnit
                         Layout.fillWidth: true
                         model: [
-                            { text: qsTr("No reminder"), value: 0 },
-                            { text: qsTr("5 minutes before"), value: 300 },
-                            { text: qsTr("15 minutes before"), value: 900 },
-                            { text: qsTr("30 minutes before"), value: 1800 },
-                            { text: qsTr("1 hour before"), value: 3600 },
-                            { text: qsTr("1 day before"), value: 86400 }
+                            { text: qsTr("days"), value: "days" },
+                            { text: qsTr("weeks"), value: "weeks" },
+                            { text: qsTr("months"), value: "months" }
                         ]
                         textRole: "text"
                         valueRole: "value"
-                        currentIndex: 2 // Default to 15 minutes
+                        currentIndex: 0
                     }
                 }
 
                 RowLayout {
                     Layout.topMargin: Appearance.spacing.normal
+                    Layout.bottomMargin: Appearance.spacing.small
                     Layout.alignment: Qt.AlignRight
                     spacing: Appearance.spacing.normal
 
@@ -220,6 +412,19 @@ Loader {
                         text: qsTr("Cancel")
                         type: TextButton.Text
                         onClicked: root.state.calendarEventModalOpen = false
+                    }
+
+                    Item { Layout.fillWidth: true }
+
+                    TextButton {
+                        text: modal.event?.isRecurringInstance ? qsTr("Delete All") : ""
+                        type: TextButton.Text
+                        visible: modal.isEdit && modal.event?.isRecurringInstance
+                        onClicked: {
+                            root.state.calendarDeleteAllRecurring = true;
+                            root.state.calendarDeleteEventId = root.eventId;
+                            root.state.calendarDeleteEventTitle = modal.event?.title ?? "";
+                        }
                     }
 
                     TextButton {
@@ -237,13 +442,38 @@ Loader {
                         type: TextButton.Filled
                         enabled: titleField.text.trim() !== ""
                         onClicked: {
-                            const dateStr = Qt.formatDate(root.prefilledDate, "yyyy-MM-dd");
-                            const startDateTime = new Date(dateStr + "T" + startTimeField.text);
-                            const endDateTime = new Date(dateStr + "T" + endTimeField.text);
+                            // Build date/time from spin boxes
+                            const baseDate = new Date(root.prefilledDate);
+                            baseDate.setHours(0, 0, 0, 0);
                             
-                            const reminders = reminderCombo.currentValue > 0 
-                                ? [{ offset: reminderCombo.currentValue, type: "toast" }]
+                            const startDateTime = new Date(baseDate);
+                            startDateTime.setHours(startHour.value, startMinute.value, 0, 0);
+                            
+                            const endDateTime = new Date(baseDate);
+                            endDateTime.setHours(endHour.value, endMinute.value, 0, 0);
+                            
+                            // Get selected reminder value
+                            const selectedReminder = reminderGroup.checkedButton;
+                            const reminders = selectedReminder && selectedReminder.value > 0
+                                ? [{ offset: selectedReminder.value, type: "notification" }]
                                 : [];
+
+                            // Build recurrence object
+                            let recurrence = null;
+                            const selectedRepeat = repeatGroup.checkedButton;
+                            if (selectedRepeat && selectedRepeat.value !== "never") {
+                                if (selectedRepeat.value === "custom") {
+                                    recurrence = {
+                                        type: "custom",
+                                        interval: customRepeatInterval.value,
+                                        unit: customRepeatUnit.currentValue
+                                    };
+                                } else {
+                                    recurrence = {
+                                        type: selectedRepeat.value
+                                    };
+                                }
+                            }
 
                             if (modal.isEdit) {
                                 CalendarEvents.updateEvent(root.eventId, {
@@ -252,7 +482,8 @@ Loader {
                                     end: endDateTime.toISOString(),
                                     location: locationField.text.trim(),
                                     description: descriptionField.text.trim(),
-                                    reminders: reminders
+                                    reminders: reminders,
+                                    recurrence: recurrence
                                 });
                             } else {
                                 CalendarEvents.createEvent(
@@ -262,7 +493,8 @@ Loader {
                                     descriptionField.text.trim(),
                                     locationField.text.trim(),
                                     "#2196F3",
-                                    reminders
+                                    reminders,
+                                    recurrence
                                 );
                             }
 

@@ -29,6 +29,18 @@ Item {
             }
         }
 
+        // Upcoming Events Panel
+        StyledRect {
+            Layout.fillWidth: true
+            implicitHeight: 220
+            visible: Config.utilities.calendar.enabled && Config.utilities.calendar.showUpcomingInSidebar
+
+            radius: Appearance.rounding.normal
+            color: Colours.tPalette.m3surfaceContainerLow
+
+            UpcomingEvents {}
+        }
+
         StyledRect {
             Layout.topMargin: Appearance.padding.large - layout.spacing
             Layout.fillWidth: true

@@ -37,6 +37,7 @@ JsonObject {
         property bool enabled: true
         property string dataPath: "~/.local/share/caelestia/calendar-events.json"
         property bool showReminderToasts: true
+        property bool showUpcomingInSidebar: false
         property int defaultReminderMinutes: 15
         property list<var> quickReminderOptions: [5, 15, 30, 60, 1440]
     }

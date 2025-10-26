@@ -15,6 +15,7 @@ Loader {
     required property var state
     property string eventId: ""
     property string eventTitle: ""
+    property bool deleteAll: false
 
     anchors.fill: parent
     z: 1001
@@ -28,6 +29,7 @@ Loader {
         onClicked: {
             root.state.calendarDeleteEventId = "";
             root.state.calendarDeleteEventTitle = "";
+            root.state.calendarDeleteAllRecurring = false;
         }
 
         Item {
@@ -64,14 +66,16 @@ Loader {
                 spacing: Appearance.spacing.normal
 
                 StyledText {
-                    text: qsTr("Delete event?")
+                    text: root.deleteAll ? qsTr("Delete all recurring events?") : qsTr("Delete event?")
                     font.pointSize: Appearance.font.size.normal * 1.2
                     font.weight: 600
                 }
 
                 StyledText {
                     Layout.fillWidth: true
-                    text: qsTr("'%1' will be permanently deleted.").arg(root.eventTitle)
+                    text: root.deleteAll 
+                        ? qsTr("All instances of '%1' will be permanently deleted.").arg(root.eventTitle)
+                        : qsTr("'%1' will be permanently deleted.").arg(root.eventTitle)
                     color: Colours.palette.m3onSurfaceVariant
                     font.pointSize: Appearance.font.size.normal * 0.9
                     wrapMode: Text.WordWrap
@@ -88,6 +92,7 @@ Loader {
                         onClicked: {
                             root.state.calendarDeleteEventId = "";
                             root.state.calendarDeleteEventTitle = "";
+                            root.state.calendarDeleteAllRecurring = false;
                         }
                     }
 
@@ -95,9 +100,17 @@ Loader {
                         text: qsTr("Delete")
                         type: TextButton.Text
                         onClicked: {
-                            CalendarEvents.deleteEvent(root.eventId);
+                            if (root.deleteAll) {
+                                const event = CalendarEvents.getEvent(root.eventId);
+                                if (event?.parentRecurrence) {
+                                    CalendarEvents.deleteRecurringSeries(event.parentRecurrence);
+                                }
+                            } else {
+                                CalendarEvents.deleteEvent(root.eventId);
+                            }
                             root.state.calendarDeleteEventId = "";
                             root.state.calendarDeleteEventTitle = "";
+                            root.state.calendarDeleteAllRecurring = false;
                             root.state.calendarEventModalOpen = false;
                         }
                     }

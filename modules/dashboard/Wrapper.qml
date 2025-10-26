@@ -22,6 +22,7 @@ Item {
         property date calendarEventModalDate: new Date()
         property string calendarDeleteEventId: ""
         property string calendarDeleteEventTitle: ""
+        property bool calendarDeleteAllRecurring: false
 
         reloadableId: "dashboardState"
     }
@@ -41,8 +42,18 @@ Item {
                 root.dashState.calendarEventModalOpen = false;
                 root.dashState.calendarDeleteEventId = "";
                 root.dashState.calendarDeleteEventTitle = "";
+                root.dashState.calendarDeleteAllRecurring = false;
             }
         }
+    }
+    
+    // Prevent dashboard from closing when modal is open
+    Binding {
+        target: root.visibilities
+        property: "dashboard"
+        value: true
+        when: root.dashState.calendarEventModalOpen || root.dashState.calendarDeleteEventId !== ""
+        restoreMode: Binding.RestoreNone
     }
     readonly property FileDialog facePicker: FileDialog {
         title: qsTr("Select a profile picture")

@@ -145,5 +145,6 @@ Item {
         state: root.state
         eventId: root.state.calendarDeleteEventId
         eventTitle: root.state.calendarDeleteEventTitle
+        deleteAll: root.state.calendarDeleteAllRecurring ?? false
     }
 }
