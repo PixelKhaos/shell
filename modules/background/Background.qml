@@ -9,7 +9,7 @@ import Quickshell.Wayland
 import QtQuick
 
 Loader {
-    asynchronous: true
+    asynchronous: false
     active: Config.background.enabled
 
     sourceComponent: Variants {
