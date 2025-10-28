@@ -106,6 +106,7 @@ Item {
     // ----------------------------------------------------------------------
     component Img: Item {
         id: img
+
         anchors.fill: parent
 
         // Path we want this slot to display
@@ -119,25 +120,31 @@ Item {
 
         // Load new wallpaper and become active when ready
         function loadAndBecomeActive(newPath: string): void {
-            path = newPath;
-            
-            if (isGif) {
-                staticImg.visible = false;
-                staticImg.path = "";
-                
-                gifImg.source = newPath;
-                gifImg.visible = true;
-            } else {
-                gifImg.visible = false;
-                gifImg.playing = false;
-                gifImg.source = "";
-                
-                staticImg.path = newPath;
-                staticImg.visible = true;
+            // Use Qt.callLater() + path reset to prevent race condition (PR #847)
+            if (path !== newPath) {
+                path = "";
+                Qt.callLater(() => {
+                    path = newPath;
+                    
+                    if (isGif) {
+                        staticImg.visible = false;
+                        staticImg.path = "";
+                        
+                        gifImg.source = newPath;
+                        gifImg.visible = true;
+                    } else {
+                        gifImg.visible = false;
+                        gifImg.playing = false;
+                        gifImg.source = "";
+                        
+                        staticImg.path = newPath;
+                        staticImg.visible = true;
+                    }
+                    
+                    // Check if already ready (sync/cached load)
+                    checkAndActivate();
+                });
             }
-            
-            // Check if already ready (sync/cached load)
-            checkAndActivate();
         }
 
         // Check if ready and activate this slot
