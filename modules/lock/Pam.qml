@@ -19,31 +19,16 @@ Scope {
     property string howdyState
     property string buffer
 
+    property bool screenIsIdle: false
+
     signal flashMsg
 
     function handleKey(event: KeyEvent): void {
-        if (passwd.active)
+        if (passwd.active || state === "max")
             return;
-        if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
-            if (buffer.length > 0) {
-                if (fprint.active)
-                    fprint.abort();
-                if (howdy.active)
-                    howdy.abort();
 
-                passwd.start();
-            } else {
-                if (howdy.available) {
-                    if (fprint.active)
-                        fprint.abort();
-                    howdy.start();
-                } else if (fprint.available) {
-                    // *** FIX: Abort howdy before starting fprint ***
-                    if (howdy.active)
-                        howdy.abort();
-                    fprint.start();
-                }
-            }
+        if (event.key === Qt.Key_Enter || event.key === Qt.Key_Return) {
+            passwd.start();
         } else if (event.key === Qt.Key_Backspace) {
             if (event.modifiers & Qt.ControlModifier) {
                 buffer = "";
@@ -72,7 +57,6 @@ Scope {
         onResponseRequiredChanged: {
             if (!responseRequired)
                 return;
-
             respond(root.buffer);
             root.buffer = "";
         }
@@ -162,7 +146,12 @@ Scope {
 
             tries = 0;
             errorTries = 0;
-        // start(); // Start only when press Enter
+
+            if (root.screenIsIdle) {
+                return;
+            }
+
+            start();
         }
 
         config: "howdy"
@@ -172,8 +161,9 @@ Scope {
             if (!available)
                 return;
 
-            if (res === PamResult.Success)
+            if (res === PamResult.Success) {
                 return root.lock.unlock();
+            }
 
             if (res === PamResult.Error) {
                 root.howdyState = "error";
@@ -184,19 +174,17 @@ Scope {
                 }
             } else if (res === PamResult.MaxTries || res === PamResult.Failed) {
                 tries++;
-                if (tries < Config.lock.maxHowdyTries) {
-                    root.howdyState = "fail";
+                root.howdyState = "fail";
+                if (!root.screenIsIdle) {
                     start();
-                } else {
-                    root.howdyState = "max";
-                    abort();
-                }
+                } else {}
             }
 
             root.flashMsg();
             howdyStateReset.restart();
         }
     }
+
     Process {
         id: availProc
 
@@ -206,6 +194,7 @@ Scope {
             fprint.checkAvail();
         }
     }
+
     Process {
         id: howdyAvailProc
 
@@ -260,25 +249,39 @@ Scope {
         }
     }
 
+    // Timer to delay the start of Howdy after unlock
+    Timer {
+        id: howdyStartDelayTimer
+
+        interval: 2000
+        repeat: false
+        onTriggered: {
+            howdyAvailProc.running = true;
+        }
+    }
+
     Connections {
         target: root.lock
-
         function onSecureChanged(): void {
             if (root.lock.secure) {
                 availProc.running = true;
-                howdyAvailProc.running = true;
+                howdyStartDelayTimer.start();
                 root.buffer = "";
                 root.state = "";
                 root.fprintState = "";
                 root.howdyState = "";
                 root.lockMessage = "";
+            } else {
+                root.screenIsIdle = false;
+                howdyStartDelayTimer.stop();
             }
         }
 
         function onUnlock(): void {
+            howdyStartDelayTimer.stop();
+
             if (fprint.active)
                 fprint.abort();
-
             if (howdy.active)
                 howdy.abort();
         }
@@ -290,9 +293,24 @@ Scope {
         function onEnableFprintChanged(): void {
             fprint.checkAvail();
         }
-
         function onEnableHowdyChanged(): void {
             howdy.checkAvail();
+        }
+    }
+
+    Connections {
+        target: root
+
+        function onScreenIsIdleChanged() {
+            if (root.screenIsIdle) {
+                if (howdy.available && howdy.active) {
+                    howdy.abort();
+                }
+            } else {
+                if (howdy.available && root.lock.secure && !howdy.active) {
+                    howdy.checkAvail();
+                }
+            }
         }
     }
 }

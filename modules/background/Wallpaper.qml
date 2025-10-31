@@ -24,13 +24,17 @@ Item {
 
     // When the source changes, update the "other" slot to enable a crossfade.
     onSourceChanged: {
-        if (!source) {
-            activeSlot = null;
-        } else {
-            // Update the inactive slot
-            const nextSlot = (activeSlot === one) ? two : one;
-            nextSlot.loadAndBecomeActive(source);
-        }
+        if (!source)
+            current = null;
+        else if (current === one)
+            two.update();
+        else
+            one.update();
+    }
+
+    Component.onCompleted: {
+        if (source)
+            Qt.callLater(() => one.update());
     }
 
     // Empty-state UI (unchanged)
