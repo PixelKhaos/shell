@@ -86,7 +86,6 @@ Scope {
 
         function checkAvail(): void {
             if (!available || !Config.lock.enableFprint || !root.lock.secure) {
-                abort();
                 return;
             }
 
@@ -109,7 +108,6 @@ Scope {
                 root.fprintState = "error";
                 errorTries++;
                 if (errorTries < 5) {
-                    abort();
                     errorRetry.restart();
                 }
             } else if (res === PamResult.MaxTries) {
@@ -122,7 +120,6 @@ Scope {
                     start();
                 } else {
                     root.fprintState = "max";
-                    abort();
                 }
             }
 
@@ -280,8 +277,6 @@ Scope {
         function onUnlock(): void {
             howdyStartDelayTimer.stop();
 
-            if (fprint.active)
-                fprint.abort();
             if (howdy.active)
                 howdy.abort();
         }
