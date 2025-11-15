@@ -31,6 +31,7 @@ RowLayout {
             anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
             flickableDirection: Flickable.VerticalFlick
             contentHeight: leftContent.height
+            clip: true
 
             ColumnLayout {
                 id: leftContent
@@ -61,13 +62,6 @@ RowLayout {
                     Layout.fillWidth: true
                     title: qsTr("Output devices")
                     expanded: true
-
-                    onToggleRequested: {
-                        if (!expanded) {
-                            // Opening output devices, close input devices
-                            inputDevicesSection.expanded = false;
-                        }
-                    }
 
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -101,8 +95,6 @@ RowLayout {
 
                                 color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Audio.sink?.id === modelData.id ? Colours.tPalette.m3surfaceContainer.a : 0)
                                 radius: Appearance.rounding.normal
-                                border.width: Audio.sink?.id === modelData.id ? 1 : 0
-                                border.color: Colours.palette.m3primary
 
                                 StateLayer {
                                     function onClicked(): void {
@@ -149,13 +141,6 @@ RowLayout {
                     title: qsTr("Input devices")
                     expanded: true
 
-                    onToggleRequested: {
-                        if (!expanded) {
-                            // Opening input devices, close output devices
-                            outputDevicesSection.expanded = false;
-                        }
-                    }
-
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: Appearance.spacing.small
@@ -188,8 +173,6 @@ RowLayout {
 
                                 color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Audio.source?.id === modelData.id ? Colours.tPalette.m3surfaceContainer.a : 0)
                                 radius: Appearance.rounding.normal
-                                border.width: Audio.source?.id === modelData.id ? 1 : 0
-                                border.color: Colours.palette.m3primary
 
                                 StateLayer {
                                     function onClicked(): void {
@@ -241,11 +224,28 @@ RowLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        ColumnLayout {
+        StyledFlickable {
+            id: rightFlickable
+
             anchors.fill: parent
             anchors.margins: Appearance.padding.large * 2
 
-            spacing: Appearance.spacing.normal
+            flickableDirection: Flickable.VerticalFlick
+            contentHeight: contentLayout.implicitHeight
+            clip: true
+
+            StyledScrollBar.vertical: StyledScrollBar {
+                flickable: rightFlickable
+            }
+
+            ColumnLayout {
+                id: contentLayout
+
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+
+                spacing: Appearance.spacing.normal
 
             MaterialIcon {
                 Layout.alignment: Qt.AlignHCenter
@@ -382,6 +382,7 @@ RowLayout {
                 opacity: enabled ? 1 : 0.5
                 onMoved: Audio.setSourceVolume(value)
             }
+        }
         }
 
         InnerBorder {

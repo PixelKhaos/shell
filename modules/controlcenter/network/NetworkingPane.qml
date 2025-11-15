@@ -30,12 +30,19 @@ RowLayout {
 
         // Left pane - networking list with collapsible sections
         StyledFlickable {
+            id: leftFlickable
+
             anchors.fill: parent
             anchors.margins: Appearance.padding.large + Appearance.padding.normal
             anchors.leftMargin: Appearance.padding.large
             anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
             flickableDirection: Flickable.VerticalFlick
             contentHeight: leftContent.height
+            clip: true
+
+            StyledScrollBar.vertical: StyledScrollBar {
+                flickable: leftFlickable
+            }
 
             ColumnLayout {
                 id: leftContent
@@ -107,13 +114,6 @@ RowLayout {
                     title: qsTr("Ethernet")
                     expanded: true
 
-                    onToggleRequested: {
-                        if (!expanded) {
-                            // Opening ethernet, close wireless
-                            wirelessListSection.expanded = false;
-                        }
-                    }
-
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: Appearance.spacing.small
@@ -148,8 +148,6 @@ RowLayout {
 
                                 color: Qt.alpha(Colours.tPalette.m3surfaceContainer, root.session.ethernet.active === modelData ? Colours.tPalette.m3surfaceContainer.a : 0)
                                 radius: Appearance.rounding.normal
-                                border.width: root.session.ethernet.active === modelData ? 1 : 0
-                                border.color: Colours.palette.m3primary
 
                                 StateLayer {
                                     function onClicked(): void {
@@ -241,13 +239,6 @@ RowLayout {
                     title: qsTr("Wireless")
                     expanded: true
 
-                    onToggleRequested: {
-                        if (!expanded) {
-                            // Opening wireless, close ethernet
-                            ethernetListSection.expanded = false;
-                        }
-                    }
-
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: Appearance.spacing.small
@@ -297,8 +288,6 @@ RowLayout {
 
                                 color: Qt.alpha(Colours.tPalette.m3surfaceContainer, root.session.network.active === modelData ? Colours.tPalette.m3surfaceContainer.a : 0)
                                 radius: Appearance.rounding.normal
-                                border.width: root.session.network.active === modelData ? 1 : 0
-                                border.color: Colours.palette.m3primary
 
                                     StateLayer {
                                         function onClicked(): void {
@@ -413,6 +402,7 @@ RowLayout {
 
             radius: rightBorder.innerRadius
             color: "transparent"
+            clip: true
 
             // Right pane - networking details/settings
             Loader {
@@ -430,7 +420,7 @@ RowLayout {
                 scale: 1
                 transformOrigin: Item.Center
 
-                clip: false
+                clip: true
                 asynchronous: true
                 sourceComponent: pane ? (ethernetPane ? ethernetDetails : wirelessDetails) : settings
 
@@ -484,8 +474,15 @@ RowLayout {
             id: settings
 
             StyledFlickable {
+                id: settingsFlickable
+
                 flickableDirection: Flickable.VerticalFlick
                 contentHeight: settingsInner.height
+                clip: true
+
+                StyledScrollBar.vertical: StyledScrollBar {
+                    flickable: settingsFlickable
+                }
 
                 NetworkSettings {
                     id: settingsInner
@@ -515,7 +512,8 @@ RowLayout {
     }
 
     WirelessPasswordDialog {
-        anchors.fill: parent
+        Layout.fillWidth: true
+        Layout.fillHeight: true
         session: root.session
         z: 1000
     }

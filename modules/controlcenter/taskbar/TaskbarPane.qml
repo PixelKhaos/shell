@@ -209,6 +209,7 @@ RowLayout {
             anchors.fill: parent
             flickableDirection: Flickable.VerticalFlick
             contentHeight: sidebarLayout.implicitHeight + Appearance.padding.large * 2
+            clip: true
 
             StyledScrollBar.vertical: StyledScrollBar {
                 flickable: sidebarFlickable
@@ -250,10 +251,10 @@ RowLayout {
                 RowLayout {
                     id: clockRow
 
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.margins: Appearance.padding.large
+                    Layout.fillWidth: true
+                    Layout.leftMargin: Appearance.padding.large
+                    Layout.rightMargin: Appearance.padding.large
+                    Layout.alignment: Qt.AlignVCenter
 
                     spacing: Appearance.spacing.normal
 
@@ -608,6 +609,7 @@ RowLayout {
 
             flickableDirection: Flickable.VerticalFlick
             contentHeight: contentLayout.implicitHeight
+            clip: true
 
             StyledScrollBar.vertical: StyledScrollBar {
                 flickable: parent

@@ -310,15 +310,12 @@ RowLayout {
                 delegate: StyledRect {
                     required property var modelData
 
-                    anchors.left: parent.left
-                    anchors.right: parent.right
+                    width: parent ? parent.width : 0
 
                     readonly property bool isSelected: root.selectedApp === modelData
 
                     color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isSelected ? Colours.tPalette.m3surfaceContainer.a : 0)
                     radius: Appearance.rounding.normal
-                    border.width: isSelected ? 1 : 0
-                    border.color: Colours.palette.m3primary
 
                     StateLayer {
                         function onClicked(): void {
@@ -422,6 +419,7 @@ RowLayout {
                     anchors.fill: parent
                     flickableDirection: Flickable.VerticalFlick
                     contentHeight: debugLayout.implicitHeight
+                    clip: true
 
                     StyledScrollBar.vertical: StyledScrollBar {
                         flickable: parent
