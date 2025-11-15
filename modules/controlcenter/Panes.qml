@@ -1,6 +1,11 @@
 pragma ComponentBehavior: Bound
 
 import "bluetooth"
+import "network"
+import "audio"
+import "appearance"
+import "taskbar"
+import "launcher"
 import qs.components
 import qs.services
 import qs.config
@@ -23,14 +28,8 @@ ClippingRectangle {
 
         Pane {
             index: 0
-            sourceComponent: Item {
-                StyledText {
-                    anchors.centerIn: parent
-                    text: qsTr("Work in progress")
-                    color: Colours.palette.m3outline
-                    font.pointSize: Appearance.font.size.extraLarge
-                    font.weight: 500
-                }
+            sourceComponent: NetworkingPane {
+                session: root.session
             }
         }
 
@@ -43,14 +42,29 @@ ClippingRectangle {
 
         Pane {
             index: 2
-            sourceComponent: Item {
-                StyledText {
-                    anchors.centerIn: parent
-                    text: qsTr("Work in progress")
-                    color: Colours.palette.m3outline
-                    font.pointSize: Appearance.font.size.extraLarge
-                    font.weight: 500
-                }
+            sourceComponent: AudioPane {
+                session: root.session
+            }
+        }
+
+        Pane {
+            index: 3
+            sourceComponent: AppearancePane {
+                session: root.session
+            }
+        }
+
+        Pane {
+            index: 4
+            sourceComponent: TaskbarPane {
+                session: root.session
+            }
+        }
+
+        Pane {
+            index: 5
+            sourceComponent: LauncherPane {
+                session: root.session
             }
         }
 
