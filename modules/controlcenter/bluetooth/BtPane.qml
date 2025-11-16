@@ -19,30 +19,57 @@ RowLayout {
     spacing: 0
 
     Item {
+        id: leftBtItem
         Layout.preferredWidth: Math.floor(parent.width * 0.4)
         Layout.minimumWidth: 420
         Layout.fillHeight: true
 
-        DeviceList {
+        ClippingRectangle {
+            id: leftBtClippingRect
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large + Appearance.padding.normal
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
+            anchors.margins: Appearance.padding.normal
+            anchors.leftMargin: 0
+            anchors.rightMargin: Appearance.padding.normal / 2
 
-            session: root.session
+            radius: leftBtBorder.innerRadius
+            color: "transparent"
+
+            Loader {
+                id: leftBtLoader
+
+                anchors.fill: parent
+                anchors.margins: Appearance.padding.large + Appearance.padding.normal
+                anchors.leftMargin: Appearance.padding.large
+                anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
+
+                asynchronous: true
+                sourceComponent: btDeviceListComponent
+            }
         }
 
         InnerBorder {
+            id: leftBtBorder
             leftThickness: 0
             rightThickness: Appearance.padding.normal / 2
+        }
+
+        Component {
+            id: btDeviceListComponent
+
+            DeviceList {
+                anchors.fill: parent
+                session: root.session
+            }
         }
     }
 
     Item {
+        id: rightBtItem
         Layout.fillWidth: true
         Layout.fillHeight: true
 
         ClippingRectangle {
+            id: btClippingRect
             anchors.fill: parent
             anchors.margins: Appearance.padding.normal
             anchors.leftMargin: 0
@@ -50,7 +77,6 @@ RowLayout {
 
             radius: rightBorder.innerRadius
             color: "transparent"
-            clip: true
 
             Loader {
                 id: loader
@@ -60,7 +86,6 @@ RowLayout {
                 anchors.fill: parent
                 anchors.margins: Appearance.padding.large * 2
 
-                clip: true
                 asynchronous: true
                 sourceComponent: pane ? details : settings
 
@@ -108,7 +133,6 @@ RowLayout {
             StyledFlickable {
                 flickableDirection: Flickable.VerticalFlick
                 contentHeight: settingsInner.height
-                clip: true
 
                 Settings {
                     id: settingsInner

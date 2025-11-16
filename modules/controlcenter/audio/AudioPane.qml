@@ -7,6 +7,7 @@ import qs.components.effects
 import qs.components.containers
 import qs.services
 import qs.config
+import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
 
@@ -20,25 +21,58 @@ RowLayout {
     spacing: 0
 
     Item {
+        id: leftAudioItem
         Layout.preferredWidth: Math.floor(parent.width * 0.4)
         Layout.minimumWidth: 420
         Layout.fillHeight: true
 
-        StyledFlickable {
+        ClippingRectangle {
+            id: leftAudioClippingRect
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large + Appearance.padding.normal
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
-            flickableDirection: Flickable.VerticalFlick
-            contentHeight: leftContent.height
-            clip: true
+            anchors.margins: Appearance.padding.normal
+            anchors.leftMargin: 0
+            anchors.rightMargin: Appearance.padding.normal / 2
 
-            ColumnLayout {
-                id: leftContent
+            radius: leftAudioBorder.innerRadius
+            color: "transparent"
 
-                anchors.left: parent.left
-                anchors.right: parent.right
-                spacing: Appearance.spacing.normal
+            Loader {
+                id: leftAudioLoader
+
+                anchors.fill: parent
+                anchors.margins: Appearance.padding.large + Appearance.padding.normal
+                anchors.leftMargin: Appearance.padding.large
+                anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
+
+                asynchronous: true
+                sourceComponent: audioLeftContentComponent
+            }
+        }
+
+        InnerBorder {
+            id: leftAudioBorder
+            leftThickness: 0
+            rightThickness: Appearance.padding.normal / 2
+        }
+
+        Component {
+            id: audioLeftContentComponent
+
+            StyledFlickable {
+                id: leftAudioFlickable
+                flickableDirection: Flickable.VerticalFlick
+                contentHeight: leftContent.height
+
+                StyledScrollBar.vertical: StyledScrollBar {
+                    flickable: leftAudioFlickable
+                }
+
+                ColumnLayout {
+                    id: leftContent
+
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    spacing: Appearance.spacing.normal
 
                 // Settings header above the collapsible sections
                 RowLayout {
@@ -93,7 +127,7 @@ RowLayout {
 
                                 Layout.fillWidth: true
 
-                                color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Audio.sink?.id === modelData.id ? Colours.tPalette.m3surfaceContainer.a : 0)
+                                color: Audio.sink?.id === modelData.id ? Colours.layer(Colours.palette.m3surfaceContainer, 2) : "transparent"
                                 radius: Appearance.rounding.normal
 
                                 StateLayer {
@@ -171,7 +205,7 @@ RowLayout {
 
                                 Layout.fillWidth: true
 
-                                color: Qt.alpha(Colours.tPalette.m3surfaceContainer, Audio.source?.id === modelData.id ? Colours.tPalette.m3surfaceContainer.a : 0)
+                                color: Audio.source?.id === modelData.id ? Colours.layer(Colours.palette.m3surfaceContainer, 2) : "transparent"
                                 radius: Appearance.rounding.normal
 
                                 StateLayer {
@@ -212,40 +246,64 @@ RowLayout {
                     }
                 }
             }
-        }
-
-        InnerBorder {
-            leftThickness: 0
-            rightThickness: Appearance.padding.normal / 2
+            }
         }
     }
 
     Item {
+        id: rightAudioItem
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        StyledFlickable {
-            id: rightFlickable
-
+        ClippingRectangle {
+            id: rightAudioClippingRect
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large * 2
+            anchors.margins: Appearance.padding.normal
+            anchors.leftMargin: 0
+            anchors.rightMargin: Appearance.padding.normal / 2
 
-            flickableDirection: Flickable.VerticalFlick
-            contentHeight: contentLayout.implicitHeight
-            clip: true
+            radius: rightAudioBorder.innerRadius
+            color: "transparent"
 
-            StyledScrollBar.vertical: StyledScrollBar {
-                flickable: rightFlickable
+            Loader {
+                id: rightAudioLoader
+
+                anchors.fill: parent
+                anchors.topMargin: Appearance.padding.large * 2
+                anchors.bottomMargin: Appearance.padding.large * 2
+                anchors.leftMargin: 0
+                anchors.rightMargin: 0
+
+                asynchronous: true
+                sourceComponent: audioRightContentComponent
             }
+        }
 
-            ColumnLayout {
-                id: contentLayout
+        InnerBorder {
+            id: rightAudioBorder
+            leftThickness: Appearance.padding.normal / 2
+        }
 
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.top: parent.top
+        Component {
+            id: audioRightContentComponent
 
-                spacing: Appearance.spacing.normal
+            StyledFlickable {
+                id: rightAudioFlickable
+                flickableDirection: Flickable.VerticalFlick
+                contentHeight: contentLayout.height
+
+                StyledScrollBar.vertical: StyledScrollBar {
+                    flickable: rightAudioFlickable
+                }
+
+                ColumnLayout {
+                    id: contentLayout
+
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.leftMargin: Appearance.padding.large * 2
+                    anchors.rightMargin: Appearance.padding.large * 2
+                    spacing: Appearance.spacing.normal
 
                 ConnectionHeader {
                     icon: "volume_up"
@@ -278,11 +336,74 @@ RowLayout {
                                 Layout.fillWidth: true
                             }
 
+                            StyledRect {
+                                Layout.preferredWidth: 70
+                                implicitHeight: outputVolumeInput.implicitHeight + Appearance.padding.small * 2
+                                color: outputVolumeInputHover.containsMouse || outputVolumeInput.activeFocus 
+                                       ? Colours.layer(Colours.palette.m3surfaceContainer, 3)
+                                       : Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                                radius: Appearance.rounding.small
+                                border.width: 1
+                                border.color: outputVolumeInput.activeFocus 
+                                              ? Colours.palette.m3primary
+                                              : Qt.alpha(Colours.palette.m3outline, 0.3)
+                                enabled: !Audio.muted
+                                opacity: enabled ? 1 : 0.5
+
+                                Behavior on color { CAnim {} }
+                                Behavior on border.color { CAnim {} }
+
+                                MouseArea {
+                                    id: outputVolumeInputHover
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.IBeamCursor
+                                    acceptedButtons: Qt.NoButton
+                                }
+
+                                StyledTextField {
+                                    id: outputVolumeInput
+                                    anchors.centerIn: parent
+                                    width: parent.width - Appearance.padding.normal
+                                    horizontalAlignment: TextInput.AlignHCenter
+                                    validator: IntValidator { bottom: 0; top: 100 }
+                                    enabled: !Audio.muted
+                                    
+                                    Component.onCompleted: {
+                                        text = Math.round(Audio.volume * 100).toString();
+                                    }
+                                    
+                                    Connections {
+                                        target: Audio
+                                        function onVolumeChanged() {
+                                            if (!outputVolumeInput.activeFocus) {
+                                                outputVolumeInput.text = Math.round(Audio.volume * 100).toString();
+                                            }
+                                        }
+                                    }
+                                    
+                                    onTextChanged: {
+                                        if (activeFocus) {
+                                            const val = parseInt(text);
+                                            if (!isNaN(val) && val >= 0 && val <= 100) {
+                                                Audio.setVolume(val / 100);
+                                            }
+                                        }
+                                    }
+                                    onEditingFinished: {
+                                        const val = parseInt(text);
+                                        if (isNaN(val) || val < 0 || val > 100) {
+                                            text = Math.round(Audio.volume * 100).toString();
+                                        }
+                                    }
+                                }
+                            }
+
                             StyledText {
-                                text: Audio.muted ? qsTr("Muted") : qsTr("%1%").arg(Math.round(Audio.volume * 100))
-                                color: Audio.muted ? Colours.palette.m3primary : Colours.palette.m3outline
+                                text: "%"
+                                color: Colours.palette.m3outline
                                 font.pointSize: Appearance.font.size.normal
-                                font.weight: 500
+                                opacity: Audio.muted ? 0.5 : 1
                             }
 
                             StyledRect {
@@ -304,20 +425,26 @@ RowLayout {
                                     id: muteIcon
 
                                     anchors.centerIn: parent
-                                    text: Audio.muted ? "volume_off" : "volume_mute"
+                                    text: Audio.muted ? "volume_off" : "volume_up"
                                     color: Audio.muted ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
                                 }
                             }
                         }
 
                         StyledSlider {
+                            id: outputVolumeSlider
                             Layout.fillWidth: true
                             implicitHeight: Appearance.padding.normal * 3
 
                             value: Audio.volume
                             enabled: !Audio.muted
                             opacity: enabled ? 1 : 0.5
-                            onMoved: Audio.setVolume(value)
+                            onMoved: {
+                                Audio.setVolume(value);
+                                if (!outputVolumeInput.activeFocus) {
+                                    outputVolumeInput.text = Math.round(value * 100).toString();
+                                }
+                            }
                         }
                     }
                 }
@@ -348,11 +475,74 @@ RowLayout {
                                 Layout.fillWidth: true
                             }
 
+                            StyledRect {
+                                Layout.preferredWidth: 70
+                                implicitHeight: inputVolumeInput.implicitHeight + Appearance.padding.small * 2
+                                color: inputVolumeInputHover.containsMouse || inputVolumeInput.activeFocus 
+                                       ? Colours.layer(Colours.palette.m3surfaceContainer, 3)
+                                       : Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                                radius: Appearance.rounding.small
+                                border.width: 1
+                                border.color: inputVolumeInput.activeFocus 
+                                              ? Colours.palette.m3primary
+                                              : Qt.alpha(Colours.palette.m3outline, 0.3)
+                                enabled: !Audio.sourceMuted
+                                opacity: enabled ? 1 : 0.5
+
+                                Behavior on color { CAnim {} }
+                                Behavior on border.color { CAnim {} }
+
+                                MouseArea {
+                                    id: inputVolumeInputHover
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.IBeamCursor
+                                    acceptedButtons: Qt.NoButton
+                                }
+
+                                StyledTextField {
+                                    id: inputVolumeInput
+                                    anchors.centerIn: parent
+                                    width: parent.width - Appearance.padding.normal
+                                    horizontalAlignment: TextInput.AlignHCenter
+                                    validator: IntValidator { bottom: 0; top: 100 }
+                                    enabled: !Audio.sourceMuted
+                                    
+                                    Component.onCompleted: {
+                                        text = Math.round(Audio.sourceVolume * 100).toString();
+                                    }
+                                    
+                                    Connections {
+                                        target: Audio
+                                        function onSourceVolumeChanged() {
+                                            if (!inputVolumeInput.activeFocus) {
+                                                inputVolumeInput.text = Math.round(Audio.sourceVolume * 100).toString();
+                                            }
+                                        }
+                                    }
+                                    
+                                    onTextChanged: {
+                                        if (activeFocus) {
+                                            const val = parseInt(text);
+                                            if (!isNaN(val) && val >= 0 && val <= 100) {
+                                                Audio.setSourceVolume(val / 100);
+                                            }
+                                        }
+                                    }
+                                    onEditingFinished: {
+                                        const val = parseInt(text);
+                                        if (isNaN(val) || val < 0 || val > 100) {
+                                            text = Math.round(Audio.sourceVolume * 100).toString();
+                                        }
+                                    }
+                                }
+                            }
+
                             StyledText {
-                                text: Audio.sourceMuted ? qsTr("Muted") : qsTr("%1%").arg(Math.round(Audio.sourceVolume * 100))
-                                color: Audio.sourceMuted ? Colours.palette.m3primary : Colours.palette.m3outline
+                                text: "%"
+                                color: Colours.palette.m3outline
                                 font.pointSize: Appearance.font.size.normal
-                                font.weight: 500
+                                opacity: Audio.sourceMuted ? 0.5 : 1
                             }
 
                             StyledRect {
@@ -381,21 +571,24 @@ RowLayout {
                         }
 
                         StyledSlider {
+                            id: inputVolumeSlider
                             Layout.fillWidth: true
                             implicitHeight: Appearance.padding.normal * 3
 
                             value: Audio.sourceVolume
                             enabled: !Audio.sourceMuted
                             opacity: enabled ? 1 : 0.5
-                            onMoved: Audio.setSourceVolume(value)
+                            onMoved: {
+                                Audio.setSourceVolume(value);
+                                if (!inputVolumeInput.activeFocus) {
+                                    inputVolumeInput.text = Math.round(value * 100).toString();
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
-
-        InnerBorder {
-            leftThickness: Appearance.padding.normal / 2
+            }
         }
     }
 }

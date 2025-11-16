@@ -13,12 +13,13 @@ StyledRect {
     required property real value
     required property real min
     required property real max
+    property real step: 1
     property var onValueModified: function(value) {}
 
     Layout.fillWidth: true
     implicitHeight: row.implicitHeight + Appearance.padding.large * 2
     radius: Appearance.rounding.normal
-    color: Colours.tPalette.m3surfaceContainer
+    color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
 
     Behavior on implicitHeight {
         Anim {}
@@ -41,6 +42,7 @@ StyledRect {
         CustomSpinBox {
             min: root.min
             max: root.max
+            step: root.step
             value: root.value
             onValueModified: value => {
                 root.onValueModified(value);

@@ -144,19 +144,50 @@ RowLayout {
     }
 
     Item {
+        id: leftLauncherItem
         Layout.preferredWidth: Math.floor(parent.width * 0.4)
         Layout.minimumWidth: 420
         Layout.fillHeight: true
 
-        ColumnLayout {
+        ClippingRectangle {
+            id: leftLauncherClippingRect
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large + Appearance.padding.normal
-            anchors.leftMargin: Appearance.padding.large
-            anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
+            anchors.margins: Appearance.padding.normal
+            anchors.leftMargin: 0
+            anchors.rightMargin: Appearance.padding.normal / 2
 
-            spacing: Appearance.spacing.small
+            radius: leftLauncherBorder.innerRadius
+            color: "transparent"
 
-            RowLayout {
+            Loader {
+                id: leftLauncherLoader
+
+                anchors.fill: parent
+                anchors.margins: Appearance.padding.large + Appearance.padding.normal
+                anchors.leftMargin: Appearance.padding.large
+                anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
+                anchors.bottomMargin: 0
+
+                asynchronous: true
+                sourceComponent: leftContentComponent
+            }
+        }
+
+        InnerBorder {
+            id: leftLauncherBorder
+            leftThickness: 0
+            rightThickness: Appearance.padding.normal / 2
+        }
+
+        Component {
+            id: leftContentComponent
+
+            ColumnLayout {
+                anchors.fill: parent
+
+                spacing: Appearance.spacing.small
+
+                RowLayout {
                 spacing: Appearance.spacing.smaller
 
                 StyledText {
@@ -187,7 +218,7 @@ RowLayout {
                 Layout.topMargin: Appearance.spacing.normal
                 Layout.bottomMargin: Appearance.spacing.small
 
-                color: Colours.tPalette.m3surfaceContainer
+                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
                 radius: Appearance.rounding.full
 
                 implicitHeight: Math.max(searchIcon.implicitHeight, searchField.implicitHeight, clearIcon.implicitHeight)
@@ -267,6 +298,7 @@ RowLayout {
             }
 
             StyledListView {
+                id: appsListView
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
@@ -285,8 +317,21 @@ RowLayout {
 
                     readonly property bool isSelected: root.selectedApp === modelData
 
-                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isSelected ? Colours.tPalette.m3surfaceContainer.a : 0)
+                    color: isSelected ? Colours.layer(Colours.palette.m3surfaceContainer, 2) : "transparent"
                     radius: Appearance.rounding.normal
+
+                    opacity: 0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: 1000
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    Component.onCompleted: {
+                        opacity = 1;
+                    }
 
                     StateLayer {
                         function onClicked(): void {
@@ -322,25 +367,54 @@ RowLayout {
                 }
             }
         }
-
-        InnerBorder {
-            leftThickness: 0
-            rightThickness: Appearance.padding.normal / 2
         }
     }
 
     Item {
+        id: rightLauncherItem
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        ColumnLayout {
+        ClippingRectangle {
+            id: rightLauncherClippingRect
             anchors.fill: parent
-            anchors.margins: Appearance.padding.large * 2
+            anchors.margins: Appearance.padding.normal
+            anchors.leftMargin: 0
+            anchors.rightMargin: Appearance.padding.normal / 2
 
-            spacing: Appearance.spacing.normal
+            radius: rightLauncherBorder.innerRadius
+            color: "transparent"
 
-            Item {
+            Loader {
+                id: rightLauncherLoader
+
+                anchors.fill: parent
+                anchors.margins: Appearance.padding.large * 2
+
+                asynchronous: true
+                sourceComponent: rightContentComponent
+            }
+        }
+
+        InnerBorder {
+            id: rightLauncherBorder
+
+            leftThickness: Appearance.padding.normal / 2
+        }
+
+        Component {
+            id: rightContentComponent
+
+            ColumnLayout {
+                anchors.fill: parent
+
+                spacing: Appearance.spacing.normal
+
+                Item {
                 Layout.alignment: Qt.AlignHCenter
+                Layout.leftMargin: Appearance.padding.large * 2
+                Layout.rightMargin: Appearance.padding.large * 2
+                Layout.topMargin: Appearance.padding.large * 2
                 implicitWidth: iconLoader.implicitWidth
                 implicitHeight: iconLoader.implicitHeight
 
@@ -376,6 +450,8 @@ RowLayout {
 
             StyledText {
                 Layout.alignment: Qt.AlignHCenter
+                Layout.leftMargin: Appearance.padding.large * 2
+                Layout.rightMargin: Appearance.padding.large * 2
                 text: root.selectedApp ? (root.selectedApp.name || root.selectedApp.entry?.name || qsTr("Application Details")) : qsTr("Launcher Applications")
                 font.pointSize: Appearance.font.size.large
                 font.bold: true
@@ -385,12 +461,14 @@ RowLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.topMargin: Appearance.spacing.large
+                Layout.leftMargin: Appearance.padding.large * 2
+                Layout.rightMargin: Appearance.padding.large * 2
 
                 StyledFlickable {
+                    id: detailsFlickable
                     anchors.fill: parent
                     flickableDirection: Flickable.VerticalFlick
-                    contentHeight: debugLayout.implicitHeight
-                    clip: true
+                    contentHeight: debugLayout.height
 
                     StyledScrollBar.vertical: StyledScrollBar {
                         flickable: parent
@@ -419,9 +497,6 @@ RowLayout {
                 }
             }
         }
-
-        InnerBorder {
-            leftThickness: Appearance.padding.normal / 2
         }
     }
 }
