@@ -130,26 +130,6 @@ RowLayout {
                 flickableDirection: Flickable.VerticalFlick
                 contentHeight: sidebarLayout.height
 
-                function collapseAllSections(exceptSection) {
-                    if (exceptSection !== themeModeSection)
-                        themeModeSection.expanded = false;
-                    if (exceptSection !== colorVariantSection)
-                        colorVariantSection.expanded = false;
-                    if (exceptSection !== colorSchemeSection)
-                        colorSchemeSection.expanded = false;
-                    if (exceptSection !== animationsSection)
-                        animationsSection.expanded = false;
-                    if (exceptSection !== fontsSection)
-                        fontsSection.expanded = false;
-                    if (exceptSection !== scalesSection)
-                        scalesSection.expanded = false;
-                    if (exceptSection !== transparencySection)
-                        transparencySection.expanded = false;
-                    if (exceptSection !== borderSection)
-                        borderSection.expanded = false;
-                    if (exceptSection !== backgroundSection)
-                        backgroundSection.expanded = false;
-                }
 
                 StyledScrollBar.vertical: StyledScrollBar {
                     flickable: sidebarFlickable
@@ -160,6 +140,17 @@ RowLayout {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     spacing: Appearance.spacing.small
+
+                    readonly property bool allSectionsExpanded: 
+                        themeModeSection.expanded &&
+                        colorVariantSection.expanded &&
+                        colorSchemeSection.expanded &&
+                        animationsSection.expanded &&
+                        fontsSection.expanded &&
+                        scalesSection.expanded &&
+                        transparencySection.expanded &&
+                        borderSection.expanded &&
+                        backgroundSection.expanded
 
                 RowLayout {
                     spacing: Appearance.spacing.smaller
@@ -173,15 +164,30 @@ RowLayout {
                     Item {
                         Layout.fillWidth: true
                     }
+
+                    IconButton {
+                        icon: sidebarLayout.allSectionsExpanded ? "unfold_less" : "unfold_more"
+                        type: IconButton.Text
+                        label.animate: true
+                        onClicked: {
+                            const shouldExpand = !sidebarLayout.allSectionsExpanded;
+                            themeModeSection.expanded = shouldExpand;
+                            colorVariantSection.expanded = shouldExpand;
+                            colorSchemeSection.expanded = shouldExpand;
+                            animationsSection.expanded = shouldExpand;
+                            fontsSection.expanded = shouldExpand;
+                            scalesSection.expanded = shouldExpand;
+                            transparencySection.expanded = shouldExpand;
+                            borderSection.expanded = shouldExpand;
+                            backgroundSection.expanded = shouldExpand;
+                        }
+                    }
                 }
 
                 CollapsibleSection {
                     id: themeModeSection
                     title: qsTr("Theme mode")
                     description: qsTr("Light or dark theme")
-                    onToggleRequested: {
-                        sidebarFlickable.collapseAllSections(themeModeSection);
-                    }
 
                     SwitchRow {
                         label: qsTr("Dark mode")
@@ -196,9 +202,6 @@ RowLayout {
                     id: colorVariantSection
                     title: qsTr("Color variant")
                     description: qsTr("Material theme variant")
-                    onToggleRequested: {
-                        sidebarFlickable.collapseAllSections(colorVariantSection);
-                    }
 
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -282,9 +285,6 @@ RowLayout {
                     id: colorSchemeSection
                     title: qsTr("Color scheme")
                     description: qsTr("Available color schemes")
-                    onToggleRequested: {
-                        sidebarFlickable.collapseAllSections(colorSchemeSection);
-                    }
 
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -422,9 +422,6 @@ RowLayout {
                 CollapsibleSection {
                     id: animationsSection
                     title: qsTr("Animations")
-                    onToggleRequested: {
-                        sidebarFlickable.collapseAllSections(animationsSection);
-                    }
 
                     SectionContainer {
                         contentSpacing: Appearance.spacing.normal
@@ -529,214 +526,229 @@ RowLayout {
                 CollapsibleSection {
                     id: fontsSection
                     title: qsTr("Fonts")
-                    onToggleRequested: {
-                        sidebarFlickable.collapseAllSections(fontsSection);
-                    }
 
-                    StyledText {
-                        Layout.topMargin: Appearance.spacing.normal
-                        text: qsTr("Material font family")
-                        font.pointSize: Appearance.font.size.larger
-                        font.weight: 500
-                    }
+                    CollapsibleSection {
+                        id: materialFontSection
+                        title: qsTr("Material font family")
+                        expanded: true
 
-                    StyledListView {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Math.min(contentHeight, 300)
-                        
-                        clip: true
-                        spacing: Appearance.spacing.small / 2
-                        model: Qt.fontFamilies()
+                        Loader {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: item ? Math.min(item.contentHeight, 300) : 0
+                            asynchronous: true
+                            active: materialFontSection.expanded
 
-                        delegate: StyledRect {
-                            required property string modelData
-                            required property int index
+                            sourceComponent: StyledListView {
+                                id: materialFontList
+                                property alias contentHeight: materialFontList.contentHeight
 
-                            width: ListView.view.width
+                                clip: true
+                                spacing: Appearance.spacing.small / 2
+                                model: Qt.fontFamilies()
 
-                            readonly property bool isCurrent: modelData === rootPane.fontFamilyMaterial
-                            color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
-                            radius: Appearance.rounding.normal
-                            border.width: isCurrent ? 1 : 0
-                            border.color: Colours.palette.m3primary
+                                delegate: StyledRect {
+                                    required property string modelData
+                                    required property int index
 
-                            StateLayer {
-                                function onClicked(): void {
-                                    rootPane.fontFamilyMaterial = modelData;
-                                    rootPane.saveConfig();
-                                }
-                            }
+                                    width: ListView.view.width
 
-                            RowLayout {
-                                id: fontFamilyMaterialRow
+                                    readonly property bool isCurrent: modelData === rootPane.fontFamilyMaterial
+                                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
+                                    radius: Appearance.rounding.normal
+                                    border.width: isCurrent ? 1 : 0
+                                    border.color: Colours.palette.m3primary
 
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.normal
-
-                                spacing: Appearance.spacing.normal
-
-                                StyledText {
-                                    text: modelData
-                                    font.pointSize: Appearance.font.size.normal
-                                }
-
-                                Item {
-                                    Layout.fillWidth: true
-                                }
-
-                                Loader {
-                                    active: isCurrent
-                                    asynchronous: true
-
-                                    sourceComponent: MaterialIcon {
-                                        text: "check"
-                                        color: Colours.palette.m3onSurfaceVariant
-                                        font.pointSize: Appearance.font.size.large
+                                    StateLayer {
+                                        function onClicked(): void {
+                                            rootPane.fontFamilyMaterial = modelData;
+                                            rootPane.saveConfig();
+                                        }
                                     }
+
+                                    RowLayout {
+                                        id: fontFamilyMaterialRow
+
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.margins: Appearance.padding.normal
+
+                                        spacing: Appearance.spacing.normal
+
+                                        StyledText {
+                                            text: modelData
+                                            font.pointSize: Appearance.font.size.normal
+                                        }
+
+                                        Item {
+                                            Layout.fillWidth: true
+                                        }
+
+                                        Loader {
+                                            active: isCurrent
+                                            asynchronous: true
+
+                                            sourceComponent: MaterialIcon {
+                                                text: "check"
+                                                color: Colours.palette.m3onSurfaceVariant
+                                                font.pointSize: Appearance.font.size.large
+                                            }
+                                        }
+                                    }
+
+                                    implicitHeight: fontFamilyMaterialRow.implicitHeight + Appearance.padding.normal * 2
                                 }
                             }
-
-                            implicitHeight: fontFamilyMaterialRow.implicitHeight + Appearance.padding.normal * 2
                         }
                     }
 
-                    StyledText {
-                        Layout.topMargin: Appearance.spacing.normal
-                        text: qsTr("Monospace font family")
-                        font.pointSize: Appearance.font.size.larger
-                        font.weight: 500
-                    }
+                    CollapsibleSection {
+                        id: monoFontSection
+                        title: qsTr("Monospace font family")
+                        expanded: false
 
-                    StyledListView {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Math.min(contentHeight, 300)
-                        
-                        clip: true
-                        spacing: Appearance.spacing.small / 2
-                        model: Qt.fontFamilies()
+                        Loader {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: item ? Math.min(item.contentHeight, 300) : 0
+                            asynchronous: true
+                            active: monoFontSection.expanded
 
-                        delegate: StyledRect {
-                            required property string modelData
-                            required property int index
+                            sourceComponent: StyledListView {
+                                id: monoFontList
+                                property alias contentHeight: monoFontList.contentHeight
 
-                            width: ListView.view.width
+                                clip: true
+                                spacing: Appearance.spacing.small / 2
+                                model: Qt.fontFamilies()
 
-                            readonly property bool isCurrent: modelData === rootPane.fontFamilyMono
-                            color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
-                            radius: Appearance.rounding.normal
-                            border.width: isCurrent ? 1 : 0
-                            border.color: Colours.palette.m3primary
+                                delegate: StyledRect {
+                                    required property string modelData
+                                    required property int index
 
-                            StateLayer {
-                                function onClicked(): void {
-                                    rootPane.fontFamilyMono = modelData;
-                                    rootPane.saveConfig();
-                                }
-                            }
+                                    width: ListView.view.width
 
-                            RowLayout {
-                                id: fontFamilyMonoRow
+                                    readonly property bool isCurrent: modelData === rootPane.fontFamilyMono
+                                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
+                                    radius: Appearance.rounding.normal
+                                    border.width: isCurrent ? 1 : 0
+                                    border.color: Colours.palette.m3primary
 
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.normal
-
-                                spacing: Appearance.spacing.normal
-
-                                StyledText {
-                                    text: modelData
-                                    font.pointSize: Appearance.font.size.normal
-                                }
-
-                                Item {
-                                    Layout.fillWidth: true
-                                }
-
-                                Loader {
-                                    active: isCurrent
-                                    asynchronous: true
-
-                                    sourceComponent: MaterialIcon {
-                                        text: "check"
-                                        color: Colours.palette.m3onSurfaceVariant
-                                        font.pointSize: Appearance.font.size.large
+                                    StateLayer {
+                                        function onClicked(): void {
+                                            rootPane.fontFamilyMono = modelData;
+                                            rootPane.saveConfig();
+                                        }
                                     }
+
+                                    RowLayout {
+                                        id: fontFamilyMonoRow
+
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.margins: Appearance.padding.normal
+
+                                        spacing: Appearance.spacing.normal
+
+                                        StyledText {
+                                            text: modelData
+                                            font.pointSize: Appearance.font.size.normal
+                                        }
+
+                                        Item {
+                                            Layout.fillWidth: true
+                                        }
+
+                                        Loader {
+                                            active: isCurrent
+                                            asynchronous: true
+
+                                            sourceComponent: MaterialIcon {
+                                                text: "check"
+                                                color: Colours.palette.m3onSurfaceVariant
+                                                font.pointSize: Appearance.font.size.large
+                                            }
+                                        }
+                                    }
+
+                                    implicitHeight: fontFamilyMonoRow.implicitHeight + Appearance.padding.normal * 2
                                 }
                             }
-
-                            implicitHeight: fontFamilyMonoRow.implicitHeight + Appearance.padding.normal * 2
                         }
                     }
 
-                    StyledText {
-                        Layout.topMargin: Appearance.spacing.normal
-                        text: qsTr("Sans-serif font family")
-                        font.pointSize: Appearance.font.size.larger
-                        font.weight: 500
-                    }
+                    CollapsibleSection {
+                        id: sansFontSection
+                        title: qsTr("Sans-serif font family")
+                        expanded: false
 
-                    StyledListView {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: Math.min(contentHeight, 300)
-                        
-                        clip: true
-                        spacing: Appearance.spacing.small / 2
-                        model: Qt.fontFamilies()
+                        Loader {
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: item ? Math.min(item.contentHeight, 300) : 0
+                            asynchronous: true
+                            active: sansFontSection.expanded
 
-                        delegate: StyledRect {
-                            required property string modelData
-                            required property int index
+                            sourceComponent: StyledListView {
+                                id: sansFontList
+                                property alias contentHeight: sansFontList.contentHeight
 
-                            width: ListView.view.width
+                                clip: true
+                                spacing: Appearance.spacing.small / 2
+                                model: Qt.fontFamilies()
 
-                            readonly property bool isCurrent: modelData === rootPane.fontFamilySans
-                            color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
-                            radius: Appearance.rounding.normal
-                            border.width: isCurrent ? 1 : 0
-                            border.color: Colours.palette.m3primary
+                                delegate: StyledRect {
+                                    required property string modelData
+                                    required property int index
 
-                            StateLayer {
-                                function onClicked(): void {
-                                    rootPane.fontFamilySans = modelData;
-                                    rootPane.saveConfig();
-                                }
-                            }
+                                    width: ListView.view.width
 
-                            RowLayout {
-                                id: fontFamilySansRow
+                                    readonly property bool isCurrent: modelData === rootPane.fontFamilySans
+                                    color: Qt.alpha(Colours.tPalette.m3surfaceContainer, isCurrent ? Colours.tPalette.m3surfaceContainer.a : 0)
+                                    radius: Appearance.rounding.normal
+                                    border.width: isCurrent ? 1 : 0
+                                    border.color: Colours.palette.m3primary
 
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.verticalCenter: parent.verticalCenter
-                                anchors.margins: Appearance.padding.normal
-
-                                spacing: Appearance.spacing.normal
-
-                                StyledText {
-                                    text: modelData
-                                    font.pointSize: Appearance.font.size.normal
-                                }
-
-                                Item {
-                                    Layout.fillWidth: true
-                                }
-
-                                Loader {
-                                    active: isCurrent
-                                    asynchronous: true
-
-                                    sourceComponent: MaterialIcon {
-                                        text: "check"
-                                        color: Colours.palette.m3onSurfaceVariant
-                                        font.pointSize: Appearance.font.size.large
+                                    StateLayer {
+                                        function onClicked(): void {
+                                            rootPane.fontFamilySans = modelData;
+                                            rootPane.saveConfig();
+                                        }
                                     }
+
+                                    RowLayout {
+                                        id: fontFamilySansRow
+
+                                        anchors.left: parent.left
+                                        anchors.right: parent.right
+                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.margins: Appearance.padding.normal
+
+                                        spacing: Appearance.spacing.normal
+
+                                        StyledText {
+                                            text: modelData
+                                            font.pointSize: Appearance.font.size.normal
+                                        }
+
+                                        Item {
+                                            Layout.fillWidth: true
+                                        }
+
+                                        Loader {
+                                            active: isCurrent
+                                            asynchronous: true
+
+                                            sourceComponent: MaterialIcon {
+                                                text: "check"
+                                                color: Colours.palette.m3onSurfaceVariant
+                                                font.pointSize: Appearance.font.size.large
+                                            }
+                                        }
+                                    }
+
+                                    implicitHeight: fontFamilySansRow.implicitHeight + Appearance.padding.normal * 2
                                 }
                             }
-
-                            implicitHeight: fontFamilySansRow.implicitHeight + Appearance.padding.normal * 2
                         }
                     }
 
@@ -788,7 +800,7 @@ RowLayout {
                                         anchors.centerIn: parent
                                         width: parent.width - Appearance.padding.normal
                                         horizontalAlignment: TextInput.AlignHCenter
-                                        validator: DoubleValidator { bottom: 0.1; top: 5.0 }
+                                        validator: DoubleValidator { bottom: 0.7; top: 1.5 }
                                         
                                         Component.onCompleted: {
                                             text = (rootPane.fontSizeScale).toFixed(1);
@@ -797,7 +809,7 @@ RowLayout {
                                         onTextChanged: {
                                             if (activeFocus) {
                                                 const val = parseFloat(text);
-                                                if (!isNaN(val) && val >= 0.1 && val <= 5.0) {
+                                                if (!isNaN(val) && val >= 0.7 && val <= 1.5) {
                                                     rootPane.fontSizeScale = val;
                                                     rootPane.saveConfig();
                                                 }
@@ -805,7 +817,7 @@ RowLayout {
                                         }
                                         onEditingFinished: {
                                             const val = parseFloat(text);
-                                            if (isNaN(val) || val < 0.1 || val > 5.0) {
+                                            if (isNaN(val) || val < 0.7 || val > 1.5) {
                                                 text = (rootPane.fontSizeScale).toFixed(1);
                                             }
                                         }
@@ -825,8 +837,8 @@ RowLayout {
                                 Layout.fillWidth: true
                                 implicitHeight: Appearance.padding.normal * 3
 
-                                from: 0.1
-                                to: 5.0
+                                from: 0.7
+                                to: 1.5
                         value: rootPane.fontSizeScale
                                 onMoved: {
                                     rootPane.fontSizeScale = fontSizeSlider.value;
@@ -843,9 +855,6 @@ RowLayout {
                 CollapsibleSection {
                     id: scalesSection
                     title: qsTr("Scales")
-                    onToggleRequested: {
-                        sidebarFlickable.collapseAllSections(scalesSection);
-                    }
 
                     SectionContainer {
                         contentSpacing: Appearance.spacing.normal
@@ -1148,9 +1157,6 @@ RowLayout {
                 CollapsibleSection {
                     id: transparencySection
                     title: qsTr("Transparency")
-                    onToggleRequested: {
-                        sidebarFlickable.collapseAllSections(transparencySection);
-                    }
 
                     SwitchRow {
                         label: qsTr("Transparency enabled")
@@ -1363,9 +1369,6 @@ RowLayout {
                 CollapsibleSection {
                     id: borderSection
                     title: qsTr("Border")
-                    onToggleRequested: {
-                        sidebarFlickable.collapseAllSections(borderSection);
-                    }
 
                     SectionContainer {
                         contentSpacing: Appearance.spacing.normal
@@ -1557,9 +1560,6 @@ RowLayout {
                 CollapsibleSection {
                     id: backgroundSection
                     title: qsTr("Background")
-                    onToggleRequested: {
-                        sidebarFlickable.collapseAllSections(backgroundSection);
-                    }
 
                     SwitchRow {
                         label: qsTr("Desktop clock")
@@ -1877,35 +1877,47 @@ RowLayout {
                 Item {
                     Layout.fillWidth: true
                     Layout.topMargin: Appearance.spacing.large
-                    Layout.preferredHeight: wallpaperGrid.Layout.preferredHeight
+                    Layout.preferredHeight: wallpaperLoader.item ? wallpaperLoader.item.layoutPreferredHeight : 0
                     
-                    GridView {
-                        id: wallpaperGrid
+                    Loader {
+                        id: wallpaperLoader
                         anchors.fill: parent
-                        
-                        readonly property int minCellWidth: 200 + Appearance.spacing.normal
-                        readonly property int columnsCount: Math.max(1, Math.floor(parent.width / minCellWidth))
-                        
-                        Layout.preferredHeight: Math.ceil(count / columnsCount) * cellHeight
-                        height: Layout.preferredHeight
-                        
-                        // Distribute width evenly across columns
-                        cellWidth: width / columnsCount
-                        cellHeight: 140 + Appearance.spacing.normal
-                        
-                        leftMargin: 0
-                        rightMargin: 0
-                        topMargin: 0
-                        bottomMargin: 0
+                        asynchronous: true
+                        active: {
+                            // Lazy load: only activate when right pane is loaded
+                            // This defers heavy wallpaper list loading until the right pane is visible
+                            return rightAppearanceLoader.item !== null;
+                        }
 
-                        model: Wallpapers.list
-                        clip: true
-                        
-                        // Disable GridView's own scrolling - let parent handle it
-                        interactive: false
+                        sourceComponent: Item {
+                            property alias layoutPreferredHeight: wallpaperGrid.layoutPreferredHeight
+                            
+                            GridView {
+                                id: wallpaperGrid
+                                anchors.fill: parent
+                                
+                                readonly property int minCellWidth: 200 + Appearance.spacing.normal
+                                readonly property int columnsCount: Math.max(1, Math.floor(parent.width / minCellWidth))
+                                
+                                readonly property int layoutPreferredHeight: Math.ceil(count / columnsCount) * cellHeight
+                                height: layoutPreferredHeight
+                                
+                                // Distribute width evenly across columns
+                                cellWidth: width / columnsCount
+                                cellHeight: 140 + Appearance.spacing.normal
+                                
+                                leftMargin: 0
+                                rightMargin: 0
+                                topMargin: 0
+                                bottomMargin: 0
 
-                    // Enable caching for better performance
-                    cacheBuffer: cellHeight * 2
+                                model: Wallpapers.list
+                                
+                                // Disable GridView's own scrolling - let parent handle it
+                                interactive: false
+
+                            // Enable caching for better performance
+                            cacheBuffer: cellHeight * 2
 
                     delegate: Item {
                         required property var modelData
@@ -1914,14 +1926,16 @@ RowLayout {
                         height: wallpaperGrid.cellHeight
 
                         readonly property bool isCurrent: modelData.path === Wallpapers.actualCurrent
+                        readonly property real itemMargin: Appearance.spacing.normal / 2
+                        readonly property real itemRadius: Appearance.rounding.normal
 
                         StateLayer {
                             anchors.fill: parent
-                            anchors.leftMargin: Appearance.spacing.normal / 2
-                            anchors.rightMargin: Appearance.spacing.normal / 2
-                            anchors.topMargin: Appearance.spacing.normal / 2
-                            anchors.bottomMargin: Appearance.spacing.normal / 2
-                            radius: Appearance.rounding.normal
+                            anchors.leftMargin: itemMargin
+                            anchors.rightMargin: itemMargin
+                            anchors.topMargin: itemMargin
+                            anchors.bottomMargin: itemMargin
+                            radius: itemRadius
 
                             function onClicked(): void {
                                 Wallpapers.setWallpaper(modelData.path);
@@ -1932,13 +1946,15 @@ RowLayout {
                             id: image
 
                             anchors.fill: parent
-                            anchors.leftMargin: Appearance.spacing.normal / 2
-                            anchors.rightMargin: Appearance.spacing.normal / 2
-                            anchors.topMargin: Appearance.spacing.normal / 2
-                            anchors.bottomMargin: Appearance.spacing.normal / 2
+                            anchors.leftMargin: itemMargin
+                            anchors.rightMargin: itemMargin
+                            anchors.topMargin: itemMargin
+                            anchors.bottomMargin: itemMargin
                             color: Colours.tPalette.m3surfaceContainer
-                            radius: Appearance.rounding.normal
+                            radius: itemRadius
                             antialiasing: true
+                            layer.enabled: true
+                            layer.smooth: true
 
                             CachingImage {
                                 id: cachingImage
@@ -1949,6 +1965,7 @@ RowLayout {
                                 cache: true
                                 visible: opacity > 0
                                 antialiasing: true
+                                smooth: true
 
                                 // Show when ready
                                 opacity: status === Image.Ready ? 1 : 0
@@ -1972,6 +1989,7 @@ RowLayout {
                                 cache: true
                                 visible: opacity > 0
                                 antialiasing: true
+                                smooth: true
 
                                 opacity: status === Image.Ready && cachingImage.status !== Image.Ready ? 1 : 0
 
@@ -1992,79 +2010,20 @@ RowLayout {
                                 running: cachingImage.status === Image.Loading || cachingImage.status === Image.Null
                                 onTriggered: triggered = true
                             }
-                        }
 
-                        // Border overlay that doesn't affect image size
-                        Rectangle {
-                            anchors.fill: parent
-                            anchors.leftMargin: Appearance.spacing.normal / 2
-                            anchors.rightMargin: Appearance.spacing.normal / 2
-                            anchors.topMargin: Appearance.spacing.normal / 2
-                            anchors.bottomMargin: Appearance.spacing.normal / 2
-                            color: "transparent"
-                            radius: Appearance.rounding.normal
-                            border.width: isCurrent ? 2 : 0
-                            border.color: Colours.palette.m3primary
-                            antialiasing: true
-
-                            Behavior on border.width {
-                                NumberAnimation {
-                                    duration: 150
-                                    easing.type: Easing.OutQuad
-                                }
-                            }
-
-                            MaterialIcon {
-                                anchors.right: parent.right
-                                anchors.top: parent.top
-                                anchors.margins: Appearance.padding.small
-
-                                visible: isCurrent
-                                text: "check_circle"
-                                color: Colours.palette.m3primary
-                                font.pointSize: Appearance.font.size.large
-                            }
-
-                            // Gradient overlay for filename with rounded bottom corners
+                            // Gradient overlay for filename - positioned inside image container for perfect alignment
                             Rectangle {
                                 id: filenameOverlay
 
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.bottom: parent.bottom
-                                anchors.leftMargin: isCurrent ? 2 : 0
-                                anchors.rightMargin: isCurrent ? 2 : 0
-                                anchors.bottomMargin: isCurrent ? 2 : 0
 
                                 implicitHeight: filenameText.implicitHeight + Appearance.padding.normal * 1.5
 
-                                // Only round bottom corners
-                                topLeftRadius: 0
-                                topRightRadius: 0
-                                bottomLeftRadius: Appearance.rounding.normal
-                                bottomRightRadius: Appearance.rounding.normal
-
-                                Behavior on anchors.leftMargin {
-                                    NumberAnimation {
-                                        duration: 150
-                                        easing.type: Easing.OutQuad
-                                    }
-                                }
+                                // No rounded corners - clipped by parent's rounded corners
+                                radius: 0
                                 
-                                Behavior on anchors.rightMargin {
-                                    NumberAnimation {
-                                        duration: 150
-                                        easing.type: Easing.OutQuad
-                                    }
-                                }
-                                
-                                Behavior on anchors.bottomMargin {
-                                    NumberAnimation {
-                                        duration: 150
-                                        easing.type: Easing.OutQuad
-                                    }
-                                }
-
                                 gradient: Gradient {
                                     GradientStop {
                                         position: 0.0
@@ -2091,19 +2050,52 @@ RowLayout {
                                                       Colours.palette.m3surfaceContainer.b, 0.95)
                                     }
                                 }
+
+                                opacity: 0
+
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: 1000
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+
+                                Component.onCompleted: {
+                                    opacity = 1;
+                                }
                             }
+                        }
 
-                            opacity: 0
+                        // Border overlay that doesn't affect image size
+                        Rectangle {
+                            anchors.fill: parent
+                            anchors.leftMargin: itemMargin
+                            anchors.rightMargin: itemMargin
+                            anchors.topMargin: itemMargin
+                            anchors.bottomMargin: itemMargin
+                            color: "transparent"
+                            radius: itemRadius + border.width
+                            border.width: isCurrent ? 2 : 0
+                            border.color: Colours.palette.m3primary
+                            antialiasing: true
+                            smooth: true
 
-                            Behavior on opacity {
+                            Behavior on border.width {
                                 NumberAnimation {
-                                    duration: 1000
-                                    easing.type: Easing.OutCubic
+                                    duration: 150
+                                    easing.type: Easing.OutQuad
                                 }
                             }
 
-                            Component.onCompleted: {
-                                opacity = 1;
+                            MaterialIcon {
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.margins: Appearance.padding.small
+
+                                visible: isCurrent
+                                text: "check_circle"
+                                color: Colours.palette.m3primary
+                                font.pointSize: Appearance.font.size.large
                             }
                         }
 
@@ -2112,8 +2104,8 @@ RowLayout {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.bottom: parent.bottom
-                            anchors.leftMargin: Appearance.padding.normal
-                            anchors.rightMargin: Appearance.padding.normal
+                            anchors.leftMargin: Appearance.padding.normal + Appearance.spacing.normal / 2
+                            anchors.rightMargin: Appearance.padding.normal + Appearance.spacing.normal / 2
                             anchors.bottomMargin: Appearance.padding.normal
 
                             readonly property string fileName: {
@@ -2144,7 +2136,9 @@ RowLayout {
                             }
                         }
                     }
-                }
+                            }
+                        }
+                    }
                 }
             }
         }

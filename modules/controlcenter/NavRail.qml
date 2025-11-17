@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import qs.components
 import qs.services
 import qs.config
+import qs.modules.controlcenter
 import Quickshell
 import QtQuick
 import QtQuick.Layouts
@@ -30,57 +31,17 @@ Item {
 
             PropertyChanges {
                 layout.spacing: Appearance.spacing.small
-                menuIcon.opacity: 0
-                menuIconExpanded.opacity: 1
-                menuIcon.rotation: 180
-                menuIconExpanded.rotation: 0
             }
         }
 
         transitions: Transition {
             Anim {
-                properties: "spacing,opacity,rotation"
-            }
-        }
-
-        Item {
-            id: menuBtn
-
-            Layout.topMargin: Appearance.spacing.large
-            implicitWidth: menuIcon.implicitWidth + menuIcon.anchors.leftMargin * 2
-            implicitHeight: menuIcon.implicitHeight + Appearance.padding.normal * 2
-
-            StateLayer {
-                radius: Appearance.rounding.small
-
-                function onClicked(): void {
-                    root.session.navExpanded = !root.session.navExpanded;
-                }
-            }
-
-            MaterialIcon {
-                id: menuIcon
-
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.leftMargin: Appearance.padding.large
-
-                text: "menu"
-                font.pointSize: Appearance.font.size.large
-            }
-
-            MaterialIcon {
-                id: menuIconExpanded
-
-                anchors.fill: menuIcon
-                text: "menu_open"
-                font.pointSize: menuIcon.font.pointSize
-                opacity: 0
-                rotation: -180
+                properties: "spacing"
             }
         }
 
         Loader {
+            Layout.topMargin: Appearance.spacing.large
             asynchronous: true
             active: !root.session.floating
             visible: active
@@ -102,7 +63,6 @@ Item {
                     function onClicked(): void {
                         root.session.root.close();
                         WindowFactory.create(null, {
-                            screen: root.screen,
                             active: root.session.active,
                             navExpanded: root.session.navExpanded
                         });

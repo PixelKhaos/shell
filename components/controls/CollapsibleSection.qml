@@ -68,39 +68,6 @@ ColumnLayout {
         }
     }
 
-    Item {
-        visible: root.description !== ""
-        Layout.fillWidth: true
-        Layout.preferredHeight: root.expanded ? descriptionText.implicitHeight + Appearance.spacing.smaller + Appearance.spacing.small : 0
-        clip: true
-
-        Behavior on Layout.preferredHeight {
-            Anim {
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
-        }
-
-        StyledText {
-            id: descriptionText
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.leftMargin: Appearance.padding.normal
-            anchors.rightMargin: Appearance.padding.normal
-            anchors.topMargin: Appearance.spacing.smaller
-            text: root.description
-            color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.small
-            opacity: root.expanded ? 1.0 : 0.0
-
-            Behavior on opacity {
-                Anim {
-                    easing.bezierCurve: Appearance.anim.curves.standard
-                }
-            }
-        }
-    }
-
     default property alias content: contentColumn.data
 
     Item {
@@ -119,10 +86,9 @@ ColumnLayout {
             id: contentColumn
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: parent.top
+            y: Appearance.spacing.small
             anchors.leftMargin: Appearance.padding.normal
             anchors.rightMargin: Appearance.padding.normal
-            anchors.topMargin: Appearance.spacing.small
             anchors.bottomMargin: Appearance.spacing.small
             spacing: Appearance.spacing.small
             opacity: root.expanded ? 1.0 : 0.0
@@ -131,6 +97,18 @@ ColumnLayout {
                 Anim {
                     easing.bezierCurve: Appearance.anim.curves.standard
                 }
+            }
+
+            StyledText {
+                id: descriptionText
+                Layout.fillWidth: true
+                Layout.topMargin: root.description !== "" ? Appearance.spacing.smaller : 0
+                Layout.bottomMargin: root.description !== "" ? Appearance.spacing.small : 0
+                visible: root.description !== ""
+                text: root.description
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
+                wrapMode: Text.Wrap
             }
         }
     }
