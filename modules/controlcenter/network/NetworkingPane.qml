@@ -82,13 +82,13 @@ Item {
                         anchors.right: parent.right
                         spacing: Appearance.spacing.normal
 
-                    // Settings header above the collapsible sections
+                    // Network header above the collapsible sections
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: Appearance.spacing.smaller
 
                         StyledText {
-                            text: qsTr("Settings")
+                            text: qsTr("Network")
                             font.pointSize: Appearance.font.size.large
                             font.weight: 500
                         }
@@ -215,19 +215,27 @@ Item {
                                             }
                                         }
 
-                                        StyledText {
+                                        ColumnLayout {
                                             Layout.fillWidth: true
-                                            elide: Text.ElideRight
-                                            maximumLineCount: 1
 
-                                            text: modelData.interface || qsTr("Unknown")
-                                        }
+                                            spacing: 0
 
-                                        StyledText {
-                                            text: modelData.connected ? qsTr("Connected") : qsTr("Disconnected")
-                                            color: modelData.connected ? Colours.palette.m3primary : Colours.palette.m3outline
-                                            font.pointSize: Appearance.font.size.small
-                                            font.weight: modelData.connected ? 500 : 400
+                                            StyledText {
+                                                Layout.fillWidth: true
+                                                elide: Text.ElideRight
+                                                maximumLineCount: 1
+
+                                                text: modelData.interface || qsTr("Unknown")
+                                            }
+
+                                            StyledText {
+                                                Layout.fillWidth: true
+                                                text: modelData.connected ? qsTr("Connected") : qsTr("Disconnected")
+                                                color: modelData.connected ? Colours.palette.m3primary : Colours.palette.m3outline
+                                                font.pointSize: Appearance.font.size.small
+                                                font.weight: modelData.connected ? 500 : 400
+                                                elide: Text.ElideRight
+                                            }
                                         }
 
                                         StyledRect {
@@ -360,39 +368,74 @@ Item {
                                                 fill: (modelData && modelData.active) ? 1 : 0
                                                 color: (modelData && modelData.active) ? Colours.palette.m3onPrimaryContainer : Colours.palette.m3onSurface
                                             }
-                                        }
 
-                                        StyledText {
-                                            Layout.fillWidth: true
-                                            elide: Text.ElideRight
-                                            maximumLineCount: 1
+                                            StyledRect {
+                                                id: lockBadge
 
-                                            text: (modelData && modelData.ssid) ? modelData.ssid : qsTr("Unknown")
-                                        }
+                                                visible: modelData && modelData.isSecure
+                                                anchors.right: parent.right
+                                                anchors.bottom: parent.bottom
+                                                anchors.margins: -Appearance.padding.smaller / 2
 
-                                        RowLayout {
-                                            spacing: Appearance.spacing.smaller
+                                                implicitWidth: lockIconSize + Appearance.padding.smaller
+                                                implicitHeight: lockIconSize + Appearance.padding.smaller
+                                                radius: Appearance.rounding.full
+                                                color: Colours.palette.m3secondaryContainer
 
-                                            MaterialIcon {
-                                                visible: (modelData && modelData.isSecure)
-                                                text: "lock"
-                                                font.pointSize: Appearance.font.size.small
-                                                color: (modelData && modelData.active) ? Colours.palette.m3primary : Colours.palette.m3outline
+                                                readonly property real lockIconSize: lockIcon.implicitWidth
+
+                                                Elevation {
+                                                    anchors.fill: parent
+                                                    radius: parent.radius
+                                                    z: -1
+                                                    level: 2
+                                                }
+
+                                                MaterialIcon {
+                                                    id: lockIcon
+
+                                                    anchors.centerIn: parent
+                                                    text: "lock"
+                                                    font.pointSize: Appearance.font.size.small
+                                                    fill: 1
+                                                    color: Colours.palette.m3onSurface
+                                                }
                                             }
+                                        }
+
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+
+                                            spacing: 0
 
                                             StyledText {
-                                                text: {
-                                                    if (!modelData) return qsTr("Open");
-                                                    if (modelData.active) return qsTr("Connected");
-                                                    if (modelData.isSecure && modelData.security && modelData.security.length > 0) {
-                                                        return modelData.security;
+                                                Layout.fillWidth: true
+                                                elide: Text.ElideRight
+                                                maximumLineCount: 1
+
+                                                text: (modelData && modelData.ssid) ? modelData.ssid : qsTr("Unknown")
+                                            }
+
+                                            RowLayout {
+                                                Layout.fillWidth: true
+                                                spacing: Appearance.spacing.smaller
+
+                                                StyledText {
+                                                    Layout.fillWidth: true
+                                                    text: {
+                                                        if (!modelData) return qsTr("Open");
+                                                        if (modelData.active) return qsTr("Connected");
+                                                        if (modelData.isSecure && modelData.security && modelData.security.length > 0) {
+                                                            return modelData.security;
+                                                        }
+                                                        if (modelData.isSecure) return qsTr("Secured");
+                                                        return qsTr("Open");
                                                     }
-                                                    if (modelData.isSecure) return qsTr("Secured");
-                                                    return qsTr("Open");
+                                                    color: (modelData && modelData.active) ? Colours.palette.m3primary : Colours.palette.m3outline
+                                                    font.pointSize: Appearance.font.size.small
+                                                    font.weight: (modelData && modelData.active) ? 500 : 400
+                                                    elide: Text.ElideRight
                                                 }
-                                                color: (modelData && modelData.active) ? Colours.palette.m3primary : Colours.palette.m3outline
-                                                font.pointSize: Appearance.font.size.small
-                                                font.weight: (modelData && modelData.active) ? 500 : 400
                                             }
                                         }
 
@@ -456,6 +499,12 @@ Item {
                     property var wirelessPane: root.session.network.active
                     property var pane: ethernetPane || wirelessPane
                     property string paneId: ethernetPane ? (ethernetPane.interface || "") : (wirelessPane ? (wirelessPane.ssid || wirelessPane.bssid || "") : "")
+                    property Component targetComponent: settings
+                    property Component nextComponent: settings
+
+                    function getComponentForPane() {
+                        return pane ? (ethernetPane ? ethernetDetails : wirelessDetails) : settings;
+                    }
 
                     anchors.fill: parent
                     anchors.margins: Appearance.padding.large * 2
@@ -463,9 +512,15 @@ Item {
                     opacity: 1
                     scale: 1
                     transformOrigin: Item.Center
+                    clip: false
 
                     asynchronous: true
-                    sourceComponent: pane ? (ethernetPane ? ethernetDetails : wirelessDetails) : settings
+                    sourceComponent: loader.targetComponent
+
+                    Component.onCompleted: {
+                        targetComponent = getComponentForPane();
+                        nextComponent = targetComponent;
+                    }
 
                     Behavior on paneId {
                         SequentialAnimation {
@@ -483,7 +538,11 @@ Item {
                                     easing.bezierCurve: Appearance.anim.curves.standardAccel
                                 }
                             }
-                            PropertyAction {}
+                            PropertyAction {
+                                target: loader
+                                property: "targetComponent"
+                                value: loader.nextComponent
+                            }
                             ParallelAnimation {
                                 Anim {
                                     target: loader
@@ -502,6 +561,7 @@ Item {
                     }
 
                     onPaneChanged: {
+                        nextComponent = getComponentForPane();
                         paneId = ethernetPane ? (ethernetPane.interface || "") : (wirelessPane ? (wirelessPane.ssid || wirelessPane.bssid || "") : "");
                     }
                 }
@@ -517,14 +577,20 @@ Item {
                 id: settings
 
                 StyledFlickable {
+                    id: settingsFlickable
                     flickableDirection: Flickable.VerticalFlick
                     contentHeight: settingsInner.height
+
+                    StyledScrollBar.vertical: StyledScrollBar {
+                        flickable: settingsFlickable
+                    }
 
                     NetworkSettings {
                         id: settingsInner
 
                         anchors.left: parent.left
                         anchors.right: parent.right
+                        anchors.top: parent.top
                         session: root.session
                     }
                 }
@@ -533,16 +599,46 @@ Item {
             Component {
                 id: ethernetDetails
 
-                EthernetDetails {
-                    session: root.session
+                StyledFlickable {
+                    id: ethernetFlickable
+                    flickableDirection: Flickable.VerticalFlick
+                    contentHeight: ethernetDetailsInner.height
+
+                    StyledScrollBar.vertical: StyledScrollBar {
+                        flickable: ethernetFlickable
+                    }
+
+                    EthernetDetails {
+                        id: ethernetDetailsInner
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        session: root.session
+                    }
                 }
             }
 
             Component {
                 id: wirelessDetails
 
-                WirelessDetails {
-                    session: root.session
+                StyledFlickable {
+                    id: wirelessFlickable
+                    flickableDirection: Flickable.VerticalFlick
+                    contentHeight: wirelessDetailsInner.height
+
+                    StyledScrollBar.vertical: StyledScrollBar {
+                        flickable: wirelessFlickable
+                    }
+
+                    WirelessDetails {
+                        id: wirelessDetailsInner
+
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.top: parent.top
+                        session: root.session
+                    }
                 }
             }
         }

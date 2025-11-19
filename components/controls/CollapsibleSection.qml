@@ -12,10 +12,12 @@ ColumnLayout {
     required property string title
     property string description: ""
     property bool expanded: false
+    property bool showBackground: false
+    property bool nested: false
 
     signal toggleRequested
 
-    spacing: 0
+    spacing: Appearance.spacing.small
     Layout.fillWidth: true
 
     Item {
@@ -79,6 +81,23 @@ ColumnLayout {
         Behavior on Layout.preferredHeight {
             Anim {
                 easing.bezierCurve: Appearance.anim.curves.standard
+            }
+        }
+
+        StyledRect {
+            id: backgroundRect
+            anchors.fill: parent
+            radius: Appearance.rounding.normal
+            color: Colours.transparency.enabled 
+                   ? Colours.layer(Colours.palette.m3surfaceContainer, root.nested ? 3 : 2)
+                   : (root.nested ? Colours.palette.m3surfaceContainerHigh : Colours.palette.m3surfaceContainer)
+            opacity: root.showBackground && root.expanded ? 1.0 : 0.0
+            visible: root.showBackground
+
+            Behavior on opacity {
+                Anim {
+                    easing.bezierCurve: Appearance.anim.curves.standard
+                }
             }
         }
 

@@ -50,46 +50,37 @@ RowLayout {
 
 
     function saveConfig() {
-        // Update animations
         Config.appearance.anim.durations.scale = root.animDurationsScale;
 
-        // Update fonts
         Config.appearance.font.family.material = root.fontFamilyMaterial;
         Config.appearance.font.family.mono = root.fontFamilyMono;
         Config.appearance.font.family.sans = root.fontFamilySans;
         Config.appearance.font.size.scale = root.fontSizeScale;
 
-        // Update scales
         Config.appearance.padding.scale = root.paddingScale;
         Config.appearance.rounding.scale = root.roundingScale;
         Config.appearance.spacing.scale = root.spacingScale;
 
-        // Update transparency
         Config.appearance.transparency.enabled = root.transparencyEnabled;
         Config.appearance.transparency.base = root.transparencyBase;
         Config.appearance.transparency.layers = root.transparencyLayers;
 
-        // Update desktop clock
         Config.background.desktopClock.enabled = root.desktopClockEnabled;
-
-        // Update background enabled
         Config.background.enabled = root.backgroundEnabled;
 
-        // Update visualiser
         Config.background.visualiser.enabled = root.visualiserEnabled;
         Config.background.visualiser.autoHide = root.visualiserAutoHide;
         Config.background.visualiser.rounding = root.visualiserRounding;
         Config.background.visualiser.spacing = root.visualiserSpacing;
 
-        // Update border
         Config.border.rounding = root.borderRounding;
         Config.border.thickness = root.borderThickness;
 
-        // Persist changes to disk
         Config.save();
     }
 
     Item {
+        id: leftAppearanceItem
         Layout.preferredWidth: Math.floor(parent.width * 0.4)
         Layout.minimumWidth: 420
         Layout.fillHeight: true
@@ -156,7 +147,7 @@ RowLayout {
                     spacing: Appearance.spacing.smaller
 
                     StyledText {
-                        text: qsTr("Settings")
+                        text: qsTr("Appearance")
                         font.pointSize: Appearance.font.size.large
                         font.weight: 500
                     }
@@ -188,6 +179,7 @@ RowLayout {
                     id: themeModeSection
                     title: qsTr("Theme mode")
                     description: qsTr("Light or dark theme")
+                    showBackground: true
 
                     SwitchRow {
                         label: qsTr("Dark mode")
@@ -202,6 +194,7 @@ RowLayout {
                     id: colorVariantSection
                     title: qsTr("Color variant")
                     description: qsTr("Material theme variant")
+                    showBackground: true
 
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -224,13 +217,11 @@ RowLayout {
                                     function onClicked(): void {
                                         const variant = modelData.variant;
 
-                                        // Optimistic update - set immediately
+                                        // Optimistic update - set immediately for responsive UI
                                         Schemes.currentVariant = variant;
-
-                                        // Execute the command
                                         Quickshell.execDetached(["caelestia", "scheme", "set", "-v", variant]);
 
-                                        // Reload after a delay to confirm
+                                        // Reload after a delay to confirm changes
                                         Qt.callLater(() => {
                                             reloadTimer.restart();
                                         });
@@ -285,6 +276,7 @@ RowLayout {
                     id: colorSchemeSection
                     title: qsTr("Color scheme")
                     description: qsTr("Available color schemes")
+                    showBackground: true
 
                     ColumnLayout {
                         Layout.fillWidth: true
@@ -312,13 +304,11 @@ RowLayout {
                                         const flavour = modelData.flavour;
                                         const schemeKey = `${name} ${flavour}`;
 
-                                        // Optimistic update - set immediately
+                                        // Optimistic update - set immediately for responsive UI
                                         Schemes.currentScheme = schemeKey;
-
-                                        // Execute the command
                                         Quickshell.execDetached(["caelestia", "scheme", "set", "-n", name, "-f", flavour]);
 
-                                        // Reload after a delay to confirm
+                                        // Reload after a delay to confirm changes
                                         Qt.callLater(() => {
                                             reloadTimer.restart();
                                         });
@@ -422,6 +412,7 @@ RowLayout {
                 CollapsibleSection {
                     id: animationsSection
                     title: qsTr("Animations")
+                    showBackground: true
 
                     SectionContainer {
                         contentSpacing: Appearance.spacing.normal
@@ -526,13 +517,17 @@ RowLayout {
                 CollapsibleSection {
                     id: fontsSection
                     title: qsTr("Fonts")
+                    showBackground: true
 
                     CollapsibleSection {
                         id: materialFontSection
                         title: qsTr("Material font family")
                         expanded: true
+                        showBackground: true
+                        nested: true
 
                         Loader {
+                            id: materialFontLoader
                             Layout.fillWidth: true
                             Layout.preferredHeight: item ? Math.min(item.contentHeight, 300) : 0
                             asynchronous: true
@@ -545,6 +540,10 @@ RowLayout {
                                 clip: true
                                 spacing: Appearance.spacing.small / 2
                                 model: Qt.fontFamilies()
+
+                                StyledScrollBar.vertical: StyledScrollBar {
+                                    flickable: materialFontList
+                                }
 
                                 delegate: StyledRect {
                                     required property string modelData
@@ -599,6 +598,7 @@ RowLayout {
                                     implicitHeight: fontFamilyMaterialRow.implicitHeight + Appearance.padding.normal * 2
                                 }
                             }
+
                         }
                     }
 
@@ -606,6 +606,8 @@ RowLayout {
                         id: monoFontSection
                         title: qsTr("Monospace font family")
                         expanded: false
+                        showBackground: true
+                        nested: true
 
                         Loader {
                             Layout.fillWidth: true
@@ -620,6 +622,10 @@ RowLayout {
                                 clip: true
                                 spacing: Appearance.spacing.small / 2
                                 model: Qt.fontFamilies()
+
+                                StyledScrollBar.vertical: StyledScrollBar {
+                                    flickable: monoFontList
+                                }
 
                                 delegate: StyledRect {
                                     required property string modelData
@@ -681,6 +687,8 @@ RowLayout {
                         id: sansFontSection
                         title: qsTr("Sans-serif font family")
                         expanded: false
+                        showBackground: true
+                        nested: true
 
                         Loader {
                             Layout.fillWidth: true
@@ -695,6 +703,10 @@ RowLayout {
                                 clip: true
                                 spacing: Appearance.spacing.small / 2
                                 model: Qt.fontFamilies()
+
+                                StyledScrollBar.vertical: StyledScrollBar {
+                                    flickable: sansFontList
+                                }
 
                                 delegate: StyledRect {
                                     required property string modelData
@@ -855,6 +867,7 @@ RowLayout {
                 CollapsibleSection {
                     id: scalesSection
                     title: qsTr("Scales")
+                    showBackground: true
 
                     SectionContainer {
                         contentSpacing: Appearance.spacing.normal
@@ -1157,6 +1170,7 @@ RowLayout {
                 CollapsibleSection {
                     id: transparencySection
                     title: qsTr("Transparency")
+                    showBackground: true
 
                     SwitchRow {
                         label: qsTr("Transparency enabled")
@@ -1369,6 +1383,7 @@ RowLayout {
                 CollapsibleSection {
                     id: borderSection
                     title: qsTr("Border")
+                    showBackground: true
 
                     SectionContainer {
                         contentSpacing: Appearance.spacing.normal
@@ -1560,6 +1575,7 @@ RowLayout {
                 CollapsibleSection {
                     id: backgroundSection
                     title: qsTr("Background")
+                    showBackground: true
 
                     SwitchRow {
                         label: qsTr("Desktop clock")
@@ -1816,6 +1832,12 @@ RowLayout {
                 asynchronous: true
                 sourceComponent: appearanceRightContentComponent
                 property var rootPane: root
+                
+                onStatusChanged: {
+                    if (status === Loader.Error) {
+                        console.error("[AppearancePane] Right appearance loader error!");
+                    }
+                }
             }
         }
 
@@ -1884,25 +1906,123 @@ RowLayout {
                         anchors.fill: parent
                         asynchronous: true
                         active: {
-                            // Lazy load: only activate when right pane is loaded
-                            // This defers heavy wallpaper list loading until the right pane is visible
-                            return rightAppearanceLoader.item !== null;
+                            // Lazy load: only activate when:
+                            // 1. Right pane is loaded AND
+                            // 2. Appearance pane is active (index 3) or adjacent (for smooth transitions)
+                            // This prevents loading all wallpapers when control center opens but appearance pane isn't visible
+                            const isActive = root.session.activeIndex === 3;
+                            const isAdjacent = Math.abs(root.session.activeIndex - 3) === 1;
+                            const shouldActivate = rightAppearanceLoader.item !== null && (isActive || isAdjacent);
+                            return shouldActivate;
+                        }
+                        
+                        onStatusChanged: {
+                            if (status === Loader.Error) {
+                                console.error("[AppearancePane] Wallpaper loader error!");
+                            }
+                        }
+                        
+                        // Stop lazy loading when loader becomes inactive
+                        onActiveChanged: {
+                            if (!active && wallpaperLoader.item) {
+                                const container = wallpaperLoader.item;
+                                // Access timer through wallpaperGrid
+                                if (container && container.wallpaperGrid) {
+                                    if (container.wallpaperGrid.scrollCheckTimer) {
+                                        container.wallpaperGrid.scrollCheckTimer.stop();
+                                    }
+                                    container.wallpaperGrid._expansionInProgress = false;
+                                }
+                            }
                         }
 
                         sourceComponent: Item {
+                            id: wallpaperGridContainer
                             property alias layoutPreferredHeight: wallpaperGrid.layoutPreferredHeight
+                            
+                            // Find and store reference to parent Flickable for scroll monitoring
+                            property var parentFlickable: {
+                                let item = parent;
+                                while (item) {
+                                    if (item.flickableDirection !== undefined) {
+                                        return item;
+                                    }
+                                    item = item.parent;
+                                }
+                                return null;
+                            }
+                            
+                            // Cleanup when component is destroyed
+                            Component.onDestruction: {
+                                if (wallpaperGrid) {
+                                    if (wallpaperGrid.scrollCheckTimer) {
+                                        wallpaperGrid.scrollCheckTimer.stop();
+                                    }
+                                    wallpaperGrid._expansionInProgress = false;
+                                }
+                            }
+                            
+                            // Lazy loading model: loads one image at a time, only when touching bottom
+                            // This prevents GridView from creating all delegates at once
+                            QtObject {
+                                id: lazyModel
+                                
+                                property var sourceList: null
+                                property int loadedCount: 0  // Total items available to load
+                                property int visibleCount: 0  // Items actually exposed to GridView (only visible + buffer)
+                                property int totalCount: 0
+                                
+                                function initialize(list) {
+                                    sourceList = list;
+                                    totalCount = list ? list.length : 0;
+                                    // Start with enough items to fill the initial viewport (~3 rows)
+                                    const initialRows = 3;
+                                    const cols = wallpaperGrid.columnsCount > 0 ? wallpaperGrid.columnsCount : 3;
+                                    const initialCount = Math.min(initialRows * cols, totalCount);
+                                    loadedCount = initialCount;
+                                    visibleCount = initialCount;
+                                }
+                                
+                                function loadOneRow() {
+                                    if (loadedCount < totalCount) {
+                                        const cols = wallpaperGrid.columnsCount > 0 ? wallpaperGrid.columnsCount : 1;
+                                        const itemsToLoad = Math.min(cols, totalCount - loadedCount);
+                                        loadedCount += itemsToLoad;
+                                    }
+                                }
+                                
+                                function updateVisibleCount(neededCount) {
+                                    // Always round up to complete rows to avoid incomplete rows in the grid
+                                    const cols = wallpaperGrid.columnsCount > 0 ? wallpaperGrid.columnsCount : 1;
+                                    const maxVisible = Math.min(neededCount, loadedCount);
+                                    const rows = Math.ceil(maxVisible / cols);
+                                    const newVisibleCount = Math.min(rows * cols, loadedCount);
+                                    
+                                    if (newVisibleCount > visibleCount) {
+                                        visibleCount = newVisibleCount;
+                                    }
+                                }
+                            }
                             
                             GridView {
                                 id: wallpaperGrid
                                 anchors.fill: parent
                                 
+                                property int _delegateCount: 0
+                                
                                 readonly property int minCellWidth: 200 + Appearance.spacing.normal
                                 readonly property int columnsCount: Math.max(1, Math.floor(parent.width / minCellWidth))
                                 
-                                readonly property int layoutPreferredHeight: Math.ceil(count / columnsCount) * cellHeight
-                                height: layoutPreferredHeight
+                                // Height based on visible items only - prevents GridView from creating all delegates
+                                readonly property int layoutPreferredHeight: {
+                                    if (!lazyModel || lazyModel.visibleCount === 0 || columnsCount === 0) {
+                                        return 0;
+                                    }
+                                    const calculated = Math.ceil(lazyModel.visibleCount / columnsCount) * cellHeight;
+                                    return calculated;
+                                }
                                 
-                                // Distribute width evenly across columns
+                                height: layoutPreferredHeight
                                 cellWidth: width / columnsCount
                                 cellHeight: 140 + Appearance.spacing.normal
                                 
@@ -1911,13 +2031,205 @@ RowLayout {
                                 topMargin: 0
                                 bottomMargin: 0
 
-                                model: Wallpapers.list
+                                // Use ListModel for incremental updates to prevent flashing when new items are added
+                                ListModel {
+                                    id: wallpaperListModel
+                                }
                                 
-                                // Disable GridView's own scrolling - let parent handle it
+                                model: wallpaperListModel
+                                
+                                Connections {
+                                    target: lazyModel
+                                    function onVisibleCountChanged(): void {
+                                        if (!lazyModel || !lazyModel.sourceList) return;
+                                        
+                                        const newCount = lazyModel.visibleCount;
+                                        const currentCount = wallpaperListModel.count;
+                                        
+                                        // Only append new items - never remove or replace existing ones
+                                        if (newCount > currentCount) {
+                                            const flickable = wallpaperGridContainer.parentFlickable;
+                                            const oldScrollY = flickable ? flickable.contentY : 0;
+                                            
+                                            for (let i = currentCount; i < newCount; i++) {
+                                                wallpaperListModel.append({modelData: lazyModel.sourceList[i]});
+                                            }
+                                            
+                                            // Preserve scroll position after model update
+                                            if (flickable) {
+                                                Qt.callLater(function() {
+                                                    if (Math.abs(flickable.contentY - oldScrollY) < 1) {
+                                                        flickable.contentY = oldScrollY;
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                Component.onCompleted: {
+                                    Qt.callLater(function() {
+                                        const isActive = root.session.activeIndex === 3;
+                                        if (width > 0 && parent && parent.visible && isActive && Wallpapers.list) {
+                                            lazyModel.initialize(Wallpapers.list);
+                                            wallpaperListModel.clear();
+                                            for (let i = 0; i < lazyModel.visibleCount; i++) {
+                                                wallpaperListModel.append({modelData: lazyModel.sourceList[i]});
+                                            }
+                                        }
+                                    });
+                                }
+                                
+                                Connections {
+                                    target: root.session
+                                    function onActiveIndexChanged(): void {
+                                        const isActive = root.session.activeIndex === 3;
+                                        
+                                        // Stop lazy loading when switching away from appearance pane
+                                        if (!isActive) {
+                                            if (scrollCheckTimer) {
+                                                scrollCheckTimer.stop();
+                                            }
+                                            if (wallpaperGrid) {
+                                                wallpaperGrid._expansionInProgress = false;
+                                            }
+                                            return;
+                                        }
+                                        
+                                        // Initialize if needed when switching to appearance pane
+                                        if (isActive && width > 0 && !lazyModel.sourceList && parent && parent.visible && Wallpapers.list) {
+                                            lazyModel.initialize(Wallpapers.list);
+                                            wallpaperListModel.clear();
+                                            for (let i = 0; i < lazyModel.visibleCount; i++) {
+                                                wallpaperListModel.append({modelData: lazyModel.sourceList[i]});
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                onWidthChanged: {
+                                    const isActive = root.session.activeIndex === 3;
+                                    if (width > 0 && !lazyModel.sourceList && parent && parent.visible && isActive && Wallpapers.list) {
+                                        lazyModel.initialize(Wallpapers.list);
+                                        wallpaperListModel.clear();
+                                        for (let i = 0; i < lazyModel.visibleCount; i++) {
+                                            wallpaperListModel.append({modelData: lazyModel.sourceList[i]});
+                                        }
+                                    }
+                                }
+                                
+                                // Force true lazy loading: only create delegates for visible items
+                                displayMarginBeginning: 0
+                                displayMarginEnd: 0
+                                cacheBuffer: 0
+                                
+                                // Debounce expansion to avoid too frequent checks
+                                property bool _expansionInProgress: false
+                                
+                                Connections {
+                                    target: wallpaperGridContainer.parentFlickable
+                                    function onContentYChanged(): void {
+                                        // Don't process scroll events if appearance pane is not active
+                                        const isActive = root.session.activeIndex === 3;
+                                        if (!isActive) return;
+                                        
+                                        if (!lazyModel || !lazyModel.sourceList || lazyModel.loadedCount >= lazyModel.totalCount || wallpaperGrid._expansionInProgress) {
+                                            return;
+                                        }
+                                        
+                                        const flickable = wallpaperGridContainer.parentFlickable;
+                                        if (!flickable) return;
+                                        
+                                        const gridY = wallpaperGridContainer.y;
+                                        const scrollY = flickable.contentY;
+                                        const viewportHeight = flickable.height;
+                                        
+                                        const topY = scrollY - gridY;
+                                        const bottomY = scrollY + viewportHeight - gridY;
+                                        
+                                        if (bottomY < 0) return;
+                                        
+                                        const topRow = Math.max(0, Math.floor(topY / wallpaperGrid.cellHeight));
+                                        const bottomRow = Math.floor(bottomY / wallpaperGrid.cellHeight);
+                                        
+                                        // Update visible count with 1 row buffer ahead
+                                        const bufferRows = 1;
+                                        const neededBottomRow = bottomRow + bufferRows;
+                                        const neededCount = Math.min((neededBottomRow + 1) * wallpaperGrid.columnsCount, lazyModel.loadedCount);
+                                        lazyModel.updateVisibleCount(neededCount);
+                                        
+                                        // Load more when we're within 1 row of running out of loaded items
+                                        const loadedRows = Math.ceil(lazyModel.loadedCount / wallpaperGrid.columnsCount);
+                                        const rowsRemaining = loadedRows - (bottomRow + 1);
+                                        
+                                        if (rowsRemaining <= 1 && lazyModel.loadedCount < lazyModel.totalCount) {
+                                            if (!wallpaperGrid._expansionInProgress) {
+                                                wallpaperGrid._expansionInProgress = true;
+                                                lazyModel.loadOneRow();
+                                                Qt.callLater(function() {
+                                                    wallpaperGrid._expansionInProgress = false;
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                // Fallback timer to check scroll position periodically
+                                Timer {
+                                    id: scrollCheckTimer
+                                    interval: 100
+                                    running: {
+                                        const isActive = root.session.activeIndex === 3;
+                                        return isActive && lazyModel && lazyModel.sourceList && lazyModel.loadedCount < lazyModel.totalCount;
+                                    }
+                                    repeat: true
+                                    onTriggered: {
+                                        // Double-check that appearance pane is still active
+                                        const isActive = root.session.activeIndex === 3;
+                                        if (!isActive) {
+                                            stop();
+                                            return;
+                                        }
+                                        
+                                        const flickable = wallpaperGridContainer.parentFlickable;
+                                        if (!flickable || !lazyModel || !lazyModel.sourceList) return;
+                                        
+                                        const gridY = wallpaperGridContainer.y;
+                                        const scrollY = flickable.contentY;
+                                        const viewportHeight = flickable.height;
+                                        
+                                        const topY = scrollY - gridY;
+                                        const bottomY = scrollY + viewportHeight - gridY;
+                                        if (bottomY < 0) return;
+                                        
+                                        const topRow = Math.max(0, Math.floor(topY / wallpaperGrid.cellHeight));
+                                        const bottomRow = Math.floor(bottomY / wallpaperGrid.cellHeight);
+                                        
+                                        const bufferRows = 1;
+                                        const neededBottomRow = bottomRow + bufferRows;
+                                        const neededCount = Math.min((neededBottomRow + 1) * wallpaperGrid.columnsCount, lazyModel.loadedCount);
+                                        lazyModel.updateVisibleCount(neededCount);
+                                        
+                                        // Load more when we're within 1 row of running out of loaded items
+                                        const loadedRows = Math.ceil(lazyModel.loadedCount / wallpaperGrid.columnsCount);
+                                        const rowsRemaining = loadedRows - (bottomRow + 1);
+                                        
+                                        if (rowsRemaining <= 1 && lazyModel.loadedCount < lazyModel.totalCount) {
+                                            if (!wallpaperGrid._expansionInProgress) {
+                                                wallpaperGrid._expansionInProgress = true;
+                                                lazyModel.loadOneRow();
+                                                Qt.callLater(function() {
+                                                    wallpaperGrid._expansionInProgress = false;
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                
+                                // Parent Flickable handles scrolling
                                 interactive: false
 
-                            // Enable caching for better performance
-                            cacheBuffer: cellHeight * 2
 
                     delegate: Item {
                         required property var modelData
@@ -1928,6 +2240,10 @@ RowLayout {
                         readonly property bool isCurrent: modelData.path === Wallpapers.actualCurrent
                         readonly property real itemMargin: Appearance.spacing.normal / 2
                         readonly property real itemRadius: Appearance.rounding.normal
+                        
+                        Component.onCompleted: {
+                            wallpaperGrid._delegateCount++;
+                        }
 
                         StateLayer {
                             anchors.fill: parent
@@ -1967,7 +2283,6 @@ RowLayout {
                                 antialiasing: true
                                 smooth: true
 
-                                // Show when ready
                                 opacity: status === Image.Ready ? 1 : 0
 
                                 Behavior on opacity {
@@ -1978,7 +2293,7 @@ RowLayout {
                                 }
                             }
 
-                            // Fallback image for when caching fails
+                            // Fallback if CachingImage fails to load
                             Image {
                                 id: fallbackImage
 
@@ -2001,7 +2316,6 @@ RowLayout {
                                 }
                             }
 
-                            // Timer to trigger fallback only if caching hasn't loaded
                             Timer {
                                 id: fallbackTimer
 
@@ -2011,7 +2325,7 @@ RowLayout {
                                 onTriggered: triggered = true
                             }
 
-                            // Gradient overlay for filename - positioned inside image container for perfect alignment
+                            // Gradient overlay for filename
                             Rectangle {
                                 id: filenameOverlay
 
@@ -2020,8 +2334,6 @@ RowLayout {
                                 anchors.bottom: parent.bottom
 
                                 implicitHeight: filenameText.implicitHeight + Appearance.padding.normal * 1.5
-
-                                // No rounded corners - clipped by parent's rounded corners
                                 radius: 0
                                 
                                 gradient: Gradient {
@@ -2066,7 +2378,6 @@ RowLayout {
                             }
                         }
 
-                        // Border overlay that doesn't affect image size
                         Rectangle {
                             anchors.fill: parent
                             anchors.leftMargin: itemMargin

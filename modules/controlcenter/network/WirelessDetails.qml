@@ -17,6 +17,9 @@ Item {
     required property Session session
     readonly property var network: session.network.active
 
+    implicitWidth: layout.implicitWidth
+    implicitHeight: layout.implicitHeight
+
     Component.onCompleted: {
         updateDeviceDetails();
         checkSavedProfile();
@@ -98,25 +101,13 @@ Item {
         }
     }
 
-    StyledFlickable {
-        id: flickable
+    ColumnLayout {
+        id: layout
 
-        anchors.fill: parent
-
-        flickableDirection: Flickable.VerticalFlick
-        clip: true
-        contentHeight: layout.height
-
-        StyledScrollBar.vertical: StyledScrollBar {
-            flickable: flickable
-        }
-
-        ColumnLayout {
-            id: layout
-
-            anchors.left: parent.left
-            anchors.right: parent.right
-            spacing: Appearance.spacing.normal
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        spacing: Appearance.spacing.normal
 
             ConnectionHeader {
                 icon: root.network?.isSecure ? "lock" : "wifi"
@@ -214,7 +205,6 @@ Item {
                     deviceDetails: Nmcli.wirelessDeviceDetails
                 }
             }
-        }
     }
 
     function handleConnect(): void {

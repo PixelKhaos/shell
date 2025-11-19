@@ -21,12 +21,25 @@ RowLayout {
 
     required property Session session
 
-    property var selectedApp: null
+    property var selectedApp: root.session.launcher.active
     property bool hideFromLauncherChecked: false
 
     anchors.fill: parent
 
     spacing: 0
+
+    onSelectedAppChanged: {
+        root.session.launcher.active = root.selectedApp;
+        updateToggleState();
+    }
+
+    Connections {
+        target: root.session.launcher
+        function onActiveChanged() {
+            root.selectedApp = root.session.launcher.active;
+            updateToggleState();
+        }
+    }
 
     function updateToggleState() {
         if (!root.selectedApp) {
@@ -73,9 +86,6 @@ RowLayout {
         Config.save();
     }
 
-    onSelectedAppChanged: {
-        updateToggleState();
-    }
 
     AppDb {
         id: allAppsDb
@@ -169,7 +179,6 @@ RowLayout {
                 anchors.margins: Appearance.padding.large + Appearance.padding.normal
                 anchors.leftMargin: Appearance.padding.large
                 anchors.rightMargin: Appearance.padding.large + Appearance.padding.normal / 2
-                anchors.bottomMargin: 0
 
                 asynchronous: true
                 sourceComponent: leftContentComponent
@@ -186,6 +195,7 @@ RowLayout {
             id: leftContentComponent
 
             ColumnLayout {
+                id: leftLauncherLayout
                 anchors.fill: parent
 
                 spacing: Appearance.spacing.small
@@ -194,13 +204,30 @@ RowLayout {
                 spacing: Appearance.spacing.smaller
 
                 StyledText {
-                    text: qsTr("Settings")
+                    text: qsTr("Launcher")
                     font.pointSize: Appearance.font.size.large
                     font.weight: 500
                 }
 
                 Item {
                     Layout.fillWidth: true
+                }
+
+                ToggleButton {
+                    toggled: !root.session.launcher.active
+                    icon: "settings"
+                    accent: "Primary"
+
+                    onClicked: {
+                        if (root.session.launcher.active) {
+                            root.session.launcher.active = null;
+                        } else {
+                            // Toggle to show settings - if there are apps, select the first one, otherwise show settings
+                            if (root.filteredApps.length > 0) {
+                                root.session.launcher.active = root.filteredApps[0];
+                            }
+                        }
+                    }
                 }
             }
 
@@ -351,7 +378,7 @@ RowLayout {
 
                         StateLayer {
                             function onClicked(): void {
-                                root.selectedApp = modelData;
+                                root.session.launcher.active = modelData;
                             }
                         }
 
@@ -405,11 +432,111 @@ RowLayout {
             Loader {
                 id: rightLauncherLoader
 
+                property var pane: root.session.launcher.active
+                property string paneId: pane ? (pane.id || pane.entry?.id || "") : ""
+                property Component targetComponent: settings
+                property Component nextComponent: settings
+                property var displayedApp: null
+
+                function getComponentForPane() {
+                    return pane ? appDetails : settings;
+                }
+
                 anchors.fill: parent
                 anchors.margins: Appearance.padding.large * 2
 
+                opacity: 1
+                scale: 1
+                transformOrigin: Item.Center
+                clip: false
+
                 asynchronous: true
-                sourceComponent: rightContentComponent
+                sourceComponent: rightLauncherLoader.targetComponent
+                active: true
+
+                Component.onCompleted: {
+                    displayedApp = pane;
+                    targetComponent = getComponentForPane();
+                    nextComponent = targetComponent;
+                }
+
+                onItemChanged: {
+                    // Ensure displayedApp is set when item is created (for async loading)
+                    if (item && pane && displayedApp !== pane) {
+                        displayedApp = pane;
+                    }
+                }
+
+                Behavior on paneId {
+                    SequentialAnimation {
+                        ParallelAnimation {
+                            Anim {
+                                target: rightLauncherLoader
+                                property: "opacity"
+                                to: 0
+                                easing.bezierCurve: Appearance.anim.curves.standardAccel
+                            }
+                            Anim {
+                                target: rightLauncherLoader
+                                property: "scale"
+                                to: 0.8
+                                easing.bezierCurve: Appearance.anim.curves.standardAccel
+                            }
+                        }
+                        PropertyAction {
+                            target: rightLauncherLoader
+                            property: "displayedApp"
+                            value: rightLauncherLoader.pane
+                        }
+                        PropertyAction {
+                            target: rightLauncherLoader
+                            property: "active"
+                            value: false
+                        }
+                        PropertyAction {
+                            target: rightLauncherLoader
+                            property: "targetComponent"
+                            value: rightLauncherLoader.nextComponent
+                        }
+                        PropertyAction {
+                            target: rightLauncherLoader
+                            property: "active"
+                            value: true
+                        }
+                        ParallelAnimation {
+                            Anim {
+                                target: rightLauncherLoader
+                                property: "opacity"
+                                to: 1
+                                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                            }
+                            Anim {
+                                target: rightLauncherLoader
+                                property: "scale"
+                                to: 1
+                                easing.bezierCurve: Appearance.anim.curves.standardDecel
+                            }
+                        }
+                    }
+                }
+
+                onPaneChanged: {
+                    nextComponent = getComponentForPane();
+                    paneId = pane ? (pane.id || pane.entry?.id || "") : "";
+                }
+
+                onDisplayedAppChanged: {
+                    if (displayedApp) {
+                        const appId = displayedApp.id || displayedApp.entry?.id;
+                        if (Config.launcher.hiddenApps && Config.launcher.hiddenApps.length > 0) {
+                            root.hideFromLauncherChecked = Config.launcher.hiddenApps.includes(appId);
+                        } else {
+                            root.hideFromLauncherChecked = false;
+                        }
+                    } else {
+                        root.hideFromLauncherChecked = false;
+                    }
+                }
             }
         }
 
@@ -420,7 +547,30 @@ RowLayout {
         }
 
         Component {
-            id: rightContentComponent
+            id: settings
+
+            StyledFlickable {
+                id: settingsFlickable
+                flickableDirection: Flickable.VerticalFlick
+                contentHeight: settingsInner.height
+
+                StyledScrollBar.vertical: StyledScrollBar {
+                    flickable: settingsFlickable
+                }
+
+                Settings {
+                    id: settingsInner
+
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    session: root.session
+                }
+            }
+        }
+
+        Component {
+            id: appDetails
 
             ColumnLayout {
                 anchors.fill: parent
@@ -437,7 +587,7 @@ RowLayout {
 
                 Loader {
                     id: iconLoader
-                    sourceComponent: root.selectedApp ? appIconComponent : defaultIconComponent
+                    sourceComponent: rightLauncherLoader.displayedApp ? appIconComponent : defaultIconComponent
                 }
 
                 Component {
@@ -445,8 +595,8 @@ RowLayout {
                     IconImage {
                         implicitSize: Appearance.font.size.extraLarge * 3 * 2
                         source: {
-                            if (!root.selectedApp) return "image-missing";
-                            const entry = root.selectedApp.entry;
+                            if (!rightLauncherLoader.displayedApp) return "image-missing";
+                            const entry = rightLauncherLoader.displayedApp.entry;
                             if (entry && entry.icon) {
                                 return Quickshell.iconPath(entry.icon, "image-missing");
                             }
@@ -469,7 +619,7 @@ RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 Layout.leftMargin: Appearance.padding.large * 2
                 Layout.rightMargin: Appearance.padding.large * 2
-                text: root.selectedApp ? (root.selectedApp.name || root.selectedApp.entry?.name || qsTr("Application Details")) : qsTr("Launcher Applications")
+                text: rightLauncherLoader.displayedApp ? (rightLauncherLoader.displayedApp.name || rightLauncherLoader.displayedApp.entry?.name || qsTr("Application Details")) : qsTr("Launcher Applications")
                 font.pointSize: Appearance.font.size.large
                 font.bold: true
             }
@@ -500,13 +650,28 @@ RowLayout {
 
                         SwitchRow {
                             Layout.topMargin: Appearance.spacing.normal
-                            visible: root.selectedApp !== null
+                            visible: rightLauncherLoader.displayedApp !== null
                             label: qsTr("Hide from launcher")
                             checked: root.hideFromLauncherChecked
-                            enabled: root.selectedApp !== null
+                            enabled: rightLauncherLoader.displayedApp !== null
                             onToggled: checked => {
                                 root.hideFromLauncherChecked = checked;
-                                root.saveHiddenApps(checked);
+                                if (rightLauncherLoader.displayedApp) {
+                                    const appId = rightLauncherLoader.displayedApp.id || rightLauncherLoader.displayedApp.entry?.id;
+                                    const hiddenApps = Config.launcher.hiddenApps ? [...Config.launcher.hiddenApps] : [];
+                                    if (checked) {
+                                        if (!hiddenApps.includes(appId)) {
+                                            hiddenApps.push(appId);
+                                        }
+                                    } else {
+                                        const index = hiddenApps.indexOf(appId);
+                                        if (index !== -1) {
+                                            hiddenApps.splice(index, 1);
+                                        }
+                                    }
+                                    Config.launcher.hiddenApps = hiddenApps;
+                                    Config.save();
+                                }
                             }
                         }
 
@@ -515,5 +680,11 @@ RowLayout {
             }
         }
         }
+    }
+
+    component Anim: NumberAnimation {
+        target: rightLauncherLoader
+        duration: Appearance.anim.durations.normal / 2
+        easing.type: Easing.BezierSpline
     }
 }
