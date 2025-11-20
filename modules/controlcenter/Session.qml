@@ -1,8 +1,9 @@
-import Quickshell.Bluetooth
 import QtQuick
+import "./state"
+import qs.modules.controlcenter
 
 QtObject {
-    readonly property list<string> panes: ["network", "bluetooth", "audio", "appearance", "taskbar", "launcher"]
+    readonly property list<string> panes: PaneRegistry.labels
 
     required property var root
     property bool floating: false
@@ -10,33 +11,11 @@ QtObject {
     property int activeIndex: 0
     property bool navExpanded: false
 
-    readonly property Bt bt: Bt {}
-    readonly property Network network: Network {}
-    readonly property Ethernet ethernet: Ethernet {}
-    readonly property Launcher launcher: Launcher {}
+    readonly property BluetoothState bt: BluetoothState {}
+    readonly property NetworkState network: NetworkState {}
+    readonly property EthernetState ethernet: EthernetState {}
+    readonly property LauncherState launcher: LauncherState {}
 
     onActiveChanged: activeIndex = panes.indexOf(active)
     onActiveIndexChanged: active = panes[activeIndex]
-
-    component Bt: QtObject {
-        property BluetoothDevice active
-        property BluetoothAdapter currentAdapter: Bluetooth.defaultAdapter
-        property bool editingAdapterName
-        property bool fabMenuOpen
-        property bool editingDeviceName
-    }
-
-    component Network: QtObject {
-        property var active
-        property bool showPasswordDialog: false
-        property var pendingNetwork
-    }
-
-    component Ethernet: QtObject {
-        property var active
-    }
-
-    component Launcher: QtObject {
-        property var active
-    }
 }

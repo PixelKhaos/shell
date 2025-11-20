@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import ".."
+import "../components"
 import qs.components
 import qs.components.controls
 import qs.components.effects
@@ -17,18 +18,9 @@ ColumnLayout {
 
     spacing: Appearance.spacing.normal
 
-    MaterialIcon {
-        Layout.alignment: Qt.AlignHCenter
-        text: "bluetooth"
-        font.pointSize: Appearance.font.size.extraLarge * 3
-        font.bold: true
-    }
-
-    StyledText {
-        Layout.alignment: Qt.AlignHCenter
-        text: qsTr("Bluetooth Settings")
-        font.pointSize: Appearance.font.size.large
-        font.bold: true
+    SettingsHeader {
+        icon: "bluetooth"
+        title: qsTr("Bluetooth Settings")
     }
 
     StyledText {
@@ -336,7 +328,7 @@ ColumnLayout {
 
                         anchors.left: parent.left
 
-                        text: qsTr("Rename adapter (currently does not work)")  // FIXME: remove disclaimer when fixed
+                        text: qsTr("Rename adapter (currently does not work)")
                         color: Colours.palette.m3outline
                         font.pointSize: Appearance.font.size.small
                     }
@@ -353,8 +345,6 @@ ColumnLayout {
                         readOnly: !root.session.bt.editingAdapterName
                         onAccepted: {
                             root.session.bt.editingAdapterName = false;
-                            // Doesn't work for now, will be added to QS later
-                            // root.session.bt.currentAdapter.name = text;
                         }
 
                         leftPadding: Appearance.padding.normal
