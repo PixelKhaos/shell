@@ -73,23 +73,15 @@ MouseArea {
     }
 
     function save(): void {
-        // Ensure screenshots directory exists
-        Quickshell.execDetached(["mkdir", "-p", Paths.shotsdir]);
-
-        // Build timestamped filename in the screenshots directory
-        const now = new Date();
-        const pad = n => n.toString().padStart(2, "0");
-        const fname = `Screenshot_${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}.png`;
-        const destUrl = Qt.resolvedUrl(`${Paths.shotsdir}/${fname}`);
-
-    // Save the selected region to the screenshots folder
-
-        CUtils.saveItem(
-            screencopy,
-            destUrl,
-            Qt.rect(Math.ceil(rsx), Math.ceil(rsy), Math.floor(sw), Math.floor(sh)),
-            path => Quickshell.execDetached(["swappy", "-f", Paths.toLocalFile(destUrl)])
-        );
+        const tmpfile = Qt.resolvedUrl(`/tmp/caelestia-picker-${Quickshell.processId}-${Date.now()}.png`);
+        CUtils.saveItem(screencopy, tmpfile, Qt.rect(Math.ceil(rsx), Math.ceil(rsy), Math.floor(sw), Math.floor(sh)), path => {
+            if (root.loader.clipboardOnly) {
+                Quickshell.execDetached(["sh", "-c", "wl-copy --type image/png < " + path]);
+                Quickshell.execDetached(["notify-send", "-a", "caelestia-cli", "-i", path, "Screenshot taken", "Screenshot copied to clipboard"]);
+            } else {
+                Quickshell.execDetached(["swappy", "-f", path]);
+            }
+        });
         closeAnim.start();
     }
 
