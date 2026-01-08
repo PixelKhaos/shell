@@ -20,10 +20,15 @@ Item {
 
     StateLayer {
         radius: Appearance.rounding.normal
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-        function onClicked(): void {
-            Apps.launch(root.modelData);
-            root.visibilities.launcher = false;
+        function onClicked(event): void {
+            if (event.button === Qt.RightButton) {
+                Actions.toggleFavorite(root.modelData.id, root.modelData.name);
+            } else {
+                Apps.launch(root.modelData);
+                root.visibilities.launcher = false;
+            }
         }
     }
 

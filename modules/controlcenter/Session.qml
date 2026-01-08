@@ -15,6 +15,7 @@ QtObject {
     readonly property NetworkState network: NetworkState {}
     readonly property EthernetState ethernet: EthernetState {}
     readonly property LauncherState launcher: LauncherState {}
+    readonly property VpnState vpn: VpnState {}
 
     onActiveChanged: activeIndex = panes.indexOf(active)
     onActiveIndexChanged: active = panes[activeIndex]

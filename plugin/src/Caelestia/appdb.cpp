@@ -183,6 +183,7 @@ void AppDb::setFavoriteApps(const QStringList& favApps) {
         }
     }
 
+    emit favoriteAppsChanged();
     emit appsChanged();
 }
 

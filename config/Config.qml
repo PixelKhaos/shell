@@ -270,6 +270,7 @@ Singleton {
             dragThreshold: launcher.dragThreshold,
             vimKeybinds: launcher.vimKeybinds,
             hiddenApps: launcher.hiddenApps,
+            favoriteApps: launcher.favoriteApps,
             useFuzzy: {
                 apps: launcher.useFuzzy.apps,
                 actions: launcher.useFuzzy.actions,
@@ -379,6 +380,10 @@ Singleton {
             vpn: {
                 enabled: utilities.vpn.enabled,
                 provider: utilities.vpn.provider
+            },
+            nightLight: {
+                enabled: utilities.nightLight.enabled,
+                temperature: utilities.nightLight.temperature
             }
         };
     }

@@ -4,6 +4,7 @@ import ".."
 import qs.services
 import qs.config
 import qs.utils
+import Caelestia
 import Quickshell
 import QtQuick
 
@@ -12,6 +13,23 @@ Searcher {
 
     function transformSearch(search: string): string {
         return search.slice(Config.launcher.actionPrefix.length);
+    }
+
+    function toggleFavorite(appId: string, appName: string): void {
+        const favorites = Config.launcher.favoriteApps;
+        const index = favorites.indexOf(appId);
+        
+        if (index >= 0) {
+            // Remove from favorites
+            Config.launcher.favoriteApps = favorites.filter(id => id !== appId);
+            Toaster.toast(qsTr("Removed from favorites"), appName, "heart_broken");
+        } else {
+            // Add to favorites
+            Config.launcher.favoriteApps = [...favorites, appId];
+            Toaster.toast(qsTr("Added to favorites"), appName, "favorite");
+        }
+        
+        Config.save();
     }
 
     list: variants.instances
