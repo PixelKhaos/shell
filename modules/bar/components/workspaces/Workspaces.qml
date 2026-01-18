@@ -11,6 +11,7 @@ import QtQuick.Effects
 StyledClippingRect {
     id: root
 
+    objectName: "workspacesRoot"
     required property ShellScreen screen
 
     readonly property bool onSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor)?.lastIpcObject?.specialWorkspace?.name !== ""
@@ -57,6 +58,7 @@ StyledClippingRect {
 
         ColumnLayout {
             id: layout
+            objectName: "layout"
 
             anchors.centerIn: parent
             spacing: Math.floor(Appearance.spacing.small / 2)
@@ -70,6 +72,7 @@ StyledClippingRect {
                     activeWsId: root.activeWsId
                     occupied: root.occupied
                     groupOffset: root.groupOffset
+                    dragProxyContainer: root.dragProxyContainer
                 }
             }
         }
@@ -87,8 +90,34 @@ StyledClippingRect {
 
         MouseArea {
             anchors.fill: layout
+            propagateComposedEvents: true
+            acceptedButtons: Qt.LeftButton
+            
             onClicked: event => {
-                const ws = layout.childAt(event.x, event.y).ws;
+                // Don't handle clicks if they're on window icons
+                const child = layout.childAt(event.x, event.y);
+                if (!child || !child.isWorkspace) {
+                    event.accepted = false;
+                    return;
+                }
+                
+                // Check if click is on a window icon (in the windows area)
+                const windowsLoader = child.children.find(c => c.objectName === "windows");
+                if (windowsLoader && windowsLoader.active) {
+                    const windowsColumn = windowsLoader.item;
+                    if (windowsColumn) {
+                        const localPos = mapToItem(windowsColumn, event.x, event.y);
+                        const iconItem = windowsColumn.childAt(localPos.x, localPos.y);
+                        if (iconItem) {
+                            // Click was on a window icon - let the icon's MouseArea handle it
+                            event.accepted = false;
+                            return;
+                        }
+                    }
+                }
+                
+                // Only handle clicks on the workspace indicator area, not on window icons
+                const ws = child.ws;
                 if (Hypr.activeWsId !== ws)
                     Hypr.dispatch(`workspace ${ws}`);
                 else
@@ -127,6 +156,13 @@ StyledClippingRect {
         Behavior on opacity {
             Anim {}
         }
+    }
+
+    // Container for drag proxies from workspace icons
+    Item {
+        id: dragProxyContainer
+        anchors.fill: parent
+        z: 100000
     }
 
     Behavior on blur {
