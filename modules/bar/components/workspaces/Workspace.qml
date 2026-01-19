@@ -1,8 +1,12 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
+import qs.config
 import qs.services
 import qs.utils
-import qs.config
+
 import Quickshell
+
 import QtQuick
 import QtQuick.Layouts
 
@@ -13,49 +17,21 @@ ColumnLayout {
     required property int activeWsId
     required property var occupied
     required property int groupOffset
-    property var dragProxyContainer: null
 
-    readonly property bool isWorkspace: true // Flag for finding workspace children
-    // Unanimated prop for others to use as reference
-    readonly property int size: implicitHeight + (hasWindows ? Appearance.padding.small : 0)
-
+    readonly property bool isWorkspace: true
+    readonly property int size: implicitHeight
     readonly property int ws: groupOffset + index + 1
     readonly property bool isOccupied: occupied[ws] ?? false
     readonly property bool hasWindows: isOccupied && Config.bar.workspaces.showWindows
 
+    property var dragProxyContainer: null
+    property bool isDropTarget: false
+    property alias indicator: indicator
+
     Layout.alignment: Qt.AlignHCenter
-    Layout.preferredHeight: size
+    Layout.preferredHeight: size + (hasWindows ? Appearance.padding.small : 0)
 
     spacing: 0
-
-    DropArea {
-        id: dropArea
-        objectName: "dropArea"
-
-        anchors.fill: parent
-        property int targetWorkspace: root.ws
-        keys: ["application"]
-
-        onEntered: drag => {
-            if (drag.source && drag.source.modelData) {
-                indicator.color = Colours.palette.m3primary;
-            }
-        }
-
-        onExited: {
-            indicator.color = Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2);
-        }
-
-        onDropped: drop => {
-            if (drop.source && drop.source.modelData && drop.source.modelData.address) {
-                const targetWs = root.ws;
-                const sourceWs = drop.source.modelData.workspace?.id;
-                if (targetWs !== sourceWs) {
-                    Hypr.dispatch(`movetoworkspace ${targetWs},address:0x${drop.source.modelData.address}`);
-                }
-            }
-        }
-    }
 
     StyledText {
         id: indicator
@@ -78,8 +54,41 @@ ColumnLayout {
             const activeLabel = Config.bar.workspaces.activeLabel || (root.isOccupied ? occupiedLabel : label);
             return root.activeWsId === root.ws ? activeLabel : root.isOccupied ? occupiedLabel : label;
         }
-        color: Config.bar.workspaces.occupiedBg || root.isOccupied || root.activeWsId === root.ws ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2)
+        color: {
+            if (root.isDropTarget) {
+                return Colours.palette.m3primary;
+            }
+            const actuallyOccupied = Hypr.toplevels.values.some(c => c.workspace?.id === root.ws);
+            const isActive = root.activeWsId === root.ws;
+            return Config.bar.workspaces.occupiedBg || actuallyOccupied || isActive ? Colours.palette.m3onSurface : Colours.layer(Colours.palette.m3outlineVariant, 2);
+        }
         verticalAlignment: Qt.AlignVCenter
+    }
+
+    // Drop indicator for empty workspaces
+    Item {
+        Layout.alignment: Qt.AlignHCenter
+        Layout.preferredWidth: Config.bar.sizes.innerWidth
+        Layout.preferredHeight: Config.bar.sizes.innerWidth
+        visible: root.isDropTarget && !root.isOccupied
+        
+        Rectangle {
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.small
+
+            radius: Appearance.rounding.small
+            color: Colours.palette.m3primary
+            opacity: 0.3
+            border.width: 2
+            border.color: Colours.palette.m3primary
+        
+            MaterialIcon {
+                anchors.centerIn: parent
+                text: "add"
+                color: Colours.palette.m3primary
+                opacity: 0.8
+            }
+        }
     }
 
     Loader {
@@ -95,6 +104,33 @@ ColumnLayout {
 
         sourceComponent: Column {
             spacing: 0
+
+            // Visual drop area spacer at the start 
+            Item {
+                width: Config.bar.sizes.innerWidth
+                height: root.isDropTarget && root.hasWindows ? Config.bar.sizes.innerWidth - Appearance.padding.small * 2 : 0
+                visible: height > 0
+                
+                Rectangle {
+                    anchors.horizontalCenter: parent.horizontalCenter
+
+                    width: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
+                    height: parent.height
+
+                    radius: Appearance.rounding.small
+                    color: Colours.palette.m3primary
+                    opacity: 0.3
+                    border.width: 2
+                    border.color: Colours.palette.m3primary
+                
+                    MaterialIcon {
+                        anchors.centerIn: parent
+                        text: "add"
+                        color: Colours.palette.m3primary
+                        opacity: 0.8
+                    }
+                }
+            }
 
             add: Transition {
                 Anim {
@@ -125,14 +161,16 @@ ColumnLayout {
                     id: iconItem
                     required property var modelData
 
-                    width: icon.width
+                    width: Config.bar.sizes.innerWidth
                     height: icon.height
 
                     MaterialIcon {
                         id: icon
 
+                        anchors.horizontalCenter: parent.horizontalCenter
+
                         grade: 0
-                        text: Icons.getAppCategoryIcon(parent.modelData.lastIpcObject.class, "terminal")
+                        text: Icons.getAppCategoryIcon(parent.modelData?.lastIpcObject?.class ?? "", "terminal")
                         color: Colours.palette.m3onSurfaceVariant
                     }
 
@@ -143,14 +181,15 @@ ColumnLayout {
                         anchors.fill: parent
                         preventStealing: true
                         hoverEnabled: true
-                        z: 1000
+                        z: isDragging ? -1 : 1000
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
-                        drag.target: iconItem
+                        drag.target: null
                         drag.threshold: 3
 
                         property bool isDragging: false
                         property point dragStart: Qt.point(0, 0)
                         property var targetWorkspace: null
+                        property point iconOffset: Qt.point(0, 0)
 
                         cursorShape: drag.active ? Qt.ClosedHandCursor : Qt.PointingHandCursor
 
@@ -159,6 +198,7 @@ ColumnLayout {
                                 // Right click: start drag
                                 mouse.accepted = true;
                                 dragStart = Qt.point(mouse.x, mouse.y);
+                                iconOffset = Qt.point(mouse.x, mouse.y);
                                 isDragging = false;
                                 targetWorkspace = null;
                             } else {
@@ -179,6 +219,9 @@ ColumnLayout {
                                 }
                                 
                                 if (isDragging) {
+                                    const parentPos = mapToItem(iconItem.parent, mouse.x, mouse.y);
+                                    iconItem.x = parentPos.x - iconOffset.x;
+                                    iconItem.y = parentPos.y - iconOffset.y;
                                     updateWorkspaceHighlight(mouse.x, mouse.y);
                                 }
                             }
@@ -209,26 +252,63 @@ ColumnLayout {
                                 current = current.parent;
                             }
                             
-                            if (!layout) return;
+                            if (!layout) {
+                                return;
+                            }
                             
-                            // Reset all workspace indicators
+                            // Find workspace containing cursor or closest one
+                            const layoutPos = mapToItem(layout, mouseX, mouseY);
+                            let closestWorkspace = null;
+                            let closestDistance = Infinity;
+                            
+                            // First pass: check if cursor is directly within any workspace bounds
                             for (let i = 0; i < layout.children.length; i++) {
                                 const ws = layout.children[i];
-                                if (ws && ws.isWorkspace && ws.indicator) {
-                                    const isOccupied = root.occupied[ws.ws] ?? false;
-                                    const activeWsId = root.activeWsId;
-                                    ws.indicator.color = Config.bar.workspaces.occupiedBg || isOccupied || activeWsId === ws.ws ? 
-                                        Colours.palette.m3onSurface : 
-                                        Colours.layer(Colours.palette.m3outlineVariant, 2);
+                                if (ws && ws.isWorkspace) {
+                                    const wsPos = layout.mapFromItem(ws, 0, 0);
+                                    const wsTop = wsPos.y;
+                                    const wsBottom = wsPos.y + ws.height;
+                                    
+                                    // Check if cursor Y is within workspace bounds
+                                    if (layoutPos.y >= wsTop && layoutPos.y <= wsBottom) {
+                                        closestWorkspace = ws;
+                                        closestDistance = 0;
+                                        break;
+                                    }
                                 }
                             }
                             
-                            // Highlight workspace under mouse
-                            const layoutPos = mapToItem(layout, mouseX, mouseY);
-                            const workspaceItem = layout.childAt(layoutPos.x, layoutPos.y);
-                            if (workspaceItem && workspaceItem.isWorkspace && workspaceItem.indicator) {
-                                workspaceItem.indicator.color = Colours.palette.m3primary;
-                                targetWorkspace = workspaceItem.ws;
+                            // Second pass: if not within any workspace, find closest by center distance
+                            if (!closestWorkspace) {
+                                for (let i = 0; i < layout.children.length; i++) {
+                                    const ws = layout.children[i];
+                                    if (ws && ws.isWorkspace) {
+                                        const wsPos = layout.mapFromItem(ws, 0, 0);
+                                        const centerY = wsPos.y + ws.height / 2;
+                                        const distance = Math.abs(layoutPos.y - centerY);
+                                        
+                                        if (distance < closestDistance) {
+                                            closestDistance = distance;
+                                            closestWorkspace = ws;
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Reset workspaces that are not the closest
+                            for (let i = 0; i < layout.children.length; i++) {
+                                const ws = layout.children[i];
+                                if (ws && ws.isWorkspace && ws !== closestWorkspace) {
+                                    if (ws.isDropTarget) {
+                                        ws.isDropTarget = false;
+                                    }
+                                }
+                            }
+                            
+                            // Only highlight if we're reasonably close to a workspace
+                            if (closestWorkspace && closestDistance < Config.bar.sizes.innerWidth * 1.5) {
+                                closestWorkspace.isDropTarget = true;
+                                targetWorkspace = closestWorkspace.ws;
                             } else {
                                 targetWorkspace = null;
                             }
@@ -276,12 +356,13 @@ ColumnLayout {
                                     }
                                 }
                                 
-                                // Move window if we have a valid target workspace
-                                if (targetWs && targetWs !== root.ws && iconItem.modelData && iconItem.modelData.address) {
+                                // Move window ONLY if we have a valid target workspace from highlighting
+                                // This prevents dropping in empty space between workspaces
+                                if (targetWs && targetWs !== root.ws && iconItem.modelData && iconItem.modelData.address && targetWorkspace !== null) {
                                     Hypr.dispatch(`movetoworkspace ${targetWs},address:0x${iconItem.modelData.address}`);
                                 }
                                 
-                                // Reset highlighting
+                                // Reset drop target highlighting
                                 let current = root.parent;
                                 let layout = null;
                                 while (current) {
@@ -294,12 +375,8 @@ ColumnLayout {
                                 if (layout) {
                                     for (let i = 0; i < layout.children.length; i++) {
                                         const ws = layout.children[i];
-                                        if (ws && ws.isWorkspace && ws.indicator) {
-                                            const isOccupied = root.occupied[ws.ws] ?? false;
-                                            const activeWsId = root.activeWsId;
-                                            ws.indicator.color = Config.bar.workspaces.occupiedBg || isOccupied || activeWsId === ws.ws ? 
-                                                Colours.palette.m3onSurface : 
-                                                Colours.layer(Colours.palette.m3outlineVariant, 2);
+                                        if (ws && ws.isWorkspace) {
+                                            ws.isDropTarget = false;
                                         }
                                     }
                                 }
@@ -312,11 +389,29 @@ ColumnLayout {
                             }
                         }
 
-                        onCanceled: {
+                        onCanceled: () => {
+                            isDragging = false;
                             iconItem.x = 0;
                             iconItem.y = 0;
-                            isDragging = false;
-                            targetWorkspace = null;
+                            
+                            // Reset drop target highlighting
+                            let current = root.parent;
+                            let layout = null;
+                            while (current) {
+                                if (current.objectName === "layout") {
+                                    layout = current;
+                                    break;
+                                }
+                                current = current.parent;
+                            }
+                            if (layout) {
+                                for (let i = 0; i < layout.children.length; i++) {
+                                    const ws = layout.children[i];
+                                    if (ws && ws.isWorkspace) {
+                                        ws.isDropTarget = false;
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -337,6 +432,7 @@ ColumnLayout {
                             }
                             PropertyChanges {
                                 target: icon
+                                restoreEntryValues: false
                                 color: Colours.palette.m3primary
                             }
                         },
@@ -362,6 +458,9 @@ ColumnLayout {
     }
 
     Behavior on Layout.preferredHeight {
-        Anim {}
+        enabled: true
+        Anim {
+            duration: 200
+        }
     }
 }
