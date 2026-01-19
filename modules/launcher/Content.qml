@@ -11,15 +11,22 @@ import QtQuick
 Item {
     id: root
 
+    required property ShellScreen screen
     required property PersistentProperties visibilities
     required property var panels
     required property real maxHeight
 
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
+    readonly property alias search: search
+    readonly property alias list: list
 
     implicitWidth: listWrapper.width + padding * 2
     implicitHeight: searchWrapper.height + listWrapper.height + padding * 2
+
+    Component.onCompleted: {
+        LauncherIpc.register(root.screen, root);
+    }
 
     Item {
         id: listWrapper
@@ -89,6 +96,12 @@ Item {
                             Wallpapers.previewColourLock = true;
                         Wallpapers.setWallpaper(currentItem.modelData.path);
                         root.visibilities.launcher = false;
+                    } else if (list.showClipboard) {
+                        Clipboard.copyToClipboard(currentItem.modelData);
+                        root.visibilities.launcher = false;
+                    } else if (list.showEmoji) {
+                        Emojis.copyEmoji(currentItem.modelData);
+                        root.visibilities.launcher = false;
                     } else if (text.startsWith(Config.launcher.actionPrefix)) {
                         if (text.startsWith(`${Config.launcher.actionPrefix}calc `))
                             currentItem.onClicked();
@@ -103,6 +116,20 @@ Item {
 
             Keys.onUpPressed: list.currentList?.decrementCurrentIndex()
             Keys.onDownPressed: list.currentList?.incrementCurrentIndex()
+            
+            Keys.onLeftPressed: event => {
+                if (list.showEmoji && list.currentList && list.currentList.moveLeft) {
+                    list.currentList.moveLeft();
+                    event.accepted = true;
+                }
+            }
+            
+            Keys.onRightPressed: event => {
+                if (list.showEmoji && list.currentList && list.currentList.moveRight) {
+                    list.currentList.moveRight();
+                    event.accepted = true;
+                }
+            }
 
             Keys.onEscapePressed: root.visibilities.launcher = false
 

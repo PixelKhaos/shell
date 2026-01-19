@@ -77,6 +77,17 @@ Item {
         anchors.bottom: parent.bottom
     }
 
+    Launcher.ClipboardPreview {
+        id: clipboardPreview
+
+        currentItem: launcher.currentClipboardItem
+        visible: root.visibilities.launcher && launcher.showingClipboard && hasImage
+
+        anchors.left: launcher.right
+        anchors.leftMargin: Appearance.spacing.large
+        anchors.bottom: launcher.bottom
+    }
+
     Dashboard.Wrapper {
         id: dashboard
 

@@ -14,6 +14,9 @@ Item {
 
     readonly property bool shouldBeActive: visibilities.launcher && Config.launcher.enabled
     property int contentHeight
+    
+    readonly property var currentClipboardItem: content.item?.list?.currentList?.currentItem
+    readonly property bool showingClipboard: content.item?.list?.showClipboard ?? false
 
     readonly property real maxHeight: {
         let max = screen.height - Config.border.thickness * 2 - Appearance.spacing.large;
@@ -120,6 +123,7 @@ Item {
         Component.onCompleted: timer.start()
 
         sourceComponent: Content {
+            screen: root.screen
             visibilities: root.visibilities
             panels: root.panels
             maxHeight: root.maxHeight
