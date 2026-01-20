@@ -81,10 +81,10 @@ Item {
         id: clipboardPreview
 
         currentItem: launcher.currentClipboardItem
-        visible: root.visibilities.launcher && launcher.showingClipboard && hasImage
+        shouldShow: root.visibilities.launcher && launcher.showingClipboard
 
         anchors.left: launcher.right
-        anchors.leftMargin: Appearance.spacing.large
+        anchors.leftMargin: Appearance.spacing.large + 4
         anchors.bottom: launcher.bottom
     }
 

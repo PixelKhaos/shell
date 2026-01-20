@@ -3,6 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import qs.config
+import Caelestia
 import QtQuick
 
 Singleton {
@@ -32,6 +33,7 @@ Singleton {
     function copyToClipboard(item): void {
         const input = item.id + "\t" + item.content;
         Quickshell.execDetached(["sh", "-c", `echo '${input}' | cliphist decode | wl-copy`]);
+        Toaster.toast("Copied to clipboard", item.preview, "content_paste");
     }
 
     function deleteItem(item): void {

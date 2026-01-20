@@ -3,6 +3,7 @@ pragma Singleton
 import Quickshell
 import Quickshell.Io
 import qs.config
+import Caelestia
 import QtQuick
 
 Singleton {
@@ -87,5 +88,7 @@ Singleton {
             root.recentEmojis = root.recentEmojis.slice(0, 20);
         }
         saveFrequentEmojis();
+        
+        Toaster.toast("Copied to clipboard", `${emoji.emoji} ${emoji.name}`, "sentiment_satisfied");
     }
 }
