@@ -135,7 +135,7 @@ Item {
             return Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
         }
         
-        return 400; // Default height while loading
+        return 400;
     }
 
     width: 400
@@ -153,77 +153,6 @@ Item {
         }
     }
 
-    Shape {
-        id: backgroundShape
-        anchors.fill: parent
-        preferredRendererType: Shape.CurveRenderer
-        
-        ShapePath {
-            strokeWidth: -1
-            fillColor: Colours.palette.m3surface
-            
-            // Start at bottom left
-            startX: 0
-            startY: root.height
-            
-            // Bottom left inverse arc
-            PathArc {
-                relativeX: root.rounding
-                relativeY: -root.rounding
-                radiusX: root.rounding
-                radiusY: root.rounding
-                direction: PathArc.Counterclockwise
-            }
-            
-            // Left edge going up
-            PathLine {
-                relativeX: 0
-                relativeY: -(root.height - root.rounding * 2)
-            }
-            
-            // Top left rounded corner
-            PathArc {
-                relativeX: root.rounding
-                relativeY: -root.rounding
-                radiusX: root.rounding
-                radiusY: root.rounding
-            }
-            
-            // Top edge
-            PathLine {
-                relativeX: root.width - root.rounding * 2
-                relativeY: 0
-            }
-            
-            // Top right rounded corner
-            PathArc {
-                relativeX: root.rounding
-                relativeY: root.rounding
-                radiusX: root.rounding
-                radiusY: root.rounding
-            }
-            
-            // Right edge going down
-            PathLine {
-                relativeX: 0
-                relativeY: root.height - root.rounding * 2
-            }
-            
-            // Bottom right inverse fillet
-            PathArc {
-                relativeX: root.rounding
-                relativeY: root.rounding
-                radiusX: root.rounding
-                radiusY: root.rounding
-                direction: PathArc.Counterclockwise
-            }
-            
-            Behavior on fillColor {
-                CAnim {}
-            }
-        }
-    }
-
     ColumnLayout {
         anchors.fill: parent
         anchors.leftMargin: (Appearance.padding.normal * 2) + (Appearance.padding.small / 2)
@@ -232,27 +161,25 @@ Item {
         anchors.bottomMargin: Appearance.padding.normal
         spacing: 0
         
-        Image {
-            id: previewImage
+        Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.alignment: Qt.AlignCenter
-            source: root.imageSource
-            fillMode: Image.PreserveAspectFit
-            asynchronous: true
-            cache: false
-            opacity: root.shouldShow && root.hasImage ? 1 : 0
-                
-            onStatusChanged: {
-                if (status === Image.Error) {
-                    root.imageLoadError = true;
-                }
-            }
+            color: "transparent"
+            clip: true
             
-            Behavior on opacity {
-                Anim {
-                    duration: Appearance.anim.durations.normal 
-                    easing.bezierCurve: Appearance.anim.curves.standard
+            Image {
+                id: previewImage
+                anchors.fill: parent
+                source: root.imageSource
+                fillMode: Image.PreserveAspectFit
+                asynchronous: true
+                cache: false
+                smooth: true
+                
+                onStatusChanged: {
+                    if (status === Image.Error) {
+                        root.imageLoadError = true;
+                    }
                 }
             }
             
@@ -260,7 +187,7 @@ Item {
                 anchors.centerIn: parent
                 text: {
                     if (root.loadingImage || (root.imageSource === "" && root.currentItem?.modelData?.isImage === true)) return "Decoding image...";
-                    if (root.decodingHtml) return "Extracting image URL...";
+                    if (root.decodingHtml) return "Extracting image...";
                     if (previewImage.status === Image.Loading) return "Loading image...";
                     return "";
                 }
@@ -285,11 +212,9 @@ Item {
             return (data.hasImageUrl === true || data.needsDecodeForUrl === true) && root.extractedImageUrl !== "" && previewImage.status === Image.Ready;
         }
         onClicked: {
-            // Grab the loaded image and save to temp file, then copy to clipboard
             previewImage.grabToImage(function(result) {
                 const tempPath = "/tmp/quickshell-clipboard-grab-" + Date.now() + ".png";
                 if (result.saveToFile(tempPath)) {
-                    // Copy the saved image to clipboard
                     const cmd = `wl-copy < '${tempPath}' --type image/png && rm '${tempPath}'`;
                     copyGrabbedImageProcess.command = ["sh", "-c", cmd];
                     copyGrabbedImageProcess.running = true;

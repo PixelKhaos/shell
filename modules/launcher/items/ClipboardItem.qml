@@ -13,6 +13,7 @@ Item {
     id: root
 
     required property var modelData
+    required property int index
     required property PersistentProperties visibilities
 
     implicitHeight: rect.implicitHeight
@@ -37,7 +38,16 @@ Item {
             id: mouse
             anchors.fill: parent
             hoverEnabled: true
+            onContainsMouseChanged: {
+                if (containsMouse) {
+                    root.ListView.view.hoveredItem = root;
+                    root.ListView.view.lastInteraction = "hover";
+                } else if (root.ListView.view.hoveredItem === root) {
+                    root.ListView.view.hoveredItem = null;
+                }
+            }
             onClicked: {
+                root.ListView.view.currentIndex = index;
                 Clipboard.copyToClipboard(root.modelData);
                 root.visibilities.launcher = false;
             }
@@ -52,7 +62,7 @@ Item {
         MaterialIcon {
             text: {
                 if (root.modelData.isPinned) return "push_pin";
-                if (root.modelData.content.startsWith("data:image")) return "image";
+                if (root.modelData.isImage) return "image";
                 return "description";
             }
             color: root.modelData.isPinned ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
@@ -65,12 +75,10 @@ Item {
 
             StyledText {
                 Layout.fillWidth: true
-                text: root.modelData.preview
-                color: Colours.palette.m3onSurface
+                text: root.modelData.content
+                color: ListView.isCurrentItem ? Colours.palette.m3onSurface : Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.normal
                 elide: Text.ElideRight
-                maximumLineCount: 2
-                wrapMode: Text.Wrap
             }
 
             StyledText {
@@ -86,11 +94,14 @@ Item {
         }
 
         Row {
+            id: buttonsRow
             spacing: Appearance.spacing.small
 
             IconButton {
                 icon: root.modelData.isPinned ? "push_pin" : "keep"
-                type: root.modelData.isPinned ? IconButton.Filled : IconButton.Tonal
+                type: root.modelData.isPinned ? IconButton.Filled : IconButton.Text
+                radius: Appearance.rounding.small
+                padding: Appearance.padding.small
                 onClicked: {
                     Clipboard.togglePin(root.modelData);
                 }
@@ -98,8 +109,11 @@ Item {
 
             IconButton {
                 icon: "delete"
-                type: IconButton.Tonal
+                type: IconButton.Text
+                radius: Appearance.rounding.small
+                padding: Appearance.padding.small
                 onClicked: {
+                    root.ListView.view.deletedItemIndex = root.index;
                     Clipboard.deleteItem(root.modelData);
                 }
             }

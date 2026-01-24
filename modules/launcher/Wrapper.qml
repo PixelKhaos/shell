@@ -15,7 +15,16 @@ Item {
     readonly property bool shouldBeActive: visibilities.launcher && Config.launcher.enabled
     property int contentHeight
     
-    readonly property var currentClipboardItem: content.item?.list?.currentList?.currentItem
+    readonly property var currentClipboardItem: {
+        const list = content.item?.list?.currentList;
+        if (!list) return null;
+        
+        // Use last interaction type to determine priority
+        if (list.lastInteraction === "hover" && list.hoveredItem) {
+            return list.hoveredItem;
+        }
+        return list.currentItem;
+    }
     readonly property bool showingClipboard: content.item?.list?.showClipboard ?? false
 
     readonly property real maxHeight: {

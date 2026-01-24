@@ -29,6 +29,29 @@ Singleton {
     function refresh(): void {
         cliphistProcess.running = true;
     }
+    
+    property string pendingImageUrl: ""
+    property string pendingImageMime: ""
+    
+    function copyImageFromUrl(url): void {
+        if (copyImageProcess.running) {
+            return;
+        }
+        
+        const escapedUrl = url.replace(/'/g, "'\\''");
+        let mimeType = "image/png";
+        if (url.match(/\.jpe?g$/i)) mimeType = "image/jpeg";
+        else if (url.match(/\.png$/i)) mimeType = "image/png";
+        else if (url.match(/\.gif$/i)) mimeType = "image/gif";
+        else if (url.match(/\.webp$/i)) mimeType = "image/webp";
+        
+        root.pendingImageUrl = escapedUrl;
+        root.pendingImageMime = mimeType;
+        
+        const cmd = `curl -sL '${escapedUrl}' | wl-copy --type '${mimeType}'`;
+        copyImageProcess.command = ["sh", "-c", cmd];
+        copyImageProcess.running = true;
+    }
 
     function copyToClipboard(item): void {
         const input = item.id + "\t" + item.content;
@@ -52,6 +75,37 @@ Singleton {
         savePinnedItems();
         root.refresh();
     }
+    
+    function clearAll(category): void {
+        let itemsToDelete = root.history.filter(item => {
+            if (item.isPinned) return false; // Never delete pinned items
+            
+            if (category === "images") {
+                return item.isImage;
+            } else if (category === "misc") {
+                return !item.isImage;
+            }
+            return true;
+        });
+        
+        if (itemsToDelete.length === 0) {
+            Toaster.toast("Nothing to clear", "No non-pinned items in this category", "info");
+            return;
+        }
+        
+        // Build a shell script that deletes each item
+        const deleteCommands = itemsToDelete.map(item => {
+            const escapedId = item.id.replace(/'/g, "'\\''");
+            return `printf '%s' '${escapedId}' | cliphist delete`;
+        }).join('; ');
+        
+        deleteProcess.command = ["sh", "-c", deleteCommands];
+        deleteProcess.running = true;
+        
+        const categoryName = category === "all" ? "All" : category === "images" ? "Images" : "Misc";
+        const count = itemsToDelete.length;
+        Toaster.toast("Clipboard cleared", `${count} ${categoryName.toLowerCase()} item${count !== 1 ? 's' : ''} deleted (pinned items preserved)`, "delete_sweep");
+    }
 
     Process {
         id: cliphistProcess
@@ -65,15 +119,41 @@ Singleton {
                         const id = parts[0] || "";
                         const content = parts.slice(1).join('\t') || line;
                         
+                        const isImage = content.includes("[[ binary data");
+                        
+                        // Detect potential HTML images (content is truncated in list, so just check for <img tag)
+                        // We'll extract the actual URL later when needed
+                        const hasHtmlImage = !isImage && content.includes("<img");
+                        
+                        const isDirectImageUrl = !isImage && !hasHtmlImage && content.match(/^https?:\/\/.*\.(png|jpg|jpeg|gif|webp|bmp)/i);
+                        
                         return {
                             id: id,
                             content: content,
                             preview: content.substring(0, 100),
                             isPinned: root.pinnedItems.includes(id),
+                            isImage: isImage,
+                            imageUrl: isDirectImageUrl ? content.trim() : "",
+                            hasImageUrl: hasHtmlImage || isDirectImageUrl,
+                            needsDecodeForUrl: hasHtmlImage,
                             index: index
                         };
                     });
                 }
+            }
+        }
+    }
+
+    Process {
+        id: copyImageProcess
+        stdout: StdioCollector {}
+        
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode === 0) {
+                Toaster.toast("Image copied", "Downloaded and copied image to clipboard", "image");
+                Qt.callLater(() => root.refresh());
+            } else {
+                Toaster.toast("Copy failed", "Failed to download or copy image", "error");
             }
         }
     }
