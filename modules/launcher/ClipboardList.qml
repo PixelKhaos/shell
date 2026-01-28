@@ -16,18 +16,18 @@ StyledListView {
 
     required property StyledTextField search
     required property PersistentProperties visibilities
-    
+
     property string activeCategory: "all"
     property bool showClearConfirmation: false
     property var hoveredItem: null
     property string lastInteraction: "keyboard" // "hover" or "keyboard"
-    
+
     property bool isCategoryChange: false
     property int deletedItemIndex: -1
-    
+
     model: ScriptModel {
         id: model
-        
+
         onValuesChanged: {
             // After deletion, adjust currentIndex if needed
             if (root.deletedItemIndex >= 0) {
@@ -43,7 +43,8 @@ StyledListView {
     spacing: Appearance.spacing.small
     orientation: Qt.Vertical
     implicitHeight: {
-        if (count === 0) return 0;
+        if (count === 0)
+            return 0;
         const itemsToShow = Math.min(Config.launcher.maxShown, count);
         const calculatedHeight = (Config.launcher.sizes.itemHeight + spacing) * itemsToShow - spacing + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
         const minHeight = 200;
@@ -62,7 +63,7 @@ StyledListView {
     preferredHighlightBegin: 0
     preferredHighlightEnd: height
     highlightRangeMode: ListView.ApplyRange
-    
+
     highlightFollowsCurrentItem: false
     highlight: StyledRect {
         radius: Appearance.rounding.normal
@@ -105,13 +106,13 @@ StyledListView {
             root.updateModel();
         }
     }
-    
+
     property string previousCategory: "all"
     property var pendingModelUpdate: null
-    
+
     Connections {
         target: root
-        
+
         function onActiveCategoryChanged(): void {
             if (previousCategory !== root.activeCategory && root.search.text.startsWith(">clipboard")) {
                 if (categoryChangeAnimation.running) {
@@ -119,7 +120,7 @@ StyledListView {
                     root.opacity = 1;
                     root.scale = 1;
                 }
-                
+
                 root.pendingModelUpdate = root.filterAndSortItems();
                 root.isCategoryChange = true;
                 categoryChangeAnimation.start();
@@ -127,10 +128,10 @@ StyledListView {
             previousCategory = root.activeCategory;
         }
     }
-    
+
     SequentialAnimation {
         id: categoryChangeAnimation
-        
+
         ParallelAnimation {
             Anim {
                 target: root
@@ -147,7 +148,7 @@ StyledListView {
                 easing.bezierCurve: Appearance.anim.curves.emphasizedAccel
             }
         }
-        
+
         ScriptAction {
             script: {
                 // Update model while invisible
@@ -163,7 +164,7 @@ StyledListView {
                 }
             }
         }
-        
+
         ParallelAnimation {
             Anim {
                 target: root
@@ -185,14 +186,14 @@ StyledListView {
     function filterAndSortItems(): var {
         const query = root.search.text.replace(/^>clipboard\s*/i, "").trim();
         let items = Clipboard.history;
-        
+
         // Filter by category using consistent isImage property
         if (root.activeCategory === "images") {
             items = items.filter(item => item.isImage);
         } else if (root.activeCategory === "misc") {
             items = items.filter(item => !item.isImage);
         }
-        
+
         // Filter by search query
         if (query) {
             const lowerQuery = query.toLowerCase();
@@ -201,8 +202,10 @@ StyledListView {
 
         // Sort: pinned items first, preserve original order otherwise
         items.sort((a, b) => {
-            if (a.isPinned && !b.isPinned) return -1;
-            if (!a.isPinned && b.isPinned) return 1;
+            if (a.isPinned && !b.isPinned)
+                return -1;
+            if (!a.isPinned && b.isPinned)
+                return 1;
             return a.index - b.index;
         });
 
@@ -217,11 +220,11 @@ StyledListView {
         Clipboard.refresh();
         updateModel();
     }
-    
+
     Behavior on scale {
         Anim {}
     }
-    
+
     // Confirmation dialog overlay
     Rectangle {
         anchors.fill: parent
@@ -229,43 +232,43 @@ StyledListView {
         visible: opacity > 0
         opacity: root.showClearConfirmation ? 1 : 0
         z: 1000
-        
+
         Behavior on opacity {
             Anim {
                 duration: Appearance.anim.durations.normal
                 easing.bezierCurve: Appearance.anim.curves.standard
             }
         }
-        
+
         MouseArea {
             anchors.fill: parent
             onClicked: root.showClearConfirmation = false
         }
-        
+
         StyledRect {
             anchors.centerIn: parent
             width: Math.min(400, parent.width - Appearance.padding.large * 2)
             height: confirmContent.implicitHeight + Appearance.padding.large * 2
             color: Colours.palette.m3surfaceContainer
             radius: Appearance.rounding.large
-            
+
             opacity: root.showClearConfirmation ? 1 : 0
             scale: root.showClearConfirmation ? 1 : 0.8
-            
+
             Behavior on opacity {
                 Anim {
                     duration: Appearance.anim.durations.normal
                     easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
                 }
             }
-            
+
             Behavior on scale {
                 Anim {
                     duration: Appearance.anim.durations.normal
                     easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
                 }
             }
-            
+
             ColumnLayout {
                 id: confirmContent
                 anchors.left: parent.left
@@ -273,7 +276,7 @@ StyledListView {
                 anchors.top: parent.top
                 anchors.margins: Appearance.padding.large
                 spacing: Appearance.spacing.normal
-                
+
                 StyledText {
                     Layout.fillWidth: true
                     text: {
@@ -290,7 +293,7 @@ StyledListView {
                     wrapMode: Text.WordWrap
                     horizontalAlignment: Text.AlignHCenter
                 }
-                
+
                 StyledText {
                     Layout.fillWidth: true
                     text: qsTr("Non-pinned items in this category will be deleted. Pinned items are preserved.")
@@ -298,22 +301,22 @@ StyledListView {
                     wrapMode: Text.WordWrap
                     horizontalAlignment: Text.AlignHCenter
                 }
-                
+
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: Appearance.spacing.normal
                     spacing: Appearance.spacing.normal
-                    
+
                     Item {
                         Layout.fillWidth: true
                     }
-                    
+
                     TextButton {
                         text: qsTr("Cancel")
                         type: TextButton.Text
                         onClicked: root.showClearConfirmation = false
                     }
-                    
+
                     TextButton {
                         text: qsTr("Clear All")
                         type: TextButton.Filled
