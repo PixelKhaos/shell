@@ -14,8 +14,6 @@ Item {
     property string source: Wallpapers.current
     property Image current: one
 
-    anchors.fill: parent
-
     onSourceChanged: {
         if (!source)
             current = null;
@@ -25,11 +23,15 @@ Item {
             one.update();
     }
 
+    Component.onCompleted: {
+        if (source)
+            Qt.callLater(() => one.update());
+    }
+
     Loader {
         anchors.fill: parent
 
         active: !root.source
-        asynchronous: true
 
         sourceComponent: StyledRect {
             color: Colours.palette.m3surfaceContainer

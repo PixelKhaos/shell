@@ -4,6 +4,7 @@ import qs.components
 import qs.components.containers
 import qs.services
 import qs.config
+import qs.utils
 import qs.modules.bar
 import Quickshell
 import Quickshell.Wayland
@@ -18,6 +19,7 @@ Variants {
         id: scope
 
         required property ShellScreen modelData
+        readonly property bool barDisabled: Strings.testRegexList(Config.bar.excludedScreens, modelData.name)
 
         Exclusions {
             screen: scope.modelData
@@ -33,7 +35,7 @@ Variants {
                     return 0;
 
                 const mon = Hypr.monitorFor(screen);
-                if (mon?.lastIpcObject.specialWorkspace.name || mon?.activeWorkspace?.lastIpcObject.windows > 0)
+                if (mon?.lastIpcObject?.specialWorkspace?.name || mon?.activeWorkspace?.lastIpcObject?.windows > 0)
                     return 0;
 
                 const thresholds = [];
@@ -169,6 +171,8 @@ Variants {
                     screen: scope.modelData
                     visibilities: visibilities
                     popouts: panels.popouts
+
+                    disabled: scope.barDisabled
 
                     Component.onCompleted: Visibilities.bars.set(scope.modelData, this)
                 }
