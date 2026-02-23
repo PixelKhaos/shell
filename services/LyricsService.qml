@@ -16,6 +16,7 @@ Singleton {
     property int currentIndex: -1
     property bool loading: false
     property bool isManualSeeking: false
+    property bool lyricsVisible: true
 
     readonly property string lyricsDir: Paths.absolutePath(Config.paths.lyricsDir)
 

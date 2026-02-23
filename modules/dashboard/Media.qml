@@ -151,6 +151,14 @@ Item {
             fillMode: Image.PreserveAspectCrop
             sourceSize.width: width
             sourceSize.height: height
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    LyricsService.lyricsVisible = !LyricsService.lyricsVisible
+                }
+            }
+
         }
     }
 
@@ -209,10 +217,12 @@ Item {
         ListView {
             id: lyricsView
             Layout.fillWidth: true
-            Layout.preferredHeight: LyricsService.model.count == 0 ? 0 : 200
+            Layout.preferredHeight: 200
             clip: true
             model: LyricsService.model
             currentIndex: LyricsService.currentIndex
+
+            visible: LyricsService.lyricsVisible && LyricsService.model.count != 0
 
             preferredHighlightBegin: height / 2 - 30
             preferredHighlightEnd: height / 2 + 30
@@ -421,7 +431,7 @@ Item {
     }
 
     RowLayout {
-        parent: LyricsService.model.count == 0 ? details: leftSection
+        parent: LyricsService.model.count == 0 || !LyricsService.lyricsVisible ? details: leftSection
         id: playerChanger
         Layout.alignment: Qt.AlignHCenter
         spacing: Appearance.spacing.small
