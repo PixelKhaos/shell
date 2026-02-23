@@ -286,7 +286,7 @@ Item {
 
                 Text {
                     id: lyricText
-                    text: model.text
+                    text: model.text ? model.text.replace(/\u00A0/g, " ") : ""
                     width: parent.width*0.85 //to make up for the size increase on scaling
                     anchors.centerIn: parent
                     horizontalAlignment: Text.AlignHCenter
