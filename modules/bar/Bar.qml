@@ -77,6 +77,7 @@ ColumnLayout {
     function handleWheel(y: real, angleDelta: point): void {
         const ch = childAt(width / 2, y) as WrappedLoader;
         if (ch?.id === "workspaces" && Config.bar.scrollActions.workspaces) {
+            // Workspace scroll
             const mon = (Config.bar.workspaces.perMonitorWorkspaces ? Hypr.monitorFor(screen) : Hypr.focusedMonitor);
             const specialWs = mon?.lastIpcObject.specialWorkspace.name;
             if (specialWs?.length > 0)
@@ -84,11 +85,13 @@ ColumnLayout {
             else if (angleDelta.y < 0 || (Config.bar.workspaces.perMonitorWorkspaces ? mon.activeWorkspace?.id : Hypr.activeWsId) > 1)
                 Hypr.dispatch(`workspace r${angleDelta.y > 0 ? "-" : "+"}1`);
         } else if (y < screen.height / 2 && Config.bar.scrollActions.volume) {
+            // Volume scroll on top half
             if (angleDelta.y > 0)
                 Audio.incrementVolume();
             else if (angleDelta.y < 0)
                 Audio.decrementVolume();
         } else if (Config.bar.scrollActions.brightness) {
+            // Brightness scroll on bottom half
             const monitor = Brightness.getMonitorForScreen(screen);
             if (angleDelta.y > 0)
                 monitor.setBrightness(monitor.brightness + Config.services.brightnessIncrement);
@@ -108,15 +111,23 @@ ColumnLayout {
 
             DelegateChoice {
                 roleValue: "spacer"
-                delegate: WrappedLoader { Layout.fillHeight: enabled }
+                delegate: WrappedLoader {
+                    Layout.fillHeight: enabled
+                }
             }
             DelegateChoice {
                 roleValue: "logo"
-                delegate: WrappedLoader { sourceComponent: OsIcon {} }
+                delegate: WrappedLoader {
+                    sourceComponent: OsIcon {}
+                }
             }
             DelegateChoice {
                 roleValue: "workspaces"
-                delegate: WrappedLoader { sourceComponent: Workspaces { screen: root.screen } }
+                delegate: WrappedLoader {
+                    sourceComponent: Workspaces {
+                        screen: root.screen
+                    }
+                }
             }
             DelegateChoice {
                 roleValue: "activeWindow"
@@ -129,20 +140,28 @@ ColumnLayout {
             }
             DelegateChoice {
                 roleValue: "tray"
-                delegate: WrappedLoader { sourceComponent: Tray {} }
+                delegate: WrappedLoader {
+                    sourceComponent: Tray {}
+                }
             }
             DelegateChoice {
                 roleValue: "clock"
-                delegate: WrappedLoader { sourceComponent: Clock {} }
+                delegate: WrappedLoader {
+                    sourceComponent: Clock {}
+                }
             }
             DelegateChoice {
                 roleValue: "statusIcons"
-                delegate: WrappedLoader { sourceComponent: StatusIcons {} }
+                delegate: WrappedLoader {
+                    sourceComponent: StatusIcons {}
+                }
             }
             DelegateChoice {
                 roleValue: "power"
                 delegate: WrappedLoader {
-                    sourceComponent: Power { visibilities: root.visibilities }
+                    sourceComponent: Power {
+                        visibilities: root.visibilities
+                    }
                 }
             }
         }
