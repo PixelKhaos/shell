@@ -98,12 +98,6 @@ Singleton {
         fallbackTimer.restart();
     }
 
-    function fallbackToOnline() {
-        let meta = getMetadata();
-        if (!meta) return;
-        fetchLRCLIB(meta.title, meta.artist, root.currentRequestId);
-    }
-
     function updateModel(parsedArray) {
         lyricsModel.clear();
         for (let line of parsedArray) {
@@ -111,81 +105,94 @@ Singleton {
         }
     }
 
-    function fetchLRCLIB(title, artist, reqId) {
-        let url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}`;
-        let xhr = new XMLHttpRequest();
-        xhr.open("GET", url);
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-
-                if (reqId !== root.currentRequestId) return;
-
-                if (xhr.status === 200) {
-                    let res = JSON.parse(xhr.responseText);
-                    if (res.syncedLyrics) {
-                        updateModel(Lrc.parseLrc(res.syncedLyrics));
-                        loading = false;
-                        return;
-                    }
-                }
-                fetchNetEase(title, artist, reqId);
-            }
-        };
-        xhr.send();
+    function fallbackToOnline() {
+        let meta = getMetadata();
+        if (!meta) return;
+        fetchNetEase(meta.title, meta.artist, root.currentRequestId);
     }
 
     function fetchNetEase(title, artist, reqId) {
+        Requests.resetCookies();
         const query = encodeURIComponent(title + " " + artist);
-        const url = `https://music.163.com/api/search/get?s=${query}&type=1&limit=5`; // Get 5 results to verify
+        const url = `https://music.163.com/api/search/get?s=${query}&type=1&limit=5`;
+        Requests.get(url, text => {
+            if (reqId !== root.currentRequestId) return;
+            const res = JSON.parse(text);
+            const songs = res.result?.songs || [];
 
-        let xhr = new XMLHttpRequest();
-        xhr.open("GET", url);
-        xhr.setRequestHeader("User-Agent", "Mozilla/5.0");
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+            const bestMatch = songs.find(s => {
+                const inputArtist = String(artist || "").toLowerCase();
+                const sArtist = String(s.artists?.[0]?.name || "").toLowerCase();
+                return inputArtist.includes(sArtist) || sArtist.includes(inputArtist);
+            });
 
-                if (reqId !== root.currentRequestId) return;
-
-                let res = JSON.parse(xhr.responseText);
-                let songs = res.result?.songs || [];
-
-                // Find a song where the artist matches
-                let bestMatch = songs.find(s => {
-                    let inputArtist = String(artist || "").toLowerCase();
-                    let sArtist = String(s.artists?.[0]?.name || "").toLowerCase();
-
-                    return inputArtist.includes(sArtist) || sArtist.includes(inputArtist);
-                });
-
-                if (bestMatch) {
-                    fetchNetEaseLyrics(bestMatch.id, reqId);
-                } else {
-                    loading = false;
-                    console.log("NetEase: No reliable match found.");
-                }
-            } else if (xhr.readyState === XMLHttpRequest.DONE) {
-                loading = false;
+            if (bestMatch) {
+                fetchNetEaseLyrics(bestMatch.id, title, artist, reqId);
+            } else {
+                console.log("NetEase: No reliable match found, trying lrclib...");
+                fetchLRCLIB(title, artist, reqId);
             }
-        };
-        xhr.send();
+        }, err => {
+            console.log("netease error:", err);
+            fetchLRCLIB(title, artist, reqId);
+        }, {
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
+            "Referer": "https://music.163.com/"
+        });
     }
 
-    function fetchNetEaseLyrics(id, reqId) {
-        let xhr = new XMLHttpRequest();
-        xhr.open("GET", `https://music.163.com/api/song/lyric?id=${id}&lv=1&kv=1&tv=-1`);
-        xhr.onreadystatechange = () => {
-            if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
-
-                if (reqId !== root.currentRequestId) return;
-
-                let res = JSON.parse(xhr.responseText);
-                if (res.lrc?.lyric) {
-                    updateModel(Lrc.parseLrc(res.lrc.lyric));
-                }
+    function fetchNetEaseLyrics(id, title, artist, reqId) {
+        const url = `https://music.163.com/api/song/lyric?id=${id}&lv=1&kv=1&tv=-1`;
+        Requests.get(url, text => {
+            if (reqId !== root.currentRequestId) return;
+            const res = JSON.parse(text);
+            if (res.lrc?.lyric) {
+                updateModel(Lrc.parseLrc(res.lrc.lyric));
                 loading = false;
+            } else {
+                fetchLRCLIB(title, artist, reqId);
             }
-        };
-        xhr.send();
+        }, () => {
+            fetchLRCLIB(title, artist, reqId);
+        });
+    }
+
+    function fetchLRCLIB(title, artist, reqId) {
+        const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}&_=${Date.now()}`;
+
+        Requests.get(url, text => {
+            if (reqId !== root.currentRequestId) return;
+            const res = JSON.parse(text);
+            if (res.syncedLyrics) {
+                updateModel(Lrc.parseLrc(res.syncedLyrics));
+                loading = false;
+                return;
+            }
+            fetchLRCLIBSearch(title, artist, reqId);
+        }, err => {
+            console.log("lrclib error:", err);
+            fetchLRCLIBSearch(title, artist, reqId);
+        });
+    }
+
+    function fetchLRCLIBSearch(title, artist, reqId) {
+        const url = `https://lrclib.net/api/search?q=${encodeURIComponent(title + " " + artist)}&_=${Date.now()}`;
+
+        Requests.get(url, text => {
+            if (reqId !== root.currentRequestId) return;
+            const results = JSON.parse(text);
+            const best = results.find(r => r.syncedLyrics);
+            if (best) {
+                updateModel(Lrc.parseLrc(best.syncedLyrics));
+                loading = false;
+                return;
+            }
+            loading = false;
+            console.log("No lyrics found anywhere.");
+        }, err => {
+            console.log("lrclib search error:", err);
+            loading = false;
+        });
     }
 
     function updatePosition() {
