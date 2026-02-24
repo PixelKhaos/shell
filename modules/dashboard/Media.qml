@@ -18,6 +18,8 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
+    
+    property bool lyricMenuOpen: false
 
     property real playerProgress: {
         const active = Players.active;
@@ -353,7 +355,7 @@ Item {
                 type: IconButton.Text
                 icon: "lyrics"
                 font.pointSize: Math.round(Appearance.font.size.large)
-                onClicked: visibilities.lyricMenu = !visibilities.lyricMenu //root.lyricMenuOpen = !root.lyricMenuOpen
+                onClicked: root.lyricMenuOpen = !root.lyricMenuOpen
             }
         }
 
@@ -428,7 +430,7 @@ Item {
         anchors.left: details.right
         anchors.leftMargin: Appearance.spacing.normal
         
-        visible: !visibilities.lyricMenu //!root.lyricMenuOpen
+        visible: !root.lyricMenuOpen
 
         Item {
             id: bongocat
@@ -466,7 +468,7 @@ Item {
         radius: Appearance.rounding.large
         color: Colours.tPalette.m3surfaceContainer
 
-        visible: visibilities.lyricMenu //root.lyricMenuOpen 
+        visible: root.lyricMenuOpen 
         
         ColumnLayout {
             anchors.fill: parent

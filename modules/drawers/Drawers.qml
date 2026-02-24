@@ -49,13 +49,12 @@ Variants {
                 visibilities.launcher = false;
                 visibilities.session = false;
                 visibilities.dashboard = false;
-                visibilities.lyricMenu = false;
             }
 
             screen: scope.modelData
             name: "drawers"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || visibilities.lyricMenu ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || visibilities.dashboard ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             mask: Region {
                 x: bar.implicitWidth + win.dragMaskPadding
@@ -98,7 +97,6 @@ Variants {
                     visibilities.session = false;
                     visibilities.sidebar = false;
                     visibilities.dashboard = false;
-                    visibilities.lyricMenu = false;
                     panels.popouts.hasCurrent = false;
                     bar.closeTray();
                 }
@@ -144,7 +142,6 @@ Variants {
                 property bool dashboard
                 property bool utilities
                 property bool sidebar
-                property bool lyricMenu
 
                 Component.onCompleted: Visibilities.load(scope.modelData, this)
             }
