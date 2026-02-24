@@ -65,29 +65,22 @@ StyledRect {
 
         // Temperature Slider Section
         ColumnLayout {
+            id: sliderContainer
             Layout.fillWidth: true
             visible: Sunset.active
+            opacity: Sunset.active ? 1 : 0
+            Layout.preferredHeight: visible ? -1 : 0
+
             spacing: Appearance.spacing.small
 
-            RowLayout {
-                StyledText {
-                    text: "Warm";
-                    font.pointSize: Appearance.font.size.smaller;
-                    color: Colours.palette.m3onSurfaceVariant
-                }
-                Item {
-                    Layout.fillWidth: true
-                }
-
-                StyledText { text: "Cool"; font.pointSize: Appearance.font.size.smaller; color: Colours.palette.m3onSurfaceVariant }
-            }
+            Behavior on opacity { NumberAnimation { duration: 200 } }
 
             StyledSlider {
                 Layout.fillWidth: true
                 implicitHeight: 24
 
                 from: 2500
-                to: 7500
+                to: 8000
                 value: Sunset.temperature
                 stepSize: 100
                 onMoved: Sunset.temperature = value
