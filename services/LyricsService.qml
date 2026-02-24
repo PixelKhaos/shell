@@ -114,6 +114,7 @@ Singleton {
         console.log(root.offset)
         root.lyricsMap[key] = {
             offset: root.offset,
+            backend: root.backend,
             neteaseId: existing.neteaseId ?? null
         };
         root.lyricsMap = root.lyricsMap;
@@ -149,12 +150,17 @@ Singleton {
         let saved = root.lyricsMap[key];
         root.offset = saved?.offset ?? 0.0;
 
-        if (saved?.neteaseId) {
+        if (saved?.neteaseId && saved?.backend == "NetEase") {
             root.backend = "NetEase";
             fetchNetEaseLyrics(saved.neteaseId, meta.title, meta.artist, requestId);
             fetchNetEaseCandidates(meta.title, meta.artist, requestId)
             return;
         }
+        
+        if (saved?.backend == "NetEase") {
+            fallbackTimer.restart();
+            return;
+        } 
 
         let filename = `${meta.artist} - ${meta.title}.lrc`;
         let cleanDir = lyricsDir.replace(/\/$/, "");
@@ -162,7 +168,8 @@ Singleton {
 
         lrcFile.path = "";
         lrcFile.path = fullPath;
-
+        
+        if (saved?.backend == "Local") return
         // Fallback safety: If FileView doesn't trigger onLoaded (file missing),
         fallbackTimer.restart();
     }
@@ -240,14 +247,10 @@ Singleton {
                 savePrefs();
                 fetchNetEaseLyrics(bestMatch.id, title, artist, reqId);
             } else {
-                console.log("NetEase: No reliable match found, trying lrclib...");
-                root.backend = "LrcLib"
-                fetchLRCLIB(title, artist, reqId);
+                console.log("NetEase: No reliable match found");
             }
         }, err => {
             console.log("netease error:", err);
-            root.backend = "LrcLib"
-            fetchLRCLIB(title, artist, reqId);
         }, {
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
             "Referer": "https://music.163.com/"
@@ -263,50 +266,8 @@ Singleton {
                 updateModel(Lrc.parseLrc(res.lrc.lyric));
                 loading = false;
             } else {
-                root.backend = "LrcLib"
-                fetchLRCLIB(title, artist, reqId);
+                console.log("No lyrics!")
             }
-        }, () => {
-            root.backend = "LrcLib"
-            fetchLRCLIB(title, artist, reqId);
-        });
-    }
-
-    function fetchLRCLIB(title, artist, reqId) {
-        const url = `https://lrclib.net/api/get?artist_name=${encodeURIComponent(artist)}&track_name=${encodeURIComponent(title)}&_=${Date.now()}`;
-
-        Requests.get(url, text => {
-            if (reqId !== root.currentRequestId) return;
-            const res = JSON.parse(text);
-            if (res.syncedLyrics) {
-                updateModel(Lrc.parseLrc(res.syncedLyrics));
-                loading = false;
-                return;
-            }
-            fetchLRCLIBSearch(title, artist, reqId);
-        }, err => {
-            console.log("lrclib error:", err);
-            fetchLRCLIBSearch(title, artist, reqId);
-        });
-    }
-
-    function fetchLRCLIBSearch(title, artist, reqId) {
-        const url = `https://lrclib.net/api/search?q=${encodeURIComponent(title + " " + artist)}&_=${Date.now()}`;
-
-        Requests.get(url, text => {
-            if (reqId !== root.currentRequestId) return;
-            const results = JSON.parse(text);
-            const best = results.find(r => r.syncedLyrics);
-            if (best) {
-                updateModel(Lrc.parseLrc(best.syncedLyrics));
-                loading = false;
-                return;
-            }
-            loading = false;
-            console.log("No lyrics found anywhere.");
-        }, err => {
-            console.log("lrclib search error:", err);
-            loading = false;
         });
     }
 
@@ -316,6 +277,7 @@ Singleton {
         let key = `${meta.artist} - ${meta.title}`;
         let existing = root.lyricsMap[key] ?? {};
         root.lyricsMap[key] = { offset: (root.lyricsMap[key]?.offset ?? 0.0), neteaseId: songId };
+        root.backend = "NetEase"
         savePrefs();
         fetchNetEaseLyrics(songId, meta.title, meta.artist, currentRequestId);
     }

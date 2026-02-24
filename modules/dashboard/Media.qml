@@ -38,7 +38,11 @@ Item {
     }
 
     implicitWidth: cover.implicitWidth + Config.dashboard.sizes.mediaVisualiserSize * 2 + details.implicitWidth + details.anchors.leftMargin + bongocat.implicitWidth + bongocat.anchors.leftMargin * 2 + Appearance.padding.large * 2
-    implicitHeight: Math.max(cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2, details.implicitHeight, bongocat.implicitHeight) + Appearance.padding.large * 2
+    implicitHeight: Math.max(
+    cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2,
+    visibilities.lyricMenu ? lyricMenu.implicitHeight : details.implicitHeight,
+    bongocat.implicitHeight
+    ) + Appearance.padding.large * 2
 
     Behavior on playerProgress {
         Anim {
@@ -456,7 +460,7 @@ Item {
         anchors.leftMargin: Appearance.spacing.normal 
 
         Layout.fillWidth: true
-        height: details.height
+        implicitHeight: LyricsService.model.count == 0 ? details.height + Appearance.padding.large * 5 : details.height
         width: 200
 
         radius: Appearance.rounding.large
@@ -647,13 +651,13 @@ Item {
                     StyledInputField {
                         id: searchTitle
                         Layout.fillWidth: true
-                        text: "title"
+                        text: (Players.active?.trackTitle ?? qsTr("title")) || qsTr("title")
                         horizontalAlignment: TextInput.AlignLeft
                     }
                     StyledInputField {
                         id: searchArtist
                         Layout.fillWidth: true
-                        text: "artist"
+                        text: (Players.active?.trackArtist ?? qsTr("artist")) || qsTr("artist")
                         horizontalAlignment: TextInput.AlignLeft
                     }
                     IconButton {
