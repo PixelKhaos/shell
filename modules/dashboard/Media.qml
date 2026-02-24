@@ -312,6 +312,14 @@ Item {
 
             PlayerControl {
                 type: IconButton.Text
+                icon: Players.active?.shuffle ? "shuffle_on" : "shuffle"
+                font.pointSize: Math.round(Appearance.font.size.large)
+                disabled: !Players.active?.shuffleSupported
+                onClicked: Players.active.shuffle = !Players.active?.shuffle
+            }
+
+            PlayerControl {
+                type: IconButton.Text
                 icon: "skip_previous"
                 font.pointSize: Math.round(Appearance.font.size.large * 1.5)
                 disabled: !Players.active?.canGoPrevious
@@ -335,6 +343,13 @@ Item {
                 font.pointSize: Math.round(Appearance.font.size.large * 1.5)
                 disabled: !Players.active?.canGoNext
                 onClicked: Players.active?.next()
+            }
+
+            PlayerControl {
+                type: IconButton.Text
+                icon: "lyrics"
+                font.pointSize: Math.round(Appearance.font.size.large)
+                onClicked: visibilities.lyricMenu = !visibilities.lyricMenu //root.lyricMenuOpen = !root.lyricMenuOpen
             }
         }
 
@@ -404,10 +419,12 @@ Item {
 
     ColumnLayout {
         id: leftSection
+
         anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: LyricsService.model.count == 0 ? 0 : -playerChanger.height/2
         anchors.left: details.right
         anchors.leftMargin: Appearance.spacing.normal
+        
+        visible: !visibilities.lyricMenu //!root.lyricMenuOpen
 
         Item {
             id: bongocat
@@ -427,6 +444,274 @@ Item {
                 asynchronous: true
                 fillMode: AnimatedImage.PreserveAspectFit
             }
+        }
+    }
+
+    StyledRect {
+        id: lyricMenu
+
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: details.right
+        anchors.right: parent.right
+        anchors.leftMargin: Appearance.spacing.normal 
+
+        Layout.fillWidth: true
+        height: details.height
+        width: 200
+
+        radius: Appearance.rounding.large
+        color: Colours.tPalette.m3surfaceContainer
+
+        visible: visibilities.lyricMenu //root.lyricMenuOpen 
+        
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.large
+            spacing: Appearance.spacing.normal
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.padding.small 
+
+                MaterialIcon {
+                    text: "lyrics"
+                    fill: 1
+                    color: Colours.palette.m3primary
+                    font.pointSize: Appearance.spacing.large
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    text: LyricsService.backend
+                    font.pointSize: Appearance.font.size.normal
+                    color: Colours.palette.m3secondary
+                    elide: Text.ElideRight
+                }
+
+                IconButton {
+                    icon: "refresh"
+                    type: IconButton.Text
+                    onClicked: LyricsService.loadLyrics()
+                }
+
+                StyledSwitch {
+                    checked: LyricsService.lyricsVisible
+                    onToggled: LyricsService.lyricsVisible = !LyricsService.lyricsVisible
+                }
+            }
+
+            StyledText {
+                Layout.fillWidth: true
+                text: "Fetched Candidates:"
+                color: Colours.palette.m3outline
+                font.pointSize: Appearance.font.size.small
+                elide: Text.ElideRight
+            }
+            
+            ListView {
+                id: candidatesView
+
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+
+                visible: LyricsService.candidatesModel.count > 0
+                model: LyricsService.candidatesModel
+                clip: true
+                spacing: Appearance.spacing.small
+
+                opacity: visible ? 1 : 0
+                Behavior on opacity {
+                    NumberAnimation { duration: Appearance.anim.durations.normal }
+                }
+
+                delegate: Item {
+                    id: delegateRoot
+                    width: candidatesView.width
+                    height: 70
+
+                    property bool hovered: false
+                    property bool pressed: false
+
+                    scale: hovered ? 1.02 : 1.0
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Appearance.anim.durations.small
+                            easing.type: Easing.OutCubic
+                        }
+                    }
+
+                    Rectangle {
+                        id: background
+                        anchors.fill: parent
+                        radius: 16
+
+                        color: pressed
+                        ? Qt.rgba(Colours.palette.m3primary.r,
+                                  Colours.palette.m3primary.g,
+                                  Colours.palette.m3primary.b, 0.25)
+                        : hovered
+                        ? Qt.rgba(1,1,1,0.06)
+                        : Qt.rgba(1,1,1,0.03)
+
+                        border.width: hovered ? 1 : 0
+                        border.color: Colours.palette.m3primary
+
+                        Behavior on color { ColorAnimation { duration: 120 } }
+                        Behavior on border.width { NumberAnimation { duration: 120 } }
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+
+                        onEntered: delegateRoot.hovered = true
+                        onExited: delegateRoot.hovered = false
+
+                        onPressed: delegateRoot.pressed = true
+                        onReleased: delegateRoot.pressed = false
+
+                        onClicked: {
+                            LyricsService.selectCandidate(model.id)
+                        }
+                    }
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.margins: 14
+                        spacing: 14
+
+                        // Accent indicator bar
+                        Rectangle {
+                            width: 4
+                            height: parent.height * 0.6
+                            radius: 2
+                            anchors.verticalCenter: parent.verticalCenter
+                            color: hovered ? Colours.palette.m3primary : "transparent"
+
+                            Behavior on color {
+                                ColorAnimation { duration: 150 }
+                            }
+                        }
+
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - 30
+                            spacing: 4
+
+                            Text {
+                                text: model.title
+                                font.pointSize: Appearance.font.size.normal
+                                font.bold: true
+                                color: hovered
+                                ? Colours.palette.m3primary
+                                : Colours.palette.m3onSurface
+                                Layout.fillWidth:true
+                                elide: Text.ElideRight
+                                wrapMode: Text.NoWrap
+
+                                Behavior on color {
+                                    ColorAnimation { duration: 150 }
+                                }
+                            }
+
+                            Text {
+                                text: model.artist
+                                font.pointSize: Appearance.font.size.small
+                                color: Colours.palette.m3onSurfaceVariant
+                                elide: Text.ElideRight
+                            }
+                        }
+                    }
+                }
+            }
+
+            Item {
+                Layout.fillHeight: true
+                visible: LyricsService.candidatesModel.count == 0
+            } 
+            
+            ColumnLayout{
+                Layout.fillWidth: true
+                spacing: Appearance.padding.small
+                StyledText {
+                    Layout.fillWidth: true
+                    text: "Manual Search"
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                    elide: Text.ElideRight
+                }
+                RowLayout {
+                    Layout.fillWidth:true
+                    spacing: Appearance.padding.small
+                    StyledInputField {
+                        id: searchTitle
+                        Layout.fillWidth: true
+                        text: "title"
+                        horizontalAlignment: TextInput.AlignLeft
+                    }
+                    StyledInputField {
+                        id: searchArtist
+                        Layout.fillWidth: true
+                        text: "artist"
+                        horizontalAlignment: TextInput.AlignLeft
+                    }
+                    IconButton {
+                        icon: "search"
+                        onClicked: {
+                            LyricsService.currentRequestId += 1
+                            LyricsService.fetchNetEaseCandidates(searchTitle.text, searchArtist.text, LyricsService.currentRequestId)
+                        }
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing:Appearance.padding.small
+
+                MaterialIcon {
+                    text: "contrast_square"
+                    font.pointSize: Appearance.font.size.large
+                    color: Colours.palette.m3secondary
+                }
+
+                StyledText {
+                    text: "Offset"
+                    color: Colours.palette.m3outline
+                    font.pointSize: Appearance.font.size.normal
+                }
+
+                Item {
+                    Layout.fillWidth:true
+                }
+                
+                IconButton {
+                    icon: "remove"
+                    type: IconButton.Text
+                    onClicked: {
+                        LyricsService.offset -= 0.1;
+                        LyricsService.savePrefs();
+                    }
+                }
+
+                StyledText {
+                    text: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
+                    font.pointSize: Appearance.font.size.normal
+                    color: Colours.palette.m3secondary
+                }
+                
+                IconButton {
+                    icon: "add"
+                    type: IconButton.Text
+                    onClicked: {
+                        LyricsService.offset += 0.1;
+                        LyricsService.savePrefs();
+                    }
+                }
+
+            }
+
         }
     }
 
