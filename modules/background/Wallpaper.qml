@@ -132,12 +132,26 @@ Item {
             transitionProgress = 0;
         } else if (source === one.path) {
             debounceTimer.stop();
+            initialDelayTimer.stop();
             pendingWallpaper = "";
         } else {
             pendingWallpaper = source;
             if (transitioning || debounceTimer.running) {
                 debounceTimer.restart();
+            } else if (initialDelayTimer.running) {
+                initialDelayTimer.restart();
             } else {
+                initialDelayTimer.start();
+            }
+        }
+    }
+
+    Timer {
+        id: initialDelayTimer
+        interval: 300
+        repeat: false
+        onTriggered: {
+            if (pendingWallpaper && pendingWallpaper !== one.path && pendingWallpaper === source) {
                 changeWallpaper();
             }
         }
@@ -213,7 +227,6 @@ Item {
                     }
                 }
             }
-            // Then start the regular timer for subsequent checks
             timeBasedTimer.running = true;
         }
     }
@@ -235,7 +248,6 @@ Item {
                 }
                 
                 if (tbw) {
-                    // Check if we should apply a scheduled wallpaper immediately on startup
                     const scheduledWallpaper = getScheduledWallpaper();
                     if (scheduledWallpaper) {
                         let expandedPath = scheduledWallpaper;
