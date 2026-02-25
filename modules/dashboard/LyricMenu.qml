@@ -213,15 +213,25 @@ StyledRect {
                 StyledInputField {
                     id: searchTitle
                     Layout.fillWidth: true
-                    text: (Players.active?.trackTitle ?? qsTr("title")) || qsTr("title")
                     horizontalAlignment: TextInput.AlignLeft
+
+                    Binding {
+                        target: searchTitle
+                        property: "text"
+                        value: (Players.active?.trackTitle ?? qsTr("title")) || qsTr("title")
+                    }
                 }
 
                 StyledInputField {
                     id: searchArtist
                     Layout.fillWidth: true
-                    text: (Players.active?.trackArtist ?? qsTr("artist")) || qsTr("artist")
                     horizontalAlignment: TextInput.AlignLeft
+
+                    Binding {
+                        target: searchArtist
+                        property: "text"
+                        value: (Players.active?.trackArtist ?? qsTr("artist")) || qsTr("artist")
+                    }
                 }
 
                 IconButton {

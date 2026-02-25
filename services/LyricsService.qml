@@ -177,6 +177,7 @@ Singleton {
 
         lrcFile.path = "";
         lrcFile.path = fullPath;
+        fetchNetEaseCandidates(meta.title, meta.artist, requestId); //to populate the list regardless
 
         // if the file is missing, FileView will not fire onLoaded, so we arm the fallback timer here as a safety net. It is cancelled in onLoaded if the file loads successfully.
         if (saved?.backend !== "Local") fallbackTimer.restart();
