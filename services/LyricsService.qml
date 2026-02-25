@@ -130,7 +130,7 @@ Singleton {
             backend: root.backend,
             neteaseId: existing.neteaseId ?? null
         };
-        // Reassign to notify QML bindings of the map change
+        // reassign to notify QML bindings of the map change
         root.lyricsMap = root.lyricsMap;
         saveLyricsMap.command = ["sh", "-c", `echo '${JSON.stringify(root.lyricsMap).replace(/'/g, "'\\''")}' > "${root.lyricsMapFile}"`];
         saveLyricsMap.running = true;
@@ -177,16 +177,14 @@ Singleton {
         lrcFile.path = "";
         lrcFile.path = fullPath;
 
-        // If the file is missing, FileView will not fire onLoaded, so we arm
-        // the fallback timer here as a safety net. It is cancelled in onLoaded
-        // if the file loads successfully.
+        // if the file is missing, FileView will not fire onLoaded, so we arm the fallback timer here as a safety net. It is cancelled in onLoaded if the file loads successfully.
         if (saved?.backend !== "Local") fallbackTimer.restart();
     }
 
     function updateModel(parsedArray) {
         lyricsModel.clear();
         for (let line of parsedArray) {
-            lyricsModel.append({ time: line.time, text: line.text });
+            lyricsModel.append({ time: line.time, lyricLine: line.text });
         }
     }
 
@@ -198,14 +196,13 @@ Singleton {
 
     // NetEase
 
-    // Shared headers for all NetEase requests
+    // shared headers for all NetEase requests
     readonly property var _netEaseHeaders: ({
         "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
                                             "Referer": "https://music.163.com/"
     })
 
-    // Searches NetEase and populates the candidates model
-    // Returns the result array via the onResults callback
+    // searches NetEase and populates the candidates model. returns the result array via the onResults callback
     function _searchNetEase(title, artist, reqId, onResults) {
         Requests.resetCookies();
         const query = encodeURIComponent(`${title} ${artist}`);
@@ -231,12 +228,12 @@ Singleton {
         }, root._netEaseHeaders);
     }
 
-    // Populates the candidates model only. Used when a saved NetEase ID already exists and we just want to refresh the picker list.
+    // populates the candidates model only. used when a saved NetEase ID already exists and we just want to refresh the picker list.
     function fetchNetEaseCandidates(title, artist, reqId) {
         _searchNetEase(title, artist, reqId, _songs => {});
     }
 
-    // Searches NetEase, populates candidates, then auto-selects the best match and fetches its lyrics.
+    // searches NetEase, populates candidates, then auto-selects the best match and fetches its lyrics.
     function fetchNetEase(title, artist, reqId) {
         _searchNetEase(title, artist, reqId, songs => {
             const bestMatch = songs.find(s => {

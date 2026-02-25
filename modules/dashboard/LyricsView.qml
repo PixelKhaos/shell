@@ -1,4 +1,4 @@
-//pragma ComponentBehavior: Bound
+pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.services
@@ -37,9 +37,13 @@ ListView {
 
     delegate: Item {
         id: delegateRoot
-        width: root.width
+        width: ListView.view.width
 
-        readonly property bool hasContent: model.text && model.text.trim().length > 0
+        required property string lyricLine
+        required property real time
+        required property int index
+
+        readonly property bool hasContent: lyricLine && lyricLine.trim().length > 0
         height: hasContent ? (lyricText.contentHeight + Appearance.spacing.large) : 0
 
         property bool isCurrent: ListView.isCurrentItem
@@ -68,16 +72,12 @@ ListView {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                if (model.time !== undefined) {
-                    LyricsService.jumpTo(index, model.time);
-                }
-            }
+            onClicked: LyricsService.jumpTo(index, time)
         }
 
         Text {
             id: lyricText
-            text: model.text ? model.text.replace(/\u00A0/g, " ") : ""
+            text: lyricLine ? lyricLine.replace(/\u00A0/g, " ") : ""
             width: parent.width * 0.85
             anchors.centerIn: parent
             horizontalAlignment: Text.AlignHCenter

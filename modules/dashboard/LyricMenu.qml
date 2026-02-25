@@ -1,4 +1,4 @@
-//pragma ComponentBehavior: Bound
+pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.components.controls
@@ -88,9 +88,13 @@ StyledRect {
 
             delegate: Item {
                 id: delegateRoot
-                width: candidatesView.width * 0.98
+                width: ListView.view.width * 0.98
                 height: 70
                 anchors.horizontalCenter: parent.horizontalCenter
+
+                required property int id
+                required property string title
+                required property string artist
 
                 property bool hovered: false
                 property bool pressed: false
@@ -136,7 +140,7 @@ StyledRect {
                     onExited: delegateRoot.hovered = false
                     onPressed: delegateRoot.pressed = true
                     onReleased: delegateRoot.pressed = false
-                    onClicked: LyricsService.selectCandidate(model.id)
+                    onClicked: LyricsService.selectCandidate(id)
                 }
 
                 Row {
@@ -150,7 +154,7 @@ StyledRect {
                         height: parent.height * 0.6
                         radius: 2
                         anchors.verticalCenter: parent.verticalCenter
-                        color: LyricsService.currentSongId === model.id
+                        color: LyricsService.currentSongId === id
                             ? Colours.palette.m3primary
                             : "transparent"
                         Behavior on color { ColorAnimation { duration: Appearance.anim.durations.small } }
@@ -162,7 +166,7 @@ StyledRect {
                         spacing: 4
 
                         Text {
-                            text: model.title
+                            text: title
                             font.pointSize: Appearance.font.size.normal
                             font.bold: true
                             color: delegateRoot.hovered
@@ -174,7 +178,7 @@ StyledRect {
                         }
 
                         Text {
-                            text: model.artist
+                            text: artist
                             font.pointSize: Appearance.font.size.small
                             color: Colours.palette.m3onSurfaceVariant
                             elide: Text.ElideRight
