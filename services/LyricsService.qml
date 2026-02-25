@@ -42,12 +42,13 @@ Singleton {
         onTriggered: root.isManualSeeking = false
     }
 
+    // If no local lyrics were loaded within the interval, fall back to NetEase
     Timer {
         id: fallbackTimer
         interval: 200
         onTriggered: {
             if (lyricsModel.count === 0) {
-                root.backend = "NetEase"
+                root.backend = "NetEase";
                 fallbackToOnline();
             }
         }
@@ -65,7 +66,7 @@ Singleton {
         onLoaded: {
             try {
                 root.lyricsMap = JSON.parse(text());
-            } catch(e) {
+            } catch (e) {
                 root.lyricsMap = {};
             }
         }
@@ -80,7 +81,7 @@ Singleton {
                 updateModel(parsed);
                 loading = false;
             } else {
-                root.backend = "NetEase"
+                root.backend = "NetEase";
                 fallbackToOnline();
             }
         }
@@ -107,73 +108,79 @@ Singleton {
         command: ["sh", "-c", `echo '${JSON.stringify(root.lyricsMap)}' > "${root.lyricsMapFile}"`]
     }
 
+    function getMetadata() {
+        if (!player || !player.metadata) return null;
+        let artist = player.metadata["xesam:artist"];
+        const title = player.metadata["xesam:title"];
+        if (Array.isArray(artist)) artist = artist.join(", ");
+        return { artist: artist || "Unknown", title: title || "Unknown" };
+    }
+
+    function _metaKey(meta) {
+        return `${meta.artist} - ${meta.title}`;
+    }
+
     function savePrefs() {
         let meta = getMetadata();
         if (!meta) return;
-        let key = `${meta.artist} - ${meta.title}`;
+        let key = _metaKey(meta);
         let existing = root.lyricsMap[key] ?? {};
         root.lyricsMap[key] = {
             offset: root.offset,
             backend: root.backend,
             neteaseId: existing.neteaseId ?? null
         };
+        // Reassign to notify QML bindings of the map change
         root.lyricsMap = root.lyricsMap;
         saveLyricsMap.command = ["sh", "-c", `echo '${JSON.stringify(root.lyricsMap).replace(/'/g, "'\\''")}' > "${root.lyricsMapFile}"`];
         saveLyricsMap.running = true;
     }
 
-    function getMetadata() {
-        if (!player || !player.metadata) return null;
-        let artist = player.metadata["xesam:artist"];
-        let title = player.metadata["xesam:title"];
-        if (Array.isArray(artist)) artist = artist.join(", ");
-        return { artist: artist || "Unknown", title: title || "Unknown" };
-    }
-    
+
     function loadLyrics() {
-        loadDebounce.restart()
+        loadDebounce.restart();
     }
 
     function _doLoadLyrics() {
-        let meta = getMetadata();
+        const meta = getMetadata();
         if (!meta) return;
 
         loading = true;
         lyricsModel.clear();
         currentIndex = -1;
-        root.currentSongId = 0
-        root.backend = "Local"
+        root.currentSongId = 0;
+        root.backend = "Local";
 
         root.currentRequestId++;
         let requestId = root.currentRequestId;
 
-        let key = `${meta.artist} - ${meta.title}`;
+        let key = _metaKey(meta);
         let saved = root.lyricsMap[key];
         root.offset = saved?.offset ?? 0.0;
 
-        if (saved?.neteaseId && saved?.backend == "NetEase") {
+        if (saved?.neteaseId && saved?.backend === "NetEase") {
             root.backend = "NetEase";
-            root.currentSongId = saved.neteaseId
-            fetchNetEaseLyrics(saved.neteaseId, meta.title, meta.artist, requestId);
-            fetchNetEaseCandidates(meta.title, meta.artist, requestId)
+            root.currentSongId = saved.neteaseId;
+            fetchNetEaseLyrics(saved.neteaseId, requestId);
+            fetchNetEaseCandidates(meta.title, meta.artist, requestId);
             return;
         }
-        
-        if (saved?.backend == "NetEase") {
+
+        if (saved?.backend === "NetEase") {
             fallbackTimer.restart();
             return;
-        } 
+        }
 
-        let filename = `${meta.artist} - ${meta.title}.lrc`;
         let cleanDir = lyricsDir.replace(/\/$/, "");
-        let fullPath = cleanDir + "/" + filename;
+        let fullPath = `${cleanDir}/${meta.artist} - ${meta.title}.lrc`;
 
         lrcFile.path = "";
         lrcFile.path = fullPath;
-        
-        if (saved?.backend == "Local") return
-        // Fallback safety: If FileView doesn't trigger onLoaded (file missing),
-        fallbackTimer.restart();
+
+        // If the file is missing, FileView will not fire onLoaded, so we arm
+        // the fallback timer here as a safety net. It is cancelled in onLoaded
+        // if the file loads successfully.
+        if (saved?.backend !== "Local") fallbackTimer.restart();
     }
 
     function updateModel(parsedArray) {
@@ -189,16 +196,26 @@ Singleton {
         fetchNetEase(meta.title, meta.artist, root.currentRequestId);
     }
 
-    function fetchNetEaseCandidates(title, artist, reqId) {
+    // NetEase
+
+    // Shared headers for all NetEase requests
+    readonly property var _netEaseHeaders: ({
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
+                                            "Referer": "https://music.163.com/"
+    })
+
+    // Searches NetEase and populates the candidates model
+    // Returns the result array via the onResults callback
+    function _searchNetEase(title, artist, reqId, onResults) {
         Requests.resetCookies();
-        const query = encodeURIComponent(title + " " + artist);
+        const query = encodeURIComponent(`${title} ${artist}`);
         const url = `https://music.163.com/api/search/get?s=${query}&type=1&limit=5`;
+
         Requests.get(url, text => {
             if (reqId !== root.currentRequestId) return;
             const res = JSON.parse(text);
             const songs = res.result?.songs || [];
-            
-            // Populate candidates model
+
             fetchedCandidatesModel.clear();
             for (let s of songs) {
                 fetchedCandidatesModel.append({
@@ -207,59 +224,45 @@ Singleton {
                     artist: s.artists?.map(a => a.name).join(", ") || "Unknown Artist"
                 });
             }
-        },
-        err => {},
-        {
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
-            "Referer": "https://music.163.com/"
-        });
 
+            onResults(songs);
+        }, err => {
+            console.log("NetEase search error:", err);
+        }, root._netEaseHeaders);
     }
 
-    function fetchNetEase(title, artist, reqId) {
-        Requests.resetCookies();
-        const query = encodeURIComponent(title + " " + artist);
-        const url = `https://music.163.com/api/search/get?s=${query}&type=1&limit=5`;
-        Requests.get(url, text => {
-            if (reqId !== root.currentRequestId) return;
-            const res = JSON.parse(text);
-            const songs = res.result?.songs || [];
-            
-            // Populate candidates model
-            fetchedCandidatesModel.clear();
-            for (let s of songs) {
-                fetchedCandidatesModel.append({
-                    id: s.id,
-                    title: s.name || "Unknown Title",
-                    artist: s.artists?.map(a => a.name).join(", ") || "Unknown Artist"
-                });
-            }
+    // Populates the candidates model only. Used when a saved NetEase ID already exists and we just want to refresh the picker list.
+    function fetchNetEaseCandidates(title, artist, reqId) {
+        _searchNetEase(title, artist, reqId, _songs => {});
+    }
 
+    // Searches NetEase, populates candidates, then auto-selects the best match and fetches its lyrics.
+    function fetchNetEase(title, artist, reqId) {
+        _searchNetEase(title, artist, reqId, songs => {
             const bestMatch = songs.find(s => {
                 const inputArtist = String(artist || "").toLowerCase();
                 const sArtist = String(s.artists?.[0]?.name || "").toLowerCase();
                 return inputArtist.includes(sArtist) || sArtist.includes(inputArtist);
             });
 
-            if (bestMatch) {
-                let key = `${artist} - ${title}`;
-                let existing = root.lyricsMap[key] ?? {};
-                root.lyricsMap[key] = { offset: (root.lyricsMap[key]?.offset ?? 0.0), neteaseId: bestMatch.id };
-                savePrefs();
-                root.currentSongId = bestMatch.id;
-                fetchNetEaseLyrics(bestMatch.id, title, artist, reqId);
-            } else {
+            if (!bestMatch) {
                 console.log("NetEase: No reliable match found");
+                return;
             }
-        }, err => {
-            console.log("netease error:", err);
-        }, {
-            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
-            "Referer": "https://music.163.com/"
+
+            let key = `${artist} - ${title}`;
+            root.lyricsMap[key] = {
+                offset: root.lyricsMap[key]?.offset ?? 0.0,
+                backend: "NetEase",
+                neteaseId: bestMatch.id
+            };
+            root.currentSongId = bestMatch.id;
+            savePrefs();
+            fetchNetEaseLyrics(bestMatch.id, reqId);
         });
     }
 
-    function fetchNetEaseLyrics(id, title, artist, reqId) {
+    function fetchNetEaseLyrics(id, reqId) {
         const url = `https://music.163.com/api/song/lyric?id=${id}&lv=1&kv=1&tv=-1`;
         Requests.get(url, text => {
             if (reqId !== root.currentRequestId) return;
@@ -268,7 +271,7 @@ Singleton {
                 updateModel(Lrc.parseLrc(res.lrc.lyric));
                 loading = false;
             } else {
-                console.log("No lyrics!")
+                console.log("NetEase: No lyrics returned for id", id);
             }
         });
     }
@@ -276,13 +279,15 @@ Singleton {
     function selectCandidate(songId) {
         let meta = getMetadata();
         if (!meta) return;
-        let key = `${meta.artist} - ${meta.title}`;
-        let existing = root.lyricsMap[key] ?? {};
-        root.lyricsMap[key] = { offset: (root.lyricsMap[key]?.offset ?? 0.0), neteaseId: songId };
-        root.backend = "NetEase"
-        root.currentSongId = songId
+        root.backend = "NetEase";
+        root.currentSongId = songId;
+        let key = _metaKey(meta);
+        root.lyricsMap[key] = {
+            offset: root.lyricsMap[key]?.offset ?? 0.0,
+            neteaseId: songId
+        };
         savePrefs();
-        fetchNetEaseLyrics(songId, meta.title, meta.artist, currentRequestId);
+        fetchNetEaseLyrics(songId, currentRequestId);
     }
 
     function updatePosition() {
@@ -307,7 +312,7 @@ Singleton {
         root.currentIndex = index;
 
         if (player) {
-            player.position = time + root.offset + 0.01; // for the rounding
+            player.position = time + root.offset + 0.01; // compensate for rounding
         }
 
         seekTimer.restart();

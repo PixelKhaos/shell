@@ -19,6 +19,11 @@ StyledRect {
     radius: Appearance.rounding.large
     color: Colours.tPalette.m3surfaceContainer
 
+    function searchCandidates(title, artist) {
+        LyricsService.currentRequestId++;
+        LyricsService.fetchNetEaseCandidates(title, artist, LyricsService.currentRequestId);
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Appearance.padding.large
@@ -145,7 +150,7 @@ StyledRect {
                         height: parent.height * 0.6
                         radius: 2
                         anchors.verticalCenter: parent.verticalCenter
-                        color: LyricsService.currentSongId == model.id
+                        color: LyricsService.currentSongId === model.id
                             ? Colours.palette.m3primary
                             : "transparent"
                         Behavior on color { ColorAnimation { duration: Appearance.anim.durations.small } }
@@ -217,10 +222,7 @@ StyledRect {
 
                 IconButton {
                     icon: "search"
-                    onClicked: {
-                        LyricsService.currentRequestId += 1
-                        LyricsService.fetchNetEaseCandidates(searchTitle.text, searchArtist.text, LyricsService.currentRequestId)
-                    }
+                    onClicked: searchCandidates(searchTitle.text, searchArtist.text)
                 }
             }
         }
@@ -248,7 +250,7 @@ StyledRect {
                 icon: "remove"
                 type: IconButton.Text
                 onClicked: {
-                    LyricsService.offset -= 0.1;
+                    LyricsService.offset = parseFloat((LyricsService.offset - 0.1).toFixed(1));
                     LyricsService.savePrefs();
                 }
             }
@@ -259,7 +261,7 @@ StyledRect {
                 color: Colours.palette.m3secondary
                 font.pointSize: Appearance.font.size.normal
                 selectByMouse: true
-                text: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
+                //text: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
 
                 Binding {
                     target: offsetInput
@@ -284,7 +286,7 @@ StyledRect {
                 icon: "add"
                 type: IconButton.Text
                 onClicked: {
-                    LyricsService.offset += 0.1;
+                    LyricsService.offset = parseFloat((LyricsService.offset + 0.1).toFixed(1));
                     LyricsService.savePrefs();
                 }
             }

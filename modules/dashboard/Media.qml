@@ -42,7 +42,7 @@ Item {
     implicitWidth: cover.implicitWidth + Config.dashboard.sizes.mediaVisualiserSize * 2 + details.implicitWidth + details.anchors.leftMargin + bongocat.implicitWidth + bongocat.anchors.leftMargin * 2 + Appearance.padding.large * 2
     implicitHeight: Math.max(
         cover.implicitHeight + Config.dashboard.sizes.mediaVisualiserSize * 2,
-        visibilities.lyricMenu ? lyricMenu.implicitHeight : details.implicitHeight,
+        lyricMenuOpen ? lyricMenu.implicitHeight : details.implicitHeight,
         bongocat.implicitHeight
     ) + Appearance.padding.large * 2
 
@@ -306,7 +306,7 @@ Item {
                         return;
 
                     event.accepted = true;
-                    const delta = event.angleDelta.y > 0 ? 10 : -10; // Time 10 seconds
+                    const delta = event.angleDelta.y > 0 ? 10 : -10;    // Time 10 seconds
                     Qt.callLater(() => {
                         active.position = Math.max(0, Math.min(active.length, active.position + delta));
                     });
