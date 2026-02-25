@@ -20,6 +20,17 @@ Item {
     required property PersistentProperties visibilities
 
     property bool lyricMenuOpen: false
+    property bool lyricsShowing: LyricsService.lyricsVisible && LyricsService.model.count != 0
+    property bool lyricsShowingDebounced: false
+
+    onLyricsShowingChanged: {
+        if (lyricsShowing) {
+            lyricsHideDelay.stop()
+            lyricsShowingDebounced = true
+        } else {
+            lyricsHideDelay.restart()
+        }
+    }
 
     property real playerProgress: {
         const active = Players.active;
@@ -63,6 +74,20 @@ Item {
             Players.active?.positionChanged();
         }
     }
+
+    Timer {
+        id: lyricsHideDelay
+        interval: 300
+        repeat: false
+    }
+
+    Connections {
+        target: lyricsHideDelay
+        function onTriggered() {
+            root.lyricsShowingDebounced = false
+        }
+    }
+
 
     ServiceRef {
         service: Audio.cava
@@ -386,7 +411,7 @@ Item {
         anchors.right: parent.right
         anchors.leftMargin: Appearance.spacing.normal
 
-        contentHeight: LyricsService.model.count == 0 || !LyricsService.lyricsVisible
+        contentHeight: !root.lyricsShowingDebounced
         ? details.height + Appearance.padding.large * 5
         : details.height
 
@@ -402,7 +427,7 @@ Item {
     }
 
     RowLayout {
-        parent: LyricsService.model.count == 0 || !LyricsService.lyricsVisible ? details : leftSection
+        parent: !root.lyricsShowingDebounced ? details : leftSection
         id: playerChanger
         Layout.alignment: Qt.AlignHCenter
         spacing: Appearance.spacing.small

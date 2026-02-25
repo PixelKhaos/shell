@@ -275,13 +275,20 @@ StyledRect {
                 color: Colours.palette.m3secondary
                 font.pointSize: Appearance.font.size.normal
                 selectByMouse: true
-                //text: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
+                text: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
 
                 Binding {
                     target: offsetInput
                     property: "text"
                     value: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
                     when: !offsetInput.activeFocus
+                }
+
+                Connections {
+                    target: LyricsService
+                    function onCurrentRequestIdChanged() {
+                        offsetInput.focus = false;
+                    }
                 }
 
                 onEditingFinished: {

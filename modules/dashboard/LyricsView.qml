@@ -14,7 +14,19 @@ ListView {
     model: LyricsService.model
     currentIndex: LyricsService.currentIndex
 
-    visible: LyricsService.lyricsVisible && LyricsService.model.count != 0
+    property bool lyricsActuallyVisible: LyricsService.lyricsVisible && LyricsService.model.count != 0
+    visible: lyricsActuallyVisible || hideTimer.running
+
+    onLyricsActuallyVisibleChanged: {
+        if (!lyricsActuallyVisible) hideTimer.restart()
+    }
+
+    Timer {
+        id: hideTimer
+        interval: 300  // long enough to bridge the track switch gap
+        running: false
+        repeat: false
+    }
 
     preferredHighlightBegin: height / 2 - 30
     preferredHighlightEnd: height / 2 + 30
