@@ -344,10 +344,18 @@ Item {
         id: leftSection
 
         anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: playerChanger.parent == leftSection ? -playerChanger.height : 0
         anchors.left: details.right
         anchors.leftMargin: Appearance.spacing.normal
 
-        visible: !root.lyricMenuOpen
+        visible: lyricMenu.height === 0 || opacity > 0
+        opacity: lyricMenu.height === 0 ? 1 : 0
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.OutCubic
+            }
+        }
 
         Item {
             id: bongocat
@@ -373,7 +381,7 @@ Item {
     LyricMenu {
         id: lyricMenu
 
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.left: details.right
         anchors.right: parent.right
         anchors.leftMargin: Appearance.spacing.normal
@@ -382,7 +390,15 @@ Item {
         ? details.height + Appearance.padding.large * 5
         : details.height
 
-        visible: root.lyricMenuOpen
+        visible: root.lyricMenuOpen || height > 0
+        height: root.lyricMenuOpen ? implicitHeight : 0
+        clip: true
+        Behavior on height {
+            NumberAnimation {
+                duration: Appearance.anim.durations.normal
+                easing.type: Easing.OutCubic
+            }
+        }
     }
 
     RowLayout {

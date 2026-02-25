@@ -82,9 +82,9 @@ StyledRect {
             spacing: Appearance.spacing.small
 
             opacity: visible ? 1 : 0
-            Behavior on opacity {
-                NumberAnimation { duration: Appearance.anim.durations.normal }
-            }
+            // Behavior on opacity {
+            //     NumberAnimation { duration: Appearance.anim.durations.normal }
+            // }
 
             delegate: Item {
                 id: delegateRoot
