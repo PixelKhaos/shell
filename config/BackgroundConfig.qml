@@ -47,5 +47,7 @@ JsonObject {
 
     component WallpaperVideo: JsonObject {
         property bool autoPause: false
+        property bool useExternalDecoder: true
+        property int decoderFps: 30
     }
 }
