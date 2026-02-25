@@ -92,7 +92,7 @@ StyledRect {
                 height: 70
                 anchors.horizontalCenter: parent.horizontalCenter
 
-                required property int id
+                required property real id
                 required property string title
                 required property string artist
 

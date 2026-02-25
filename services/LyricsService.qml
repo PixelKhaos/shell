@@ -18,7 +18,7 @@ Singleton {
     property bool isManualSeeking: false
     property bool lyricsVisible: true
     property string backend: "Local"
-    property var currentSongId: 0
+    property real currentSongId: 0
 
     property real offset
 
@@ -78,6 +78,7 @@ Singleton {
             fallbackTimer.stop();
             let parsed = Lrc.parseLrc(text());
             if (parsed.length > 0) {
+                root.backend = "Local"
                 updateModel(parsed);
                 loading = false;
             } else {
