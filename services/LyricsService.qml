@@ -112,7 +112,6 @@ Singleton {
         if (!meta) return;
         let key = `${meta.artist} - ${meta.title}`;
         let existing = root.lyricsMap[key] ?? {};
-        console.log(root.offset)
         root.lyricsMap[key] = {
             offset: root.offset,
             backend: root.backend,

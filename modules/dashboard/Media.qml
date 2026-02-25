@@ -462,7 +462,7 @@ Item {
         anchors.leftMargin: Appearance.spacing.normal 
 
         Layout.fillWidth: true
-        implicitHeight: LyricsService.model.count == 0 ? details.height + Appearance.padding.large * 5 : details.height
+        implicitHeight: LyricsService.model.count == 0 || !LyricsService.lyricsVisible ? details.height + Appearance.padding.large * 5 : details.height
         width: 200
 
         radius: Appearance.rounding.large
@@ -702,10 +702,31 @@ Item {
                     }
                 }
 
-                StyledText {
-                    text: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
-                    font.pointSize: Appearance.font.size.normal
+                TextInput {
+                    id: offsetInput
+                    horizontalAlignment: TextInput.AlignHCenter
                     color: Colours.palette.m3secondary
+                    font.pointSize: Appearance.font.size.normal
+                    selectByMouse: true
+                    text: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
+
+                    Binding {
+                        target: offsetInput
+                        property: "text"
+                        value: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
+                        when: !offsetInput.activeFocus
+                    }
+
+                    onEditingFinished: {
+                        let cleaned = offsetInput.text.replace(/[+s]/g, "").trim();
+                        let val = parseFloat(cleaned);
+                        if (!isNaN(val)) {
+                            LyricsService.offset = parseFloat(val.toFixed(1));
+                            LyricsService.savePrefs();
+                        } else {
+                            offsetInput.text = (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s";
+                        }
+                    }
                 }
                 
                 IconButton {
