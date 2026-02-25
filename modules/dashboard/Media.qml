@@ -532,8 +532,9 @@ Item {
 
                 delegate: Item {
                     id: delegateRoot
-                    width: candidatesView.width
+                    width: candidatesView.width*0.98
                     height: 70
+                    anchors.horizontalCenter: parent.horizontalCenter
 
                     property bool hovered: false
                     property bool pressed: false
@@ -586,6 +587,7 @@ Item {
                         anchors.fill: parent
                         anchors.margins: 14
                         spacing: 14
+                        Layout.fillWidth: true
 
                         // Accent indicator bar
                         Rectangle {
@@ -593,7 +595,7 @@ Item {
                             height: parent.height * 0.6
                             radius: 2
                             anchors.verticalCenter: parent.verticalCenter
-                            color: hovered ? Colours.palette.m3primary : "transparent"
+                            color: LyricsService.currentSongId == model.id ? Colours.palette.m3primary : "transparent"
 
                             Behavior on color {
                                 ColorAnimation { duration: 150 }
@@ -612,9 +614,8 @@ Item {
                                 color: hovered
                                 ? Colours.palette.m3primary
                                 : Colours.palette.m3onSurface
-                                Layout.fillWidth:true
+                                width: parent.width
                                 elide: Text.ElideRight
-                                wrapMode: Text.NoWrap
 
                                 Behavior on color {
                                     ColorAnimation { duration: 150 }

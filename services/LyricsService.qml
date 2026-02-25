@@ -18,6 +18,7 @@ Singleton {
     property bool isManualSeeking: false
     property bool lyricsVisible: true
     property string backend: "Local"
+    property var currentSongId: 0
 
     property real offset
 
@@ -141,6 +142,7 @@ Singleton {
         loading = true;
         lyricsModel.clear();
         currentIndex = -1;
+        root.currentSongId = 0
         root.backend = "Local"
 
         root.currentRequestId++;
@@ -152,6 +154,7 @@ Singleton {
 
         if (saved?.neteaseId && saved?.backend == "NetEase") {
             root.backend = "NetEase";
+            root.currentSongId = saved.neteaseId
             fetchNetEaseLyrics(saved.neteaseId, meta.title, meta.artist, requestId);
             fetchNetEaseCandidates(meta.title, meta.artist, requestId)
             return;
@@ -242,9 +245,9 @@ Singleton {
             if (bestMatch) {
                 let key = `${artist} - ${title}`;
                 let existing = root.lyricsMap[key] ?? {};
-                console.log(root.lyricsMap[key]?.offset)
                 root.lyricsMap[key] = { offset: (root.lyricsMap[key]?.offset ?? 0.0), neteaseId: bestMatch.id };
                 savePrefs();
+                root.currentSongId = bestMatch.id;
                 fetchNetEaseLyrics(bestMatch.id, title, artist, reqId);
             } else {
                 console.log("NetEase: No reliable match found");
@@ -278,6 +281,7 @@ Singleton {
         let existing = root.lyricsMap[key] ?? {};
         root.lyricsMap[key] = { offset: (root.lyricsMap[key]?.offset ?? 0.0), neteaseId: songId };
         root.backend = "NetEase"
+        root.currentSongId = songId
         savePrefs();
         fetchNetEaseLyrics(songId, meta.title, meta.artist, currentRequestId);
     }
