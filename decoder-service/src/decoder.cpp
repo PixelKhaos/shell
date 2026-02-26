@@ -97,8 +97,8 @@ void VideoDecoder::decodeLoop() {
         throw std::runtime_error("Failed to open video file: " + video_path_);
     }
     
-    format_ctx_->probesize = 5000000;
-    format_ctx_->max_analyze_duration = 1000000;
+    format_ctx_->probesize = 2500000;
+    format_ctx_->max_analyze_duration = 500000;
     
     if (avformat_find_stream_info(format_ctx_, nullptr) < 0) {
         throw std::runtime_error("Failed to find stream info");
@@ -206,7 +206,7 @@ void VideoDecoder::decodeLoop() {
                 sws_ctx_ = sws_getContext(
                     decode_frame->width, decode_frame->height, src_fmt,
                     target_width_, target_height_, AV_PIX_FMT_BGRA,
-                    SWS_BILINEAR, nullptr, nullptr, nullptr
+                    SWS_FAST_BILINEAR, nullptr, nullptr, nullptr
                 );
                 if (!sws_ctx_) {
                     std::cerr << "Failed to create swscaler context" << std::endl;
