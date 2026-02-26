@@ -26,29 +26,37 @@ Item {
             Qt.callLater(root.ready);
             return;
         }
-        
+
         path = path.toString();
         if (!path || path.trim() === "")
             return;
 
         root.source = path;
         root.hasSignaledReady = false;
-        
-        if (root.slotTimer) root.slotTimer.destroy();
-        if (root.fallbackTimer) root.fallbackTimer.destroy();
-        
+
+        if (root.slotTimer)
+            root.slotTimer.destroy();
+        if (root.fallbackTimer)
+            root.fallbackTimer.destroy();
+
         videoFrame.slot = -1;
         const targetSlot = slotId;
-        DecoderService.loadVideo(targetSlot, path, function() {
+        DecoderService.loadVideo(targetSlot, path, function () {
             root.slotTimer = Qt.createQmlObject('import QtQuick; Timer { interval: 75; repeat: false }', root);
             root.slotTimer.triggered.connect(() => {
                 videoFrame.slot = targetSlot;
-                
+
                 root.fallbackTimer = Qt.createQmlObject('import QtQuick; Timer { interval: 25; repeat: false }', root);
                 root.fallbackTimer.triggered.connect(() => {
                     if (!root.hasSignaledReady && root.source) {
                         root.hasSignaledReady = true;
-                        Qt.callLater(root.ready);
+
+                        const timer = Qt.createQmlObject('import QtQuick; Timer { interval: 100; repeat: false }', root);
+                        timer.triggered.connect(() => {
+                            root.ready();
+                            timer.destroy();
+                        });
+                        timer.start();
                     }
                 });
                 root.fallbackTimer.start();
@@ -100,14 +108,21 @@ Item {
     VideoFrameItem {
         id: videoFrame
         anchors.fill: parent
-        slot: -1
-        opacity: root.visualMode === "video" ? 1 : 0
+        visible: root.visualMode === "video"
+        opacity: root.isCurrent ? 1.0 : 0.0
+        pollRate: 16  // Match screen refresh rate (60 Hz), decoder FPS controls actual decode rate
         scale: (root.isCurrent ? 1 : Wallpapers.showPreview ? 1 : 0.8)
-        
+
         onFrameReady: {
             if (!root.hasSignaledReady && root.source) {
                 root.hasSignaledReady = true;
-                Qt.callLater(root.ready);
+
+                const timer = Qt.createQmlObject('import QtQuick; Timer { interval: 50; repeat: false }', root);
+                timer.triggered.connect(() => {
+                    root.ready();
+                    timer.destroy();
+                });
+                timer.start();
             }
         }
 

@@ -106,14 +106,26 @@ bool VideoFrameItem::openSharedMemory() {
     // For now, we'll poll the shared memory
     // TODO: Implement proper eventfd passing via control socket
     
-    QTimer* timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &VideoFrameItem::onFrameAvailable);
-    timer->start(16); // ~60 FPS polling
+    poll_timer_ = new QTimer(this);
+    connect(poll_timer_, &QTimer::timeout, this, &VideoFrameItem::onFrameAvailable);
+    poll_timer_->start(poll_rate_);
     
     return true;
 }
 
+void VideoFrameItem::setPollRate(int rate) {
+    if (rate == poll_rate_) return;
+    poll_rate_ = rate;
+    if (poll_timer_ && poll_timer_->isActive()) {
+        poll_timer_->setInterval(poll_rate_);
+    }
+    emit pollRateChanged();
+}
+
 void VideoFrameItem::closeSharedMemory() {
+    if (poll_timer_) {
+        poll_timer_->stop();
+    }
     notifier_.reset();
     
     if (event_fd_ >= 0) {

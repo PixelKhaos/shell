@@ -95,13 +95,11 @@ Item {
         if (inactive.item && inactive.item.slotId !== undefined && inactive.item.slotId >= 0) {
             DecoderService.stopSlot(inactive.item.slotId);
         }
-        
+
         inactive.sourceComponent = null;
         Qt.callLater(() => {
             if (isVideo(source)) {
-                inactive.sourceComponent = Config.background.wallpaper.video.useExternalDecoder 
-                    ? videoDecoderComponent 
-                    : videoComponent;
+                inactive.sourceComponent = Config.background.wallpaper.video.useExternalDecoder ? videoDecoderComponent : videoComponent;
             } else {
                 inactive.sourceComponent = imageComponent;
             }
@@ -110,23 +108,25 @@ Item {
         waitForItem(inactive, function () {
             if (inactive.item.slotId !== undefined) {
                 const newSlotId = (inactive === oneLoader) ? 0 : 1;
-                    inactive.item.slotId = newSlotId;
+                inactive.item.slotId = newSlotId;
             }
-            
+
             Qt.callLater(() => {
                 inactive.item.update(source);
 
                 inactive.item.ready.connect(function handler() {
+                    inactive.z = 1;
+                    active.z = 0;
+
                     inactive.item.isCurrent = true;
-                    Qt.callLater(() => {
-                        const timer = Qt.createQmlObject('import QtQuick; Timer { interval: ' + Appearance.anim.durations.normal + '; repeat: false }', root);
-                        timer.triggered.connect(() => {
-                            active.item.isCurrent = false;
-                            timer.destroy();
-                        });
-                        timer.start();
+
+                    const timer = Qt.createQmlObject('import QtQuick; Timer { interval: ' + Appearance.anim.durations.normal + '; repeat: false }', root);
+                    timer.triggered.connect(() => {
+                        active.item.isCurrent = false;
+                        timer.destroy();
                     });
-                    
+                    timer.start();
+
                     inactive.item.ready.disconnect(handler);
                 });
             });
@@ -219,8 +219,9 @@ Item {
     Loader {
         id: oneLoader
         anchors.fill: parent
+        asynchronous: true
         sourceComponent: imageComponent
-
+        z: 1
         onLoaded: {
             root.loadedCount++;
             if (root.loadedCount === 2)
@@ -236,7 +237,9 @@ Item {
     Loader {
         id: twoLoader
         anchors.fill: parent
+        asynchronous: true
         sourceComponent: imageComponent
+        z: 0
         onLoaded: {
             root.loadedCount++;
             if (root.loadedCount === 2)
