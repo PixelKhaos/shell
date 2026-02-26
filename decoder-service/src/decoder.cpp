@@ -81,14 +81,28 @@ void VideoDecoder::setFps(int fps) {
 
 bool VideoDecoder::initHardwareAccel() {
     int ret = av_hwdevice_ctx_create(&hw_device_ctx_, AV_HWDEVICE_TYPE_VAAPI, nullptr, nullptr, 0);
-    if (ret < 0) {
-        std::cerr << "Failed to create VAAPI device context" << std::endl;
-        return false;
+    if (ret >= 0) {
+        codec_ctx_->hw_device_ctx = av_buffer_ref(hw_device_ctx_);
+        std::cout << "VAAPI hardware acceleration enabled" << std::endl;
+        return true;
     }
     
-    codec_ctx_->hw_device_ctx = av_buffer_ref(hw_device_ctx_);
-    std::cout << "VAAPI hardware acceleration enabled" << std::endl;
-    return true;
+    ret = av_hwdevice_ctx_create(&hw_device_ctx_, AV_HWDEVICE_TYPE_CUDA, nullptr, nullptr, 0);
+    if (ret >= 0) {
+        codec_ctx_->hw_device_ctx = av_buffer_ref(hw_device_ctx_);
+        std::cout << "CUDA/NVDEC hardware acceleration enabled" << std::endl;
+        return true;
+    }
+    
+    ret = av_hwdevice_ctx_create(&hw_device_ctx_, AV_HWDEVICE_TYPE_VDPAU, nullptr, nullptr, 0);
+    if (ret >= 0) {
+        codec_ctx_->hw_device_ctx = av_buffer_ref(hw_device_ctx_);
+        std::cout << "VDPAU hardware acceleration enabled" << std::endl;
+        return true;
+    }
+    
+    std::cerr << "No hardware acceleration available, using software decode" << std::endl;
+    return false;
 }
 
 void VideoDecoder::decodeLoop() {
@@ -143,14 +157,27 @@ void VideoDecoder::decodeLoop() {
     
     size_t frame_size = target_width_ * target_height_ * 4; // BGRA
     std::string shm_name = "/caelestia_slot_" + std::to_string(slot_id_);
-    shm_buffer_ = std::make_unique<SharedMemoryRingBuffer>(shm_name, frame_size, 3);
+    shm_buffer_ = std::make_unique<SharedMemoryRingBuffer>(shm_name, frame_size, 6);
     
     // Note: swscaler will be initialized after we know the actual pixel format
     // (which may be NV12 after VAAPI transfer instead of the codec format)
     sws_ctx_ = nullptr;
     
     AVPacket* packet = av_packet_alloc();
-    auto frame_duration = std::chrono::microseconds(1000000 / target_fps_);
+    
+    // Get video stream time base for PTS conversion
+    AVRational time_base = video_stream->time_base;
+    double fps = av_q2d(video_stream->avg_frame_rate);
+    if (fps <= 0) fps = 30.0;
+    
+    std::cout << "Video native FPS: " << fps << ", target FPS: " << target_fps_ << std::endl;
+    
+    // Use the lower of video native FPS or target FPS
+    double effective_fps = std::min(fps, static_cast<double>(target_fps_));
+    auto frame_duration = std::chrono::microseconds(static_cast<int64_t>(1000000.0 / effective_fps));
+    
+    auto decode_start_time = std::chrono::steady_clock::now();
+    int64_t first_pts = -1;
     auto last_frame_time = std::chrono::steady_clock::now();
     
     // Decode loop
@@ -162,7 +189,13 @@ void VideoDecoder::decodeLoop() {
         
         int ret = av_read_frame(format_ctx_, packet);
         if (ret < 0) {
+            // Flush decoder buffers before seeking
+            avcodec_flush_buffers(codec_ctx_);
             av_seek_frame(format_ctx_, video_stream_idx_, 0, AVSEEK_FLAG_BACKWARD);
+            // Reset timing for loop
+            first_pts = -1;
+            decode_start_time = std::chrono::steady_clock::now();
+            last_frame_time = std::chrono::steady_clock::now();
             continue;
         }
         
@@ -180,6 +213,11 @@ void VideoDecoder::decodeLoop() {
             ret = avcodec_receive_frame(codec_ctx_, frame_);
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF) break;
             if (ret < 0) break;
+            
+            // Use PTS for timing if available
+            if (first_pts < 0 && frame_->pts != AV_NOPTS_VALUE) {
+                first_pts = frame_->pts;
+            }
             
             AVFrame* decode_frame = frame_;
             if (frame_->format == AV_PIX_FMT_VAAPI) {
@@ -216,13 +254,27 @@ void VideoDecoder::decodeLoop() {
                           << " format=" << src_fmt << " -> " << target_width_ << "x" << target_height_ << " BGRA" << std::endl;
             }
             
-            // Rate limiting
-            auto now = std::chrono::steady_clock::now();
-            auto elapsed = now - last_frame_time;
-            if (elapsed < frame_duration) {
-                std::this_thread::sleep_for(frame_duration - elapsed);
+            // Rate limiting based on PTS or frame duration
+            if (frame_->pts != AV_NOPTS_VALUE && first_pts >= 0) {
+                // Calculate target time based on PTS
+                int64_t pts_offset = frame_->pts - first_pts;
+                auto target_time = decode_start_time + std::chrono::microseconds(
+                    static_cast<int64_t>(pts_offset * av_q2d(time_base) * 1000000.0)
+                );
+                
+                auto now = std::chrono::steady_clock::now();
+                if (now < target_time) {
+                    std::this_thread::sleep_for(target_time - now);
+                }
+            } else {
+                // Fallback to fixed frame duration if no PTS
+                auto now = std::chrono::steady_clock::now();
+                auto elapsed = now - last_frame_time;
+                if (elapsed < frame_duration) {
+                    std::this_thread::sleep_for(frame_duration - elapsed);
+                }
+                last_frame_time = std::chrono::steady_clock::now();
             }
-            last_frame_time = std::chrono::steady_clock::now();
             
             size_t slot_index;
             uint8_t* dst = shm_buffer_->getWriteSlot(slot_index);

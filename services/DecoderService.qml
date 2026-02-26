@@ -15,7 +15,7 @@ Singleton {
     property int targetFps: Config.background.wallpaper.video.decoderFps
 
     readonly property string socketPath: "/tmp/caelestia-decoder.sock"
-    readonly property string servicePath: "/usr/lib/caelestia/caelestia-decoder-service"
+    readonly property string servicePath: "/usr/local/bin/caelestia-decoder-service"
     
     property var loadCallbacks: ({})
 

@@ -110,7 +110,10 @@ Item {
         anchors.fill: parent
         visible: root.visualMode === "video"
         opacity: root.isCurrent ? 1.0 : 0.0
-        pollRate: 16  // Match screen refresh rate (60 Hz), decoder FPS controls actual decode rate
+        pollRate: {
+            const refreshRate = root.screen?.refreshRate ?? 60;
+            return Math.round(1000 / refreshRate);
+        }
         scale: (root.isCurrent ? 1 : Wallpapers.showPreview ? 1 : 0.8)
 
         onFrameReady: {

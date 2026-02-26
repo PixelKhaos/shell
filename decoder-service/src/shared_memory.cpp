@@ -82,6 +82,8 @@ uint8_t* SharedMemoryRingBuffer::getWriteSlot(size_t& slot_index) {
 
 void SharedMemoryRingBuffer::commitWrite(size_t slot_index, const FrameMetadata& metadata) {
     header_->frame_slots[slot_index] = metadata;
+    // ensure frame data is written before valid flag
+    __sync_synchronize();
     header_->frame_slots[slot_index].valid = true;
     header_->write_index++;
 }
