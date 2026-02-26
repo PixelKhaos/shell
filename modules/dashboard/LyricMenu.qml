@@ -90,7 +90,7 @@ StyledRect {
                 id: delegateRoot
                 width: ListView.view.width * 0.98
                 height: 70
-                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.horizontalCenter: parent?.horizontalCenter
 
                 required property real id
                 required property string title

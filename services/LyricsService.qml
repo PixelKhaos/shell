@@ -184,6 +184,7 @@ Singleton {
     }
 
     function updateModel(parsedArray) {
+        root.currentIndex = -1;
         lyricsModel.clear();
         for (let line of parsedArray) {
             lyricsModel.append({ time: line.time, lyricLine: line.text });
@@ -225,9 +226,7 @@ Singleton {
             }
 
             onResults(songs);
-        }, err => {
-            console.log("NetEase search error:", err);
-        }, root._netEaseHeaders);
+        }, err => {}, root._netEaseHeaders);
     }
 
     // populates the candidates model only. used when a saved NetEase ID already exists and we just want to refresh the picker list.
@@ -245,8 +244,7 @@ Singleton {
             });
 
             if (!bestMatch) {
-                console.log("NetEase: No reliable match found");
-                return;
+                return; // No reliable lyrics found
             }
 
             let key = `${artist} - ${title}`;
@@ -269,8 +267,6 @@ Singleton {
             if (res.lrc?.lyric) {
                 updateModel(Lrc.parseLrc(res.lrc.lyric));
                 loading = false;
-            } else {
-                console.log("NetEase: No lyrics returned for id", id);
             }
         });
     }
@@ -290,7 +286,7 @@ Singleton {
     }
 
     function updatePosition() {
-        if (isManualSeeking || !player || lyricsModel.count === 0) return;
+        if (isManualSeeking || loading || !player || lyricsModel.count === 0) return;
 
         let pos = player.position - root.offset;
         let newIdx = -1;

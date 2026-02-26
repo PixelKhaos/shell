@@ -18,6 +18,8 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
+    
+    readonly property real detailsHeightWithoutLyrics: details.implicitHeight - lyricsViewInDetails.implicitHeight
 
     property bool lyricMenuOpen: false
     property bool lyricsShowing: LyricsService.lyricsVisible && LyricsService.model.count != 0
@@ -245,6 +247,7 @@ Item {
         }
 
         LyricsView {
+            id: lyricsViewInDetails
             Layout.fillWidth: true
             Layout.preferredHeight: 200
         }
@@ -412,8 +415,8 @@ Item {
         anchors.leftMargin: Appearance.spacing.normal
 
         contentHeight: !root.lyricsShowingDebounced
-        ? details.height + Appearance.padding.large * 5
-        : details.height
+        ? root.detailsHeightWithoutLyrics + Appearance.padding.large * 5
+        : root.detailsHeightWithoutLyrics + lyricsViewInDetails.implicitHeight
 
         visible: root.lyricMenuOpen || height > 0
         height: root.lyricMenuOpen ? implicitHeight : 0
