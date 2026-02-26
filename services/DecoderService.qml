@@ -38,7 +38,7 @@ Singleton {
         decoderProcess.running = true;
         running = true;
         
-        const timer = Qt.createQmlObject('import QtQuick; Timer { interval: 800; repeat: false }', root);
+        const timer = Qt.createQmlObject('import QtQuick; Timer { interval: 200; repeat: false }', root);
         timer.triggered.connect(() => {
             processCommandQueue();
             timer.destroy();

@@ -49,7 +49,6 @@ SharedMemoryRingBuffer::SharedMemoryRingBuffer(const std::string& name, size_t f
 
     frame_data_ = static_cast<uint8_t*>(mapped_memory_) + sizeof(Header);
 
-    // Create eventfd for frame notifications
     event_fd_ = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     if (event_fd_ < 0) {
         munmap(mapped_memory_, total_size_);

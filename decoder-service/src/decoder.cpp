@@ -159,8 +159,6 @@ void VideoDecoder::decodeLoop() {
     std::string shm_name = "/caelestia_slot_" + std::to_string(slot_id_);
     shm_buffer_ = std::make_unique<SharedMemoryRingBuffer>(shm_name, frame_size, 6);
     
-    // Note: swscaler will be initialized after we know the actual pixel format
-    // (which may be NV12 after VAAPI transfer instead of the codec format)
     sws_ctx_ = nullptr;
     
     AVPacket* packet = av_packet_alloc();
@@ -189,10 +187,8 @@ void VideoDecoder::decodeLoop() {
         
         int ret = av_read_frame(format_ctx_, packet);
         if (ret < 0) {
-            // Flush decoder buffers before seeking
             avcodec_flush_buffers(codec_ctx_);
             av_seek_frame(format_ctx_, video_stream_idx_, 0, AVSEEK_FLAG_BACKWARD);
-            // Reset timing for loop
             first_pts = -1;
             decode_start_time = std::chrono::steady_clock::now();
             last_frame_time = std::chrono::steady_clock::now();
@@ -256,7 +252,6 @@ void VideoDecoder::decodeLoop() {
             
             // Rate limiting based on PTS or frame duration
             if (frame_->pts != AV_NOPTS_VALUE && first_pts >= 0) {
-                // Calculate target time based on PTS
                 int64_t pts_offset = frame_->pts - first_pts;
                 auto target_time = decode_start_time + std::chrono::microseconds(
                     static_cast<int64_t>(pts_offset * av_q2d(time_base) * 1000000.0)
@@ -267,7 +262,6 @@ void VideoDecoder::decodeLoop() {
                     std::this_thread::sleep_for(target_time - now);
                 }
             } else {
-                // Fallback to fixed frame duration if no PTS
                 auto now = std::chrono::steady_clock::now();
                 auto elapsed = now - last_frame_time;
                 if (elapsed < frame_duration) {
