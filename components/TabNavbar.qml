@@ -216,7 +216,8 @@ StyledRect {
 
             // Non-scrollable version (for clipboard navbar)
             Item {
-                anchors.fill: parent
+                Layout.fillWidth: true
+                Layout.preferredHeight: tabsRowSimple.height
                 visible: !root.showScrollButtons
 
                 StyledRect {

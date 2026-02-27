@@ -141,7 +141,7 @@ Item {
         id: list
 
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.top: categoryNavbar.bottom
+        anchors.top: root.showClipboardNav ? clipboardNav.bottom : categoryNavbar.bottom
         anchors.bottom: searchWrapper.top
         anchors.topMargin: (root.showCategoryNav || root.showClipboardNav) ? root.padding : 0
         anchors.bottomMargin: root.padding

@@ -20,9 +20,9 @@ Item {
         spacing: Appearance.spacing.normal
 
 
-        HyprSunset {}
+        UtilCards.HyprSunset {}
 
-        IdleInhibit {}
+        UtilCards.IdleInhibit {}
 
         // Combined media card: Screenshots + Recordings in tabs
         UtilCards.Media {
