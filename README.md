@@ -580,18 +580,18 @@ default, you must create it manually.
             "wallpapers": false
         },
         "showOnHover": false,
-        "favoriteApps": ["zen", "vesktop", "code-oss"],
-        "hiddenApps": ["electron34", "thunar-settings"],
+        "favouriteApps": [],
+        "hiddenApps": [],
         "categories": [
             {
                 "name": "Development",
                 "icon": "code",
-                "apps": ["code-oss", "github-desktop"]
+                "apps": ["code-oss"]
             },
             {
                 "name": "Graphics",
                 "icon": "palette",
-                "apps": ["org.inkscape.Inkscape", "gimp"]
+                "apps": []
             },
             {
                 "name": "Communication",
@@ -611,8 +611,26 @@ default, you must create it manually.
             {
                 "name": "Utilities",
                 "icon": "build",
-                "apps": ["obs", "thunar"]
+                "apps": ["obs"]
             }
+        ],
+        "contextMenuMain": [
+            {"launch": {"text": "Launch", "icon": "play_arrow", "bold": true}},
+            {"terminal": {"parent": "launch"}},
+            "separator",
+            "favorites",
+            "categories",
+            "hide",
+            "workspaces"
+        ],
+        "contextMenuAdvanced": [
+            "open-path",
+            "desktop-file",
+            "separator",
+            {"custom-submenu": {"text": "Advanced Options", "icon": "settings"}},
+            {"kill": {"parent": "custom-submenu"}},
+            {"separator": {"parent": "custom-submenu"}},
+            {"copy-exec": {"parent": "custom-submenu"}}
         ]
     },
     "lock": {

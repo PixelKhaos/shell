@@ -25,21 +25,27 @@ StyledListView {
         }
     }
     
+    // Force model refresh when favourites change
+    Connections {
+        target: Config.launcher
+        function onFavouriteAppsChanged() {
+            if (root.state === "apps") {
+                model.values = root.filterAppsByCategory(Apps.search(search.text));
+            }
+        }
+    }
+    
     property string previousCategory: ""
     property var pendingModelUpdate: null
     
     onActiveCategoryChanged: {
         if (previousCategory !== "" && root.state === "apps") {
-            // Stop any running animation first
             if (categoryChangeAnimation.running) {
                 categoryChangeAnimation.stop();
-                // Reset opacity and scale immediately
                 root.opacity = 1;
                 root.scale = 1;
             }
-            // Store the new filtered apps
             pendingModelUpdate = root.filterAppsByCategory(Apps.search(search.text));
-            // Start fade out animation
             categoryChangeAnimation.start();
         }
         previousCategory = activeCategory;
@@ -93,7 +99,6 @@ StyledListView {
         }
     }
     
-    // Helper function to check if app has a specific category
     function appHasCategory(appId: string, categoryName: string): bool {
         if (!Config.launcher.categories) return false;
         
@@ -116,10 +121,10 @@ StyledListView {
     function filterAppsByCategory(apps) {
         if (root.activeCategory === "all") {
             return apps;
-        } else if (root.activeCategory === "favorites") {
+        } else if (root.activeCategory === "favourites") {
             return apps.filter(app => {
                 const appId = app.id || app.entry?.id;
-                return Config.launcher.favoriteApps && Config.launcher.favoriteApps.includes(appId);
+                return Config.launcher.favouriteApps && Config.launcher.favouriteApps.includes(appId);
             });
         } else {
             // Custom category
@@ -407,11 +412,16 @@ StyledListView {
         }
     }
 
+    property var showContextMenuAt: null
+    property Item wrapperRoot: null
+
     Component {
         id: appItem
 
         AppItem {
             visibilities: root.visibilities
+            showContextMenuAt: root.showContextMenuAt
+            wrapperRoot: root.wrapperRoot
         }
     }
 

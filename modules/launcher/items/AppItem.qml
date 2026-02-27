@@ -1,3 +1,5 @@
+pragma NativeMethodBehavior: AcceptThisObject
+
 import "../services"
 import qs.components
 import qs.services
@@ -12,22 +14,36 @@ Item {
 
     required property DesktopEntry modelData
     required property PersistentProperties visibilities
-
+    property var showContextMenuAt: null
+    property Item wrapperRoot: null
+    
     implicitHeight: Config.launcher.sizes.itemHeight
 
     anchors.left: parent?.left
     anchors.right: parent?.right
 
     StateLayer {
+        id: stateLayer
         radius: Appearance.rounding.normal
         acceptedButtons: Qt.LeftButton | Qt.RightButton
-
+        
         function onClicked(event): void {
-            if (event.button === Qt.RightButton) {
-                Actions.toggleFavorite(root.modelData.id, root.modelData.name);
-            } else {
+            if (event.button === Qt.LeftButton) {
                 Apps.launch(root.modelData);
                 root.visibilities.launcher = false;
+            } else if (event.button === Qt.RightButton) {
+                if (!root.showContextMenuAt || !root.wrapperRoot || !root.modelData) {
+                    return;
+                }
+                
+                try {
+                    const pos = stateLayer.mapToItem(root.wrapperRoot, event.x, event.y);
+                    if (pos && typeof pos.x === 'number' && typeof pos.y === 'number') {
+                        root.showContextMenuAt(root.modelData, pos.x, pos.y);
+                    }
+                } catch (error) {
+                    console.error("Failed to show context menu:", error);
+                }
             }
         }
     }
