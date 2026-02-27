@@ -143,6 +143,17 @@ Item {
         }
     }
 
+    Launcher.ClipboardPreview {
+        id: clipboardPreview
+
+        currentItem: launcher.currentClipboardItem
+        shouldShow: root.visibilities.launcher && launcher.showingClipboard && !root.visibilities.utilities && !root.visibilities.sidebar
+
+        anchors.left: launcher.right
+        anchors.leftMargin: Appearance.spacing.large + 4
+        anchors.bottom: launcher.bottom
+    }
+
     Dashboard.Wrapper {
         id: dashboard
 

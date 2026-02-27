@@ -21,14 +21,26 @@ Item {
     required property string activeCategory
 
     readonly property bool showWallpapers: search.text.startsWith(`${Config.launcher.actionPrefix}wallpaper `)
-    readonly property Item currentList: showWallpapers ? wallpaperList.item : appList.item
+    readonly property bool showClipboard: search.text.startsWith(`${Config.launcher.actionPrefix}clipboard `)
+    readonly property bool showEmoji: search.text.startsWith(`${Config.launcher.actionPrefix}emoji `)
+    readonly property Item currentList: {
+        if (showWallpapers) return wallpaperList.item;
+        if (showClipboard) return clipboardList.item;
+        if (showEmoji) return emojiList.item;
+        return appList.item;
+    }
 
     anchors.horizontalCenter: parent.horizontalCenter
     anchors.top: parent.top
     anchors.bottom: parent.bottom
 
     clip: true
-    state: showWallpapers ? "wallpapers" : "apps"
+    state: {
+        if (showWallpapers) return "wallpapers";
+        if (showClipboard) return "clipboard";
+        if (showEmoji) return "emoji";
+        return "apps";
+    }
 
     states: [
         State {
@@ -52,6 +64,34 @@ Item {
                 root.implicitWidth: Math.max(Config.launcher.sizes.itemWidth * 1.2, wallpaperList.implicitWidth)
                 root.implicitHeight: Config.launcher.sizes.wallpaperHeight
                 wallpaperList.active: true
+            }
+        },
+        State {
+            name: "clipboard"
+
+            PropertyChanges {
+                root.implicitWidth: Config.launcher.sizes.itemWidth
+                root.implicitHeight: Math.min(root.maxHeight, clipboardList.implicitHeight > 0 ? clipboardList.implicitHeight : empty.implicitHeight)
+                clipboardList.active: true
+            }
+
+            AnchorChanges {
+                anchors.left: root.parent.left
+                anchors.right: root.parent.right
+            }
+        },
+        State {
+            name: "emoji"
+
+            PropertyChanges {
+                root.implicitWidth: Math.max(Config.launcher.sizes.itemWidth * 1.2, emojiList.implicitWidth)
+                root.implicitHeight: Math.min(root.maxHeight, emojiList.implicitHeight > 0 ? emojiList.implicitHeight : empty.implicitHeight)
+                emojiList.active: true
+            }
+
+            AnchorChanges {
+                anchors.left: root.parent.left
+                anchors.right: root.parent.right
             }
         }
     ]
@@ -112,6 +152,32 @@ Item {
         }
     }
 
+    Loader {
+        id: clipboardList
+
+        active: false
+
+        anchors.fill: parent
+
+        sourceComponent: ClipboardList {
+            search: root.search
+            visibilities: root.visibilities
+        }
+    }
+
+    Loader {
+        id: emojiList
+
+        active: false
+
+        anchors.fill: parent
+
+        sourceComponent: EmojiList {
+            search: root.search
+            visibilities: root.visibilities
+        }
+    }
+
     Row {
         id: empty
 
@@ -123,9 +189,15 @@ Item {
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenterOffset: root.state === "emoji" ? 50 : 0
 
         MaterialIcon {
-            text: root.state === "wallpapers" ? "wallpaper_slideshow" : "manage_search"
+            text: {
+                if (root.state === "wallpapers") return "wallpaper_slideshow";
+                if (root.state === "clipboard") return "content_paste";
+                if (root.state === "emoji") return "sentiment_satisfied";
+                return "manage_search";
+            }
             color: Colours.palette.m3onSurfaceVariant
             font.pointSize: Appearance.font.size.extraLarge
 
@@ -136,14 +208,27 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
 
             StyledText {
-                text: root.state === "wallpapers" ? qsTr("No wallpapers found") : qsTr("No results")
+                text: {
+                    if (root.state === "wallpapers") return qsTr("No wallpapers found");
+                    if (root.state === "clipboard") return qsTr("No clipboard history");
+                    if (root.state === "emoji") return qsTr("No emojis found");
+                    return qsTr("No results");
+                }
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.larger
                 font.weight: 500
             }
 
             StyledText {
-                text: root.state === "wallpapers" && Wallpapers.list.length === 0 ? qsTr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir)) : qsTr("Try searching for something else")
+                text: {
+                    if (root.state === "wallpapers" && Wallpapers.list.length === 0)
+                        return qsTr("Try putting some wallpapers in %1").arg(Paths.shortenHome(Paths.wallsdir));
+                    if (root.state === "clipboard")
+                        return qsTr("Copy something to populate clipboard history");
+                    if (root.state === "emoji")
+                        return qsTr("Try searching for an emoji");
+                    return qsTr("Try searching for something else");
+                }
                 color: Colours.palette.m3onSurfaceVariant
                 font.pointSize: Appearance.font.size.normal
             }

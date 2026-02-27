@@ -137,7 +137,11 @@ StyledListView {
 
     spacing: Appearance.spacing.small
     orientation: Qt.Vertical
-    implicitHeight: (Config.launcher.sizes.itemHeight + spacing) * Math.min(Config.launcher.maxShown, count) - spacing
+    implicitHeight: {
+        if (count === 0) return 0;
+        const itemsToShow = Math.min(Config.launcher.maxShown, count);
+        return (Config.launcher.sizes.itemHeight + spacing) * itemsToShow - spacing + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
+    }
 
     preferredHighlightBegin: 0
     preferredHighlightEnd: height

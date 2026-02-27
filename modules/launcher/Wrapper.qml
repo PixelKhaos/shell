@@ -17,6 +17,19 @@ Item {
     property int contentHeight
     property bool animationComplete: false
 
+    readonly property var currentClipboardItem: {
+        const list = content.item?.list?.currentList;
+        if (!list)
+            return null;
+
+        // Use last interaction type to determine priority
+        if (list.lastInteraction === "hover" && list.hoveredItem) {
+            return list.hoveredItem;
+        }
+        return list.currentItem;
+    }
+    readonly property bool showingClipboard: content.item?.list?.showClipboard ?? false
+
     readonly property real maxHeight: {
         let max = screen.height - Config.border.thickness * 2 - Appearance.spacing.large;
         if (visibilities.dashboard)
@@ -131,6 +144,7 @@ Item {
         Component.onCompleted: timer.start()
 
         sourceComponent: Content {
+            screen: root.screen
             visibilities: root.visibilities
             panels: root.panels
             maxHeight: root.maxHeight

@@ -14,6 +14,7 @@ import QtQuick.Layouts
 Item {
     id: root
 
+    required property ShellScreen screen
     required property PersistentProperties visibilities
     required property var panels
     required property real maxHeight
@@ -21,12 +22,15 @@ Item {
     readonly property alias searchField: search
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
+    readonly property alias search: search
+    readonly property alias list: list
+    readonly property bool showClipboardNav: list.showClipboard
 
     property var showContextMenuAt: null
     property Item wrapperRoot: null
 
     property string activeCategory: "all"
-    property bool showNavbar: (Config.launcher.enableCategories ?? true) && !search.text.startsWith(Config.launcher.actionPrefix)
+    property bool showCategoryNav: (Config.launcher.enableCategories ?? true) && !search.text.startsWith(Config.launcher.actionPrefix) && !list.showClipboard
 
     readonly property var categoryList: [
         {
@@ -60,7 +64,11 @@ Item {
     }
 
     implicitWidth: list.width + padding * 2
-    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + categoryNavbar.height + (showNavbar ? padding * 2 : 0) + padding * 2 + Appearance.spacing.normal
+    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + categoryNavbar.height + clipboardNav.height + (showCategoryNav ? padding : 0) + (showClipboardNav ? padding : 0) + padding * 2 + Appearance.spacing.normal
+
+    Component.onCompleted: {
+        LauncherIpc.register(root.screen, root);
+    }
 
     Components.CategoryNavbar {
         id: categoryNavbar
@@ -74,10 +82,9 @@ Item {
 
         categories: root.categoryList
         activeCategory: root.activeCategory
-        showScrollButtons: true
 
-        opacity: root.showNavbar ? 1 : 0
-        height: root.showNavbar ? implicitHeight : 0
+        opacity: root.showCategoryNav ? 1 : 0
+        height: root.showCategoryNav ? implicitHeight : 0
 
         Behavior on opacity {
             Anim {
@@ -98,19 +105,58 @@ Item {
         }
     }
 
+    ClipboardNavBar {
+        id: clipboardNav
+
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.leftMargin: root.padding
+        anchors.rightMargin: root.padding
+        anchors.topMargin: root.padding
+
+        clipboardList: list.currentList
+
+        visible: opacity > 0
+        opacity: root.showClipboardNav ? 1 : 0
+        height: root.showClipboardNav ? implicitHeight : 0
+        clip: true
+
+        Behavior on opacity {
+            Anim {
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.standard
+            }
+        }
+
+        Behavior on height {
+            Anim {
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.emphasized
+            }
+        }
+    }
+
     ContentList {
         id: list
 
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: categoryNavbar.bottom
         anchors.bottom: searchWrapper.top
-        anchors.topMargin: root.showNavbar ? root.padding : 0
+        anchors.topMargin: (root.showCategoryNav || root.showClipboardNav) ? root.padding : 0
         anchors.bottomMargin: root.padding
+
+        Behavior on anchors.topMargin {
+            Anim {
+                duration: Appearance.anim.durations.normal
+                easing.bezierCurve: Appearance.anim.curves.emphasized
+            }
+        }
 
         content: root
         visibilities: root.visibilities
         panels: root.panels
-        maxHeight: root.maxHeight - searchWrapper.implicitHeight - categoryNavbar.implicitHeight - (root.showNavbar ? root.padding * 2 : 0) - root.padding * 4
+        maxHeight: root.maxHeight - searchWrapper.implicitHeight - categoryNavbar.height - clipboardNav.height - ((root.showCategoryNav || root.showClipboardNav) ? root.padding : 0) - root.padding * 3
         search: search
         padding: root.padding
         rounding: root.rounding
@@ -156,10 +202,6 @@ Item {
 
             placeholderText: qsTr("Type \"%1\" for commands").arg(Config.launcher.actionPrefix)
 
-            onTextChanged: {
-                root.showNavbar = !text.startsWith(Config.launcher.actionPrefix);
-            }
-
             onAccepted: {
                 const currentItem = list.currentList?.currentItem;
                 if (currentItem) {
@@ -168,9 +210,14 @@ Item {
                             Wallpapers.previewColourLock = true;
                         Wallpapers.setWallpaper(currentItem.modelData.path);
                         root.visibilities.launcher = false;
+                    } else if (list.showClipboard) {
+                        Clipboard.copyToClipboard(currentItem.modelData);
+                        root.visibilities.launcher = false;
+                    } else if (list.showEmoji) {
+                        Emojis.copyEmoji(currentItem.modelData);
+                        root.visibilities.launcher = false;
                     } else if (text.startsWith(Config.launcher.actionPrefix)) {
-                        if (text.startsWith(`${Config.launcher.actionPrefix}calc `) || 
-                            text.startsWith(`${Config.launcher.actionPrefix}translate `))
+                        if (text.startsWith(`${Config.launcher.actionPrefix}calc `) || text.startsWith(`${Config.launcher.actionPrefix}translate `))
                             currentItem.onClicked();
                         else
                             currentItem.modelData.onClicked(list.currentList);
@@ -185,14 +232,20 @@ Item {
             Keys.onDownPressed: list.currentList?.incrementCurrentIndex()
 
             Keys.onLeftPressed: event => {
-                if (event.modifiers === Qt.NoModifier) {
+                if (list.showEmoji && list.currentList && list.currentList.moveLeft) {
+                    list.currentList.moveLeft();
+                    event.accepted = true;
+                } else if (event.modifiers === Qt.NoModifier && !list.showClipboard) {
                     root.navigateCategory(-1);
                     event.accepted = true;
                 }
             }
 
             Keys.onRightPressed: event => {
-                if (event.modifiers === Qt.NoModifier) {
+                if (list.showEmoji && list.currentList && list.currentList.moveRight) {
+                    list.currentList.moveRight();
+                    event.accepted = true;
+                } else if (event.modifiers === Qt.NoModifier && !list.showClipboard) {
                     root.navigateCategory(1);
                     event.accepted = true;
                 }

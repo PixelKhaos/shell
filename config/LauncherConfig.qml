@@ -26,6 +26,8 @@ JsonObject {
     ]
     property UseFuzzy useFuzzy: UseFuzzy {}
     property Sizes sizes: Sizes {}
+    property list<string> pinnedClipboardItems: []
+    property list<string> frequentEmojis: []
 
     component UseFuzzy: JsonObject {
         property bool apps: false

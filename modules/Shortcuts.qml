@@ -113,6 +113,40 @@ Scope {
     }
 
     IpcHandler {
+        target: "clipboard"
+
+        function toggle(): void {
+            if (root.hasFullscreen)
+                return;
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
+            // Set the launcher text to trigger clipboard view
+            const launcher = LauncherIpc.getForActive();
+            if (launcher) {
+                launcher.search.text = ">clipboard ";
+                launcher.search.forceActiveFocus();
+            }
+        }
+    }
+
+    IpcHandler {
+        target: "emoji"
+
+        function toggle(): void {
+            if (root.hasFullscreen)
+                return;
+            const visibilities = Visibilities.getForActive();
+            visibilities.launcher = true;
+            // Set the launcher text to trigger emoji view
+            const launcher = LauncherIpc.getForActive();
+            if (launcher) {
+                launcher.search.text = ">emoji ";
+                launcher.search.forceActiveFocus();
+            }
+        }
+    }
+
+    IpcHandler {
         target: "controlCenter"
 
         function open(): void {
