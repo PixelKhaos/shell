@@ -454,12 +454,26 @@ default, you must create it manually.
         "actionPrefix": ">",
         "actions": [
             {
-                "name": "Chatgpt",
-                "icon": "smart_toy",
-                "description": "Ask anything to ChatGpt",
-                "command": ["autocomplete", "gpt"],
-                "enabled": true,
-                "dangerous": false
+              "name": "Example subaction",
+              "icon": "tune",
+              "description": "example of a subaction",
+              "command": ["openGroup", "example"],
+              "enabled": true,
+              "dangerous": false,
+              "children": [
+                {
+                  "name": "action1",
+                  "icon": "settings",
+                  "description": "example of action1",
+                  "command": [""]
+                },
+                {
+                  "name": "action2",
+                  "icon": "settings",
+                  "description": "example of action2",
+                  "command": [""]
+                }
+              ]
             },
             {
                 "name": "Calculator",
