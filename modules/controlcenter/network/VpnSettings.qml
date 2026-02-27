@@ -54,17 +54,17 @@ ColumnLayout {
         ListView {
             Layout.fillWidth: true
             Layout.preferredHeight: contentHeight
-            
+
             interactive: false
             spacing: Appearance.spacing.smaller
-            
+
             model: ScriptModel {
                 values: Config.utilities.vpn.provider.map((provider, index) => {
                     const isObject = typeof provider === "object";
                     const name = isObject ? (provider.name || "custom") : String(provider);
                     const displayName = isObject ? (provider.displayName || name) : name;
                     const iface = isObject ? (provider.interface || "") : "";
-                    
+
                     return {
                         index: index,
                         name: name,
@@ -226,186 +226,6 @@ ColumnLayout {
                 });
                 Config.utilities.vpn.provider = providers;
                 Config.save();
-            }
-        }
-
-        TextButton {
-            Layout.fillWidth: true
-            text: qsTr("+ Add WireGuard")
-            inactiveColour: Colours.tPalette.m3surfaceContainerHigh
-            inactiveOnColour: Colours.palette.m3onSurface
-
-            onClicked: {
-                customProviderDialog.providerType = "wireguard";
-                customProviderDialog.open();
-            }
-        }
-    }
-
-    // Simple add provider dialog
-    Popup {
-        id: addProviderDialog
-        
-        anchors.centerIn: parent
-        width: Math.min(500, parent.width - Appearance.padding.large * 2)
-        
-        modal: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        
-        background: StyledRect {
-            color: Colours.palette.m3surfaceContainerHigh
-            radius: Appearance.rounding.large
-        }
-        
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Appearance.padding.large
-            spacing: Appearance.spacing.normal
-            
-            StyledText {
-                text: qsTr("Add VPN Provider")
-                font.pointSize: Appearance.font.size.large
-                font.weight: 500
-            }
-            
-            StyledText {
-                Layout.fillWidth: true
-                text: qsTr("Choose a provider type or use Quick Add buttons below")
-                wrapMode: Text.WordWrap
-                color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.small
-            }
-            
-            Item { Layout.preferredHeight: Appearance.spacing.normal }
-            
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.spacing.normal
-                
-                TextButton {
-                    Layout.fillWidth: true
-                    text: qsTr("Cancel")
-                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
-                    inactiveOnColour: Colours.palette.m3onSurface
-                    
-                    onClicked: addProviderDialog.close()
-                }
-                
-                TextButton {
-                    Layout.fillWidth: true
-                    text: qsTr("Custom")
-                    inactiveColour: Colours.palette.m3primaryContainer
-                    inactiveOnColour: Colours.palette.m3onPrimaryContainer
-                    
-                    onClicked: {
-                        addProviderDialog.close();
-                        customProviderDialog.providerType = "custom";
-                        customProviderDialog.open();
-                    }
-                }
-            }
-        }
-    }
-
-    // Custom provider dialog (for WireGuard with interface name)
-    Popup {
-        id: customProviderDialog
-        
-        property string providerType: "custom"
-        property string interfaceName: ""
-        property string displayName: ""
-        
-        anchors.centerIn: parent
-        width: Math.min(500, parent.width - Appearance.padding.large * 2)
-        
-        modal: true
-        closePolicy: Popup.CloseOnEscape
-        
-        onOpened: {
-            interfaceName = "";
-            displayName = "";
-            if (providerType === "wireguard") {
-                displayName = "WireGuard";
-            }
-        }
-        
-        background: StyledRect {
-            color: Colours.palette.m3surfaceContainerHigh
-            radius: Appearance.rounding.large
-        }
-        
-        ColumnLayout {
-            anchors.fill: parent
-            anchors.margins: Appearance.padding.large
-            spacing: Appearance.spacing.normal
-            
-            StyledText {
-                text: customProviderDialog.providerType === "wireguard" ? qsTr("Add WireGuard VPN") : qsTr("Add Custom VPN")
-                font.pointSize: Appearance.font.size.large
-                font.weight: 500
-            }
-            
-            StyledText {
-                Layout.fillWidth: true
-                text: customProviderDialog.providerType === "wireguard" ? 
-                    qsTr("Enter the WireGuard interface name (e.g., wg0, torguard)") :
-                    qsTr("Enter custom VPN details")
-                wrapMode: Text.WordWrap
-                color: Colours.palette.m3outline
-                font.pointSize: Appearance.font.size.small
-            }
-            
-            TextField {
-                id: displayNameField
-                Layout.fillWidth: true
-                placeholderText: qsTr("Display Name")
-                text: customProviderDialog.displayName
-                onTextChanged: customProviderDialog.displayName = text
-            }
-            
-            TextField {
-                id: interfaceField
-                Layout.fillWidth: true
-                placeholderText: customProviderDialog.providerType === "wireguard" ? qsTr("Interface (e.g., wg0)") : qsTr("Interface")
-                text: customProviderDialog.interfaceName
-                onTextChanged: customProviderDialog.interfaceName = text
-            }
-            
-            Item { Layout.preferredHeight: Appearance.spacing.normal }
-            
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: Appearance.spacing.normal
-                
-                TextButton {
-                    Layout.fillWidth: true
-                    text: qsTr("Cancel")
-                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
-                    inactiveOnColour: Colours.palette.m3onSurface
-                    
-                    onClicked: customProviderDialog.close()
-                }
-                
-                TextButton {
-                    Layout.fillWidth: true
-                    text: qsTr("Add")
-                    enabled: customProviderDialog.interfaceName.length > 0
-                    inactiveColour: Colours.palette.m3primaryContainer
-                    inactiveOnColour: Colours.palette.m3onPrimaryContainer
-                    
-                    onClicked: {
-                        const providers = [...Config.utilities.vpn.provider];
-                        const newProvider = {
-                            name: customProviderDialog.providerType,
-                            displayName: customProviderDialog.displayName || customProviderDialog.interfaceName,
-                            interface: customProviderDialog.interfaceName
-                        };
-                        providers.push(newProvider);
-                        Config.utilities.vpn.provider = providers;
-                        Config.save();
-                        customProviderDialog.close();
-                    }
-                }
             }
         }
     }

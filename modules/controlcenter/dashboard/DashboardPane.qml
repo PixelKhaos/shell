@@ -22,45 +22,30 @@ Item {
     // General Settings
     property bool enabled: Config.dashboard.enabled ?? true
     property bool showOnHover: Config.dashboard.showOnHover ?? true
+    property int updateInterval: Config.dashboard.updateInterval ?? 1000
     property int dragThreshold: Config.dashboard.dragThreshold ?? 50
-    
-    // Media Settings
-    property int mediaUpdateInterval: Config.dashboard.mediaUpdateInterval ?? 500
-    property int mediaWidth: Config.dashboard.sizes.mediaWidth ?? 200
-    property int mediaCoverArtSize: Config.dashboard.sizes.mediaCoverArtSize ?? 150
-    property int mediaProgressSweep: Config.dashboard.sizes.mediaProgressSweep ?? 180
-    property int mediaProgressThickness: Config.dashboard.sizes.mediaProgressThickness ?? 8
-    property int mediaVisualiserSize: Config.dashboard.sizes.mediaVisualiserSize ?? 80
     
     // Performance Resources
     property bool showBattery: Config.dashboard.performance.showBattery ?? false
     property bool showGpu: Config.dashboard.performance.showGpu ?? true
     property bool showCpu: Config.dashboard.performance.showCpu ?? true
     property bool showMemory: Config.dashboard.performance.showMemory ?? true
-    property bool showStorage: Config.dashboard.performance.showStorage ?? false
-    property int resourceSize: Config.dashboard.sizes.resourceSize ?? 200
-    property int resourceProgessThickness: Config.dashboard.sizes.resourceProgessThickness ?? 10
-
-    // Widget Sizes
-    property int tabIndicatorHeight: Config.dashboard.sizes.tabIndicatorHeight ?? 3
-    property int tabIndicatorSpacing: Config.dashboard.sizes.tabIndicatorSpacing ?? 5
-    property int infoWidth: Config.dashboard.sizes.infoWidth ?? 200
-    property int infoIconSize: Config.dashboard.sizes.infoIconSize ?? 25
-    property int dateTimeWidth: Config.dashboard.sizes.dateTimeWidth ?? 110
-    property int weatherWidth: Config.dashboard.sizes.weatherWidth ?? 250
+    property bool showStorage: Config.dashboard.performance.showStorage ?? true 
+    property bool showNetwork: Config.dashboard.performance.showNetwork ?? true
 
     anchors.fill: parent
 
     function saveConfig() {
         Config.dashboard.enabled = root.enabled;
         Config.dashboard.showOnHover = root.showOnHover;
+        Config.dashboard.updateInterval = root.updateInterval;
         Config.dashboard.dragThreshold = root.dragThreshold;
-        Config.dashboard.mediaUpdateInterval = root.mediaUpdateInterval;
         Config.dashboard.performance.showBattery = root.showBattery;
         Config.dashboard.performance.showGpu = root.showGpu;
         Config.dashboard.performance.showCpu = root.showCpu;
         Config.dashboard.performance.showMemory = root.showMemory;
         Config.dashboard.performance.showStorage = root.showStorage;
+        Config.dashboard.performance.showNetwork = root.showNetwork;
         // Note: sizes properties are readonly and cannot be modified
         Config.save();
     }
@@ -83,7 +68,6 @@ Item {
             anchors.leftMargin: Appearance.padding.large
             anchors.rightMargin: Appearance.padding.large
 
-            asynchronous: true
             sourceComponent: dashboardContentComponent
         }
     }
@@ -132,35 +116,6 @@ Item {
                 // Performance Resources Section
                 PerformanceSection {
                     rootItem: root
-                }
-
-                // Two-column layout for Media and Widget Sizes
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: Appearance.spacing.normal
-                    Layout.alignment: Qt.AlignTop
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        spacing: Appearance.spacing.normal
-
-                        // Media Widget Section
-                        MediaSection {
-                            rootItem: root
-                        }
-                    }
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignTop
-                        spacing: Appearance.spacing.normal
-
-                        // Widget Sizes Section
-                        WidgetSizesSection {
-                            rootItem: root
-                        }
-                    }
                 }
             }
         }

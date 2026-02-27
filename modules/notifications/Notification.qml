@@ -109,7 +109,6 @@ StyledRect {
                 id: image
 
                 active: root.hasImage
-                asynchronous: true
 
                 anchors.left: parent.left
                 anchors.top: parent.top
@@ -136,7 +135,6 @@ StyledRect {
                 id: appIcon
 
                 active: root.hasAppIcon || !root.hasImage
-                asynchronous: true
 
                 anchors.horizontalCenter: root.hasImage ? undefined : image.horizontalCenter
                 anchors.verticalCenter: root.hasImage ? undefined : image.verticalCenter
@@ -153,7 +151,6 @@ StyledRect {
                         id: icon
 
                         active: root.hasAppIcon
-                        asynchronous: true
 
                         anchors.centerIn: parent
 
@@ -170,7 +167,6 @@ StyledRect {
 
                     Loader {
                         active: !root.hasAppIcon
-                        asynchronous: true
                         anchors.centerIn: parent
                         anchors.horizontalCenterOffset: -Appearance.font.size.large * 0.02
                         anchors.verticalCenterOffset: Appearance.font.size.large * 0.02

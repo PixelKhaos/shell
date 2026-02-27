@@ -13,14 +13,7 @@ Item {
 
     // Current wallpaper path (managed by Caelestia)
     property string source: Wallpapers.current
-
-    // Expose the currently visible image item (for visualiser/shaders)
-    readonly property Item current: activeSlot?.activeChild
-
-    // Track which slot is currently active
-    property Item activeSlot: one
-
-    anchors.fill: parent
+    property Image current: one
 
     // When the source changes, update the "other" slot to enable a crossfade.
     onSourceChanged: {
@@ -37,7 +30,6 @@ Item {
     Loader {
         anchors.fill: parent
         active: !root.source
-        asynchronous: true
 
         sourceComponent: StyledRect {
             color: Colours.palette.m3surfaceContainer

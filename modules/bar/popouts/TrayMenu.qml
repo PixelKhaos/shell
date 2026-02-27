@@ -85,7 +85,6 @@ StackView {
                     anchors.right: parent.right
 
                     active: !item.modelData.isSeparator
-                    asynchronous: true
 
                     sourceComponent: Item {
                         implicitHeight: label.implicitHeight
@@ -117,8 +116,7 @@ StackView {
 
                             anchors.left: parent.left
 
-                            active: item.modelData.buttonType !== 0 || item.modelData.icon !== ""
-                            asynchronous: true
+                            active: item.modelData.icon !== ""
 
                             sourceComponent: {
                                 if (item.modelData.buttonType === 1) return checkBoxComp;
@@ -193,7 +191,6 @@ StackView {
                             anchors.right: parent.right
 
                             active: item.modelData.hasChildren
-                            asynchronous: true
 
                             sourceComponent: MaterialIcon {
                                 text: "chevron_right"
@@ -207,7 +204,6 @@ StackView {
 
         Loader {
             active: menu.isSubMenu
-            asynchronous: true
 
             sourceComponent: Item {
                 implicitWidth: back.implicitWidth

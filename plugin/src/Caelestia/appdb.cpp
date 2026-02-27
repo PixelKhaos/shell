@@ -162,28 +162,28 @@ void AppDb::setEntries(const QObjectList& entries) {
     m_timer->start();
 }
 
-QStringList AppDb::favoriteApps() const {
-    return m_favoriteApps;
+QStringList AppDb::favouriteApps() const {
+    return m_favouriteApps;
 }
 
-void AppDb::setFavoriteApps(const QStringList& favApps) {
-    if (m_favoriteApps == favApps) {
+void AppDb::setFavouriteApps(const QStringList& favApps) {
+    if (m_favouriteApps == favApps) {
         return;
     }
 
-    m_favoriteApps = favApps;
-    m_favoriteAppsRegex.clear();
-    m_favoriteAppsRegex.reserve(m_favoriteApps.size());
-    for (const QString& item : m_favoriteApps) {
+    m_favouriteApps = favApps;
+    emit favouriteAppsChanged();
+    m_favouriteAppsRegex.clear();
+    m_favouriteAppsRegex.reserve(m_favouriteApps.size());
+    for (const QString& item : std::as_const(m_favouriteApps)) {
         const QRegularExpression re(regexifyString(item));
         if (re.isValid()) {
-            m_favoriteAppsRegex << re;
+            m_favouriteAppsRegex << re;
         } else {
-            qWarning() << "AppDb::setFavoriteApps: Regular expression is not valid: " << re.pattern();
+            qWarning() << "AppDb::setFavouriteApps: Regular expression is not valid: " << re.pattern();
         }
     }
 
-    emit favoriteAppsChanged();
     emit appsChanged();
 }
 
@@ -226,8 +226,8 @@ void AppDb::incrementFrequency(const QString& id) {
 QList<AppEntry*>& AppDb::getSortedApps() const {
     m_sortedApps = m_apps.values();
     std::sort(m_sortedApps.begin(), m_sortedApps.end(), [this](AppEntry* a, AppEntry* b) {
-        bool aIsFav = isFavorite(a);
-        bool bIsFav = isFavorite(b);
+        bool aIsFav = isFavourite(a);
+        bool bIsFav = isFavourite(b);
         if (aIsFav != bIsFav) {
             return aIsFav;
         }
@@ -239,8 +239,8 @@ QList<AppEntry*>& AppDb::getSortedApps() const {
     return m_sortedApps;
 }
 
-bool AppDb::isFavorite(const AppEntry* app) const {
-    for (const QRegularExpression& re : m_favoriteAppsRegex) {
+bool AppDb::isFavourite(const AppEntry* app) const {
+    for (const QRegularExpression& re : m_favouriteAppsRegex) {
         if (re.match(app->id()).hasMatch()) {
             return true;
         }
