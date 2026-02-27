@@ -49,6 +49,7 @@ qml_module(caelestia
         requests.hpp requests.cpp
         toaster.hpp toaster.cpp
         imageanalyser.hpp imageanalyser.cpp
+        videoframeitem.hpp videoframeitem.cpp
     LIBRARIES
         Qt::Gui
         Qt::Quick

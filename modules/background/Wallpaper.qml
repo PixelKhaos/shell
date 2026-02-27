@@ -1,33 +1,159 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.components.images
 import qs.components.filedialog
 import qs.services
 import qs.config
-import qs.utils
+import Quickshell
 import QtQuick
 
 Item {
     id: root
+    anchors.fill: parent
+    required property ShellScreen screen
 
     // Current wallpaper path (managed by Caelestia)
     property string source: Wallpapers.current
-    property Image current: one
+    property bool initialized: false
+    property int loadedCount: 0
+    property bool itemsReady: false
+    property bool initStarted: false
+    property bool gamemodeEnabled: GameMode.enabled
+    property var sessionLock: null
+    readonly property bool sessionLocked: sessionLock ? sessionLock.secure : false
+    property bool shouldPause: Config.background.wallpaper.video.autoPause && !(Hypr.monitorFor(screen)?.activeWorkspace?.toplevels?.values.every(t => t.lastIpcObject?.floating) ?? true)
 
-    // When the source changes, update the "other" slot to enable a crossfade.
-    onSourceChanged: {
-        if (!source) {
-            activeSlot = null;
-        } else {
-            // Update the inactive slot
-            const nextSlot = (activeSlot === one) ? two : one;
-            nextSlot.loadAndBecomeActive(source);
-        }
+    function applySessionLock(loader) {
+        if (!loader || !loader.item)
+            return;
+
+        if (typeof loader.item.pausePlayVideo === "function")
+            loader.item.pausePlayVideo(sessionLocked);
     }
 
-    // Empty-state UI (unchanged)
+    function autoPauseVideo(loader) {
+        if (!loader || !loader.item)
+            return;
+
+        const pause = root.shouldPause && !root.gamemodeEnabled;
+
+        if (typeof loader.item.shouldPause === "boolean")
+            loader.item.shouldPause = pause;
+    }
+
+    function isVideo(path) {
+        path = path.toString();
+        if (!path || path.trim() === "")
+            return false;
+
+        const videoExtensions = [".mp4", ".mkv", ".webm", ".avi", ".mov", ".flv", ".wmv", ".gif"];
+
+        const lower = path.toLowerCase();
+        for (let i = 0; i < videoExtensions.length; i++) {
+            if (lower.endsWith(videoExtensions[i]))
+                return true;
+        }
+        return false;
+    }
+
+    function waitForBothItems() {
+        if (oneLoader.item && twoLoader.item) {
+            itemsReady = true;
+            initialize();
+            return;
+        }
+        Qt.callLater(waitForBothItems);
+    }
+
+    function initialize() {
+        if (initStarted || loadedCount < 2 || !itemsReady)
+            return;
+
+        initStarted = true;
+
+        oneLoader.item.isCurrent = true;
+        twoLoader.item.isCurrent = false;
+
+        initialized = true;
+        Qt.callLater(switchWallpaper);
+    }
+
+    function switchWallpaper() {
+        if (!initialized || !root.source)
+            return;
+
+        let active;
+        let inactive;
+
+        if (oneLoader.item.isCurrent) {
+            active = oneLoader;
+            inactive = twoLoader;
+        } else {
+            active = twoLoader;
+            inactive = oneLoader;
+        }
+
+        if (inactive.item && inactive.item.slotId !== undefined && inactive.item.slotId >= 0) {
+            DecoderService.stopSlot(inactive.item.slotId);
+        }
+
+        inactive.sourceComponent = null;
+        Qt.callLater(() => {
+            if (isVideo(source)) {
+                inactive.sourceComponent = Config.background.wallpaper.video.useExternalDecoder ? videoDecoderComponent : videoComponent;
+            } else {
+                inactive.sourceComponent = imageComponent;
+            }
+        });
+
+        waitForItem(inactive, function () {
+            if (inactive.item.slotId !== undefined) {
+                const newSlotId = (inactive === oneLoader) ? 0 : 1;
+                inactive.item.slotId = newSlotId;
+            }
+
+            Qt.callLater(() => {
+                inactive.item.update(source);
+
+                inactive.item.ready.connect(function handler() {
+                    inactive.z = 1;
+                    active.z = 0;
+
+                    inactive.item.isCurrent = true;
+
+                    const timer = Qt.createQmlObject('import QtQuick; Timer { interval: ' + Appearance.anim.durations.normal + '; repeat: false }', root);
+                    timer.triggered.connect(() => {
+                        active.item.isCurrent = false;
+                        timer.destroy();
+                    });
+                    timer.start();
+
+                    inactive.item.ready.disconnect(handler);
+                });
+            });
+        });
+    }
+
+    function waitForItem(loader, callback) {
+        if (loader.item) {
+            callback();
+            return;
+        }
+        Qt.callLater(() => waitForItem(loader, callback));
+    }
+
+    onSessionLockedChanged: {
+        applySessionLock(oneLoader);
+        applySessionLock(twoLoader);
+    }
+
+    onShouldPauseChanged: {
+        autoPauseVideo(oneLoader);
+        autoPauseVideo(twoLoader);
+    }
+
     Loader {
+        id: placeholderLoader
         anchors.fill: parent
         active: !root.source
 
@@ -65,15 +191,17 @@ Item {
                         FileDialog {
                             id: dialog
                             title: qsTr("Select a wallpaper")
-                            filterLabel: qsTr("Image files")
-                            filters: Images.validImageExtensions
+                            filterLabel: qsTr("Files")
+                            filters: ["jpg", "jpeg", "png", "webp", "tif", "tiff", "svg", "mp4", "mkv", "webm", "avi", "mov", "flv", "wmv", "gif"]
                             onAccepted: path => Wallpapers.setWallpaper(path)
                         }
 
                         StateLayer {
                             radius: parent.radius
                             color: Colours.palette.m3onPrimary
-                            function onClicked(): void { dialog.open(); }
+                            function onClicked(): void {
+                                dialog.open();
+                            }
                         }
 
                         StyledText {
@@ -89,161 +217,59 @@ Item {
         }
     }
 
-    // Two slots that we crossfade between
-    Img { id: one }
-    Img { id: two }
-
-    // ----------------------------------------------------------------------
-    // Img: persistent dual-renderer (static + gif), no Loader, no reparenting
-    // ----------------------------------------------------------------------
-    component Img: Item {
-        id: img
-
+    Loader {
+        id: oneLoader
         anchors.fill: parent
-
-        // Path we want this slot to display
-        property string path: ""
-
-        // Determine renderer
-        readonly property bool isGif: path && path.toLowerCase().endsWith(".gif")
-
-        // The child that is currently visible (either staticImg or gifImg)
-        readonly property Item activeChild: isGif ? gifImg : staticImg
-
-        // Load new wallpaper and become active when ready
-        function loadAndBecomeActive(newPath: string): void {
-            // Use Qt.callLater() + path reset to prevent race condition (PR #847)
-            if (path !== newPath) {
-                path = "";
-                Qt.callLater(() => {
-                    path = newPath;
-                    
-                    if (isGif) {
-                        staticImg.visible = false;
-                        staticImg.path = "";
-                        
-                        gifImg.source = newPath;
-                        gifImg.visible = true;
-                    } else {
-                        gifImg.visible = false;
-                        gifImg.playing = false;
-                        gifImg.source = "";
-                        
-                        staticImg.path = newPath;
-                        staticImg.visible = true;
-                    }
-                    
-                    // Check if already ready (sync/cached load)
-                    checkAndActivate();
-                });
-            }
+        asynchronous: true
+        sourceComponent: imageComponent
+        z: 1
+        onLoaded: {
+            root.loadedCount++;
+            if (root.loadedCount === 2)
+                root.waitForBothItems();
         }
 
-        // Check if ready and activate this slot
-        function checkAndActivate(): void {
-            if (activeChild.status !== Image.Ready) return;
-            
-            // Start GIF playback
-            if (isGif) {
-                gifImg.currentFrame = 0;
-                gifImg.playing = true;
-            }
-            
-            // Make this slot active
-            root.activeSlot = img;
+        onItemChanged: {
+            root.applySessionLock(oneLoader);
+            root.autoPauseVideo(oneLoader);
+        }
+    }
+
+    Loader {
+        id: twoLoader
+        anchors.fill: parent
+        asynchronous: true
+        sourceComponent: imageComponent
+        z: 0
+        onLoaded: {
+            root.loadedCount++;
+            if (root.loadedCount === 2)
+                root.waitForBothItems();
         }
 
-        // Crossfade/scale state lives on the slot wrapper
-        opacity: 0
-        scale: Wallpapers.showPreview ? 1 : 0.8
-
-        // --- Static renderer (persistent) ---
-        CachingImage {
-            id: staticImg
-            anchors.fill: parent
-            visible: false
-
-            onStatusChanged: {
-                if (status === Image.Ready && visible) {
-                    img.checkAndActivate();
-                }
-            }
+        onItemChanged: {
+            root.applySessionLock(oneLoader);
+            root.autoPauseVideo(twoLoader);
         }
+    }
 
-        // --- GIF renderer (persistent AnimatedImage) ---
-        AnimatedImage {
-            id: gifImg
-            anchors.fill: parent
-            visible: false
-            cache: false
-            asynchronous: false
-            playing: false
-            fillMode: Image.PreserveAspectCrop
+    onSourceChanged: {
+        if (initialized)
+            switchWallpaper();
+    }
 
-            onStatusChanged: {
-                if (status === Image.Ready && visible) {
-                    img.checkAndActivate();
-                }
-            }
+    Component {
+        id: imageComponent
+        ImageWallpaper {}
+    }
 
-            onVisibleChanged: {
-                if (!visible) playing = false;
-            }
-        }
+    Component {
+        id: videoComponent
+        VideoWallpaper {}
+    }
 
-        // Animate *this slot* (not the child), to avoid touching decoder items
-        states: State {
-            name: "visible"
-            when: root.activeSlot === img
-            PropertyChanges { target: img; opacity: 1; scale: 1 }
-        }
-
-        transitions: [
-            Transition {
-                to: "visible"
-                ParallelAnimation {
-                    NumberAnimation {
-                        target: img
-                        property: "opacity"
-                        duration: Appearance.anim.durations.large
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.standard
-                    }
-                    NumberAnimation {
-                        target: img
-                        property: "scale"
-                        duration: Appearance.anim.durations.large
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.standard
-                    }
-                }
-            },
-            Transition {
-                from: "visible"; to: ""
-                ParallelAnimation {
-                    NumberAnimation {
-                        target: img
-                        property: "opacity"
-                        duration: Appearance.anim.durations.large
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.standard
-                    }
-                    NumberAnimation {
-                        target: img
-                        property: "scale"
-                        duration: Appearance.anim.durations.large
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.standard
-                    }
-                }
-            }
-        ]
-
-        // Initialize once at creation
-        Component.onCompleted: {
-            if (root.source && root.activeSlot === img) {
-                loadAndBecomeActive(root.source);
-            }
-        }
+    Component {
+        id: videoDecoderComponent
+        VideoWallpaperDecoder {}
     }
 }
