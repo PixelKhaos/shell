@@ -36,6 +36,41 @@ JsonObject {
         property list<var> provider: ["netbird"]
     }
 
+    property list<var> quickToggles: [
+        {
+            id: "wifi",
+            enabled: true
+        },
+        {
+            id: "bluetooth",
+            enabled: true
+        },
+        {
+            id: "mic",
+            enabled: true
+        },
+        {
+            id: "settings",
+            enabled: true
+        },
+        {
+            id: "gameMode",
+            enabled: true
+        },
+        {
+            id: "dnd",
+            enabled: true
+        },
+        {
+            id: "vpn",
+            enabled: false
+        },
+        {
+            id: "nightLight",
+            enabled: false
+        }
+    ]
+
     component NightLight: JsonObject {
         property bool enabled: false
         property int temperature: 4500

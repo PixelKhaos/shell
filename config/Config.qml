@@ -431,7 +431,8 @@ Singleton {
             nightLight: {
                 enabled: utilities.nightLight.enabled,
                 temperature: utilities.nightLight.temperature
-            }
+            },
+            quickToggles: utilities.quickToggles
         };
     }
 
