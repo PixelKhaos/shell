@@ -19,11 +19,10 @@ Item {
         anchors.fill: parent
         spacing: Appearance.spacing.normal
 
-        HyprSunset {}
 
         HyprSunset {}
 
-    UtilCards.IdleInhibit {}
+        IdleInhibit {}
 
         // Combined media card: Screenshots + Recordings in tabs
         UtilCards.Media {
