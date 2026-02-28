@@ -1,6 +1,7 @@
 pragma Singleton
 
 import QtQuick
+import Quickshell.Services.UPower
 
 QtObject {
     id: root
@@ -23,6 +24,13 @@ QtObject {
             readonly property string label: "audio"
             readonly property string icon: "volume_up"
             readonly property string component: "audio/AudioPane.qml"
+        },
+        QtObject {
+            readonly property string id: "power"
+            readonly property string label: "power"
+            readonly property string icon: "battery_charging_full"
+            readonly property string component: "battery/BatteryPane.qml"
+            readonly property bool visible: UPower.displayDevice !== null
         },
         QtObject {
             readonly property string id: "appearance"
