@@ -349,14 +349,6 @@ Scope {
         
         root.settingsModified = false;
         root.currentThresholdIndex = -1;
-        
-        const changedSomething = config.setPowerProfile !== "" || config.setRefreshRate !== "" ||
-                                config.disableAnimations !== "" || config.disableBlur !== "" ||
-                                config.disableRounding !== "" || config.disableShadows !== "";
-        
-        if (Config.utilities.toasts.chargingChanged && changedSomething && root.initialized) {
-            Toaster.toast(qsTr("Charger plugged in"), qsTr("Battery is charging"), "power");
-        }
     }
     
     function restoreSettings() {

@@ -51,7 +51,9 @@ StyledRect {
                 id: track
                 anchors.fill: parent
                 radius: height / 2
-                color: toggle.state === 2 ? Colours.palette.m3primary : Colours.layer(Colours.palette.m3surfaceContainerHighest, 1)
+                color: toggle.state === 2 ? Colours.palette.m3primary : 
+                       toggle.state === 0 ? Colours.palette.m3error : 
+                       Colours.layer(Colours.palette.m3surfaceContainerHighest, 1)
 
                 Behavior on color {
                     ColorAnimation {
@@ -71,7 +73,9 @@ StyledRect {
                     readonly property real rightPos: thumbPadding + availableWidth
 
                     radius: height / 2
-                    color: toggle.state === 2 ? Colours.palette.m3onPrimary : Colours.layer(Colours.palette.m3outline, 2)
+                    color: toggle.state === 2 ? Colours.palette.m3onPrimary : 
+                           toggle.state === 0 ? Colours.palette.m3onError : 
+                           Colours.layer(Colours.palette.m3outline, 2)
 
                     x: toggle.state === 2 ? rightPos : toggle.state === 1 ? centerPos : leftPos
                     width: nonAnimWidth
@@ -171,7 +175,9 @@ StyledRect {
 
                         ShapePath {
                             strokeWidth: Appearance.font.size.larger * 0.15
-                            strokeColor: toggle.state === 2 ? Colours.palette.m3primary : Colours.palette.m3surfaceContainerHighest
+                            strokeColor: toggle.state === 2 ? Colours.palette.m3primary : 
+                                        toggle.state === 0 ? Colours.palette.m3error : 
+                                        Colours.palette.m3surfaceContainerHighest
                             fillColor: "transparent"
                             capStyle: Appearance.rounding.scale === 0 ? ShapePath.SquareCap : ShapePath.RoundCap
 

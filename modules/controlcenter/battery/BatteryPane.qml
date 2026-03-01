@@ -101,14 +101,26 @@ Item {
                     }
                 }
 
-                Power.ThresholdsSection {
+                RowLayout {
                     Layout.fillWidth: true
-                    rootItem: root
-                }
-
-                Power.ChargingBehaviorSection {
-                    Layout.fillWidth: true
-                    rootItem: root
+                    spacing: Appearance.spacing.normal
+                    
+                    Power.ChargingBehaviorSection {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: 0
+                        Layout.alignment: Qt.AlignTop
+                        rootItem: root
+                    }
+                    
+                    Power.ThresholdsSection {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: 0
+                        Layout.maximumWidth: parent.width * 0.4
+                        Layout.alignment: Qt.AlignTop
+                        rootItem: root
+                    }
                 }
 
                 Power.ProfileBehaviorsSection {

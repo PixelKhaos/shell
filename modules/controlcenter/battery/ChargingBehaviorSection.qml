@@ -14,7 +14,12 @@ SectionContainer {
     required property var rootItem
 
     Layout.fillWidth: true
+    Layout.fillHeight: true
     alignTop: true
+    
+    Behavior on implicitHeight {
+        Anim {}
+    }
 
     StyledText {
         text: qsTr("Charging & Unplugged Behavior")

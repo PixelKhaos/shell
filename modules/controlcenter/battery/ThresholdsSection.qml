@@ -16,6 +16,7 @@ SectionContainer {
     required property var rootItem
 
     Layout.fillWidth: true
+    Layout.fillHeight: true
     alignTop: true
 
     Component.onCompleted: {
@@ -70,20 +71,18 @@ SectionContainer {
         wrapMode: Text.WordWrap
     }
 
-    GridLayout {
+    ColumnLayout {
         Layout.fillWidth: true
-        columns: 3
-        columnSpacing: Appearance.spacing.normal
-        rowSpacing: Appearance.spacing.normal
+        spacing: Appearance.spacing.normal
         
         Behavior on implicitHeight {
             Anim {}
         }
 
-        // Add threshold button (first cell)
+        // Add threshold button
         StyledRect {
             Layout.fillWidth: true
-            Layout.preferredHeight: 150
+            Layout.preferredHeight: 60
             radius: Appearance.rounding.normal
             color: Colours.layer(Colours.palette.m3surfaceContainer, 1)
             border.width: 2
@@ -94,7 +93,7 @@ SectionContainer {
                     thresholdsModel.append({
                         level: 50,
                         setPowerProfile: "",
-                        setRefreshRate: "",
+                        setRefreshRate: "auto",
                         disableAnimations: "",
                         disableBlur: "",
                         disableRounding: "",
@@ -104,23 +103,24 @@ SectionContainer {
                 }
             }
 
-            ColumnLayout {
-                anchors.centerIn: parent
-                spacing: Appearance.spacing.smaller
+            RowLayout {
+                anchors.fill: parent
+                anchors.margins: Appearance.padding.normal
+                spacing: Appearance.spacing.normal
 
                 MaterialIcon {
-                    Layout.alignment: Qt.AlignHCenter
                     text: "add_circle"
-                    font.pointSize: Appearance.font.size.large * 2
+                    font.pointSize: Appearance.font.size.large
                     color: Colours.palette.m3primary
                 }
 
                 StyledText {
-                    Layout.alignment: Qt.AlignHCenter
                     text: qsTr("Add Threshold")
                     font.pointSize: Appearance.font.size.normal
                     color: Colours.palette.m3primary
                 }
+                
+                Item { Layout.fillWidth: true }
             }
         }
 
@@ -129,67 +129,238 @@ SectionContainer {
             model: thresholdsModel
 
             delegate: StyledRect {
+                id: card
+                
                 required property int index
                 required property int level
-                required property var setPowerProfile
-                required property var setRefreshRate
+                required property string setPowerProfile
+                required property string setRefreshRate
                 required property string disableAnimations
                 required property string disableBlur
                 required property string disableRounding
                 required property string disableShadows
 
+                property bool editing: false
+                property bool removing: false
+
                 Layout.fillWidth: true
-                Layout.preferredHeight: 150
+                Layout.preferredHeight: editing ? contentColumn.implicitHeight + Appearance.padding.normal * 2 : 60
                 radius: Appearance.rounding.normal
                 color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                scale: removing ? 0 : 1
+                opacity: removing ? 0 : 1
+
+                Behavior on Layout.preferredHeight {
+                    Anim {}
+                }
+
+                Behavior on scale {
+                    Anim {
+                        duration: Appearance.anim.durations.normal
+                        easing.bezierCurve: Appearance.anim.curves.standardAccel
+                    }
+                }
+
+                Behavior on opacity {
+                    Anim {
+                        duration: Appearance.anim.durations.normal
+                        easing.bezierCurve: Appearance.anim.curves.standardAccel
+                    }
+                }
+
+                SequentialAnimation {
+                    id: removeAnimation
+                    
+                    PropertyAction {
+                        target: card
+                        property: "removing"
+                        value: true
+                    }
+                    PauseAnimation {
+                        duration: Appearance.anim.durations.normal
+                    }
+                    ScriptAction {
+                        script: {
+                            thresholdsModel.remove(card.index);
+                            root.saveThresholds();
+                        }
+                    }
+                }
 
                 ColumnLayout {
-                    anchors.fill: parent
+                    id: contentColumn
+                    
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
                     anchors.margins: Appearance.padding.normal
-                    spacing: Appearance.spacing.smaller
+                    spacing: Appearance.spacing.normal
 
                     RowLayout {
                         Layout.fillWidth: true
+                        spacing: Appearance.spacing.normal
 
                         StyledText {
                             Layout.fillWidth: true
-                            text: level + "% Battery"
+                            text: card.level + "% Battery"
                             font.pointSize: Appearance.font.size.normal
                             font.weight: 500
                         }
 
+                        TextButton {
+                            text: card.editing ? qsTr("Done") : qsTr("Edit")
+                            onClicked: card.editing = !card.editing
+                        }
+
                         IconButton {
                             icon: "delete"
-                            onClicked: {
-                                thresholdsModel.remove(index);
-                                root.saveThresholds();
-                            }
+                            onClicked: removeAnimation.start()
                         }
                     }
 
-                    StyledText {
-                        text: {
-                            const parts = [];
-                            if (setPowerProfile) parts.push(setPowerProfile);
-                            if (disableAnimations !== "" || disableBlur !== "" || disableRounding !== "" || disableShadows !== "") {
-                                parts.push("effects configured");
-                            }
-                            return parts.length > 0 ? parts.join(", ") : qsTr("No actions");
-                        }
-                        font.pointSize: Appearance.font.size.smaller
-                        opacity: 0.7
-                        elide: Text.ElideRight
+                    Loader {
                         Layout.fillWidth: true
-                    }
-
-                    Item { Layout.fillHeight: true }
-
-                    TextButton {
-                        Layout.alignment: Qt.AlignRight
-                        text: qsTr("Edit")
-                        onClicked: {
-                            // TODO: Open edit dialog
+                        active: true
+                        asynchronous: false
+                        visible: opacity > 0
+                        opacity: card.editing ? 1 : 0
+                        
+                        Behavior on opacity {
+                            Anim {
+                                duration: Appearance.anim.durations.normal
+                                easing.bezierCurve: Appearance.anim.curves.standard
+                            }
                         }
+                        
+                        sourceComponent: ColumnLayout {
+                            spacing: Appearance.spacing.normal
+                            
+                            StyledRect {
+                                Layout.fillWidth: true
+                                implicitHeight: batteryLevelRow.implicitHeight + Appearance.padding.large * 2
+                                radius: Appearance.rounding.normal
+                                color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                                
+                                Behavior on implicitHeight {
+                                    Anim {}
+                                }
+                                
+                                RowLayout {
+                                    id: batteryLevelRow
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.margins: Appearance.padding.large
+                                    spacing: Appearance.spacing.normal
+                                    
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: qsTr("Battery Level")
+                                    }
+                                    
+                                    CustomSpinBox {
+                                        min: 5
+                                        max: 95
+                                        step: 1
+                                        value: card.level
+                                        onValueModified: newValue => {
+                                            if (newValue !== card.level) {
+                                                thresholdsModel.setProperty(card.index, "level", Math.round(newValue));
+                                                root.saveThresholds();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            Power.PowerProfileSelector {
+                                Layout.fillWidth: true
+                                label: qsTr("Power Profile")
+                                value: card.setPowerProfile
+                                onProfileChanged: newValue => {
+                                    thresholdsModel.setProperty(card.index, "setPowerProfile", newValue);
+                                    root.saveThresholds();
+                                }
+                            }
+                            
+                            Power.RefreshRateSelector {
+                                Layout.fillWidth: true
+                                label: qsTr("Refresh Rate")
+                                showUnchanged: true
+                                value: card.setRefreshRate
+                                onRateChanged: newValue => {
+                                    thresholdsModel.setProperty(card.index, "setRefreshRate", newValue);
+                                    root.saveThresholds();
+                                }
+                            }
+                            
+                            TriStateRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Animations")
+                                value: card.disableAnimations
+                                onTriStateValueChanged: newValue => {
+                                    thresholdsModel.setProperty(card.index, "disableAnimations", newValue);
+                                    root.saveThresholds();
+                                }
+                            }
+                            
+                            TriStateRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Blur")
+                                value: card.disableBlur
+                                onTriStateValueChanged: newValue => {
+                                    thresholdsModel.setProperty(card.index, "disableBlur", newValue);
+                                    root.saveThresholds();
+                                }
+                            }
+                            
+                            TriStateRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Rounding")
+                                value: card.disableRounding
+                                onTriStateValueChanged: newValue => {
+                                    thresholdsModel.setProperty(card.index, "disableRounding", newValue);
+                                    root.saveThresholds();
+                                }
+                            }
+                            
+                            TriStateRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Shadows")
+                                value: card.disableShadows
+                                onTriStateValueChanged: newValue => {
+                                    thresholdsModel.setProperty(card.index, "disableShadows", newValue);
+                                    root.saveThresholds();
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                Component.onCompleted: {
+                    scale = 0;
+                    opacity = 0;
+                    scaleInAnimation.start();
+                }
+                
+                ParallelAnimation {
+                    id: scaleInAnimation
+                    
+                    Anim {
+                        target: card
+                        property: "scale"
+                        from: 0.7
+                        to: 1
+                        duration: Appearance.anim.durations.normal
+                        easing.bezierCurve: Appearance.anim.curves.standardDecel
+                    }
+                    Anim {
+                        target: card
+                        property: "opacity"
+                        from: 0
+                        to: 1
+                        duration: Appearance.anim.durations.normal
+                        easing.bezierCurve: Appearance.anim.curves.standardDecel
                     }
                 }
             }
