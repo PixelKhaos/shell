@@ -58,7 +58,7 @@ SectionContainer {
 
     RowLayout {
         Layout.fillWidth: true
-        spacing: Appearance.spacing.normal
+        spacing: 0
 
         // Power Saver Profile Column
         ColumnLayout {

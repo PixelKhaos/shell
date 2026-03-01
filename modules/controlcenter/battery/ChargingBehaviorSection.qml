@@ -28,7 +28,7 @@ SectionContainer {
 
     RowLayout {
         Layout.fillWidth: true
-        spacing: Appearance.spacing.normal
+        spacing: 0
 
         // Charging behavior column
         ColumnLayout {

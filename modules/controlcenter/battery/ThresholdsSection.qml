@@ -71,15 +71,19 @@ SectionContainer {
         wrapMode: Text.WordWrap
     }
 
-    ColumnLayout {
+    SectionContainer {
         Layout.fillWidth: true
-        spacing: Appearance.spacing.normal
-        
-        Behavior on implicitHeight {
-            Anim {}
-        }
+        alignTop: true
 
-        // Add threshold button
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: Appearance.spacing.normal
+            
+            Behavior on implicitHeight {
+                Anim {}
+            }
+
+            // Add threshold button
         StyledRect {
             Layout.fillWidth: true
             Layout.preferredHeight: 60
@@ -364,6 +368,7 @@ SectionContainer {
                     }
                 }
             }
+        }
         }
     }
 }
