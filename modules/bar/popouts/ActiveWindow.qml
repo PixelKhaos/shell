@@ -99,4 +99,24 @@ Item {
             }
         }
     }
+
+    MouseArea {
+        anchors.fill: parent
+        anchors.leftMargin: -Appearance.padding.large
+        anchors.rightMargin: -Appearance.padding.large
+        anchors.topMargin: -Appearance.padding.large
+        anchors.bottomMargin: -Appearance.padding.large
+        propagateComposedEvents: true
+        hoverEnabled: Config.bar.activeWindow.popoutMode === "hover"
+
+        onContainsMouseChanged: {
+            if (Config.bar.activeWindow.popoutMode === "hover") {
+                root.wrapper.hasCurrent = containsMouse;
+            }
+        }
+
+        onPressed: mouse => mouse.accepted = false
+        onReleased: mouse => mouse.accepted = false
+        onClicked: mouse => mouse.accepted = false
+    }
 }

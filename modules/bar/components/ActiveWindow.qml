@@ -33,22 +33,18 @@ Item {
     MouseArea {
         anchors.fill: parent
         cursorShape: Qt.PointingHandCursor
-        hoverEnabled: Config.bar.activeWindow.popoutMode === "hover"
+        hoverEnabled: true
 
-        onEntered: {
+        onContainsMouseChanged: {
             if (Config.bar.activeWindow.popoutMode === "hover") {
-                const name = "activewindow"
-                if (bar.popouts.currentName !== name || !bar.popouts.hasCurrent) {
-                    bar.popouts.currentName = name;
-                    bar.popouts.currentCenter = root.mapToItem(bar, 0, root.height / 2).y;
-                    bar.popouts.hasCurrent = true;
+                if (containsMouse) {
+                    const name = "activewindow"
+                    if (bar.popouts.currentName !== name || !bar.popouts.hasCurrent) {
+                        bar.popouts.currentName = name;
+                        bar.popouts.currentCenter = root.mapToItem(bar, 0, root.height / 2).y;
+                        bar.popouts.hasCurrent = true;
+                    }
                 }
-            }
-        }
-
-        onExited: {
-            if (Config.bar.activeWindow.popoutMode === "hover") {
-                bar.popouts.hasCurrent = false;
             }
         }
 

@@ -48,7 +48,11 @@ ColumnLayout {
         const top = ch.y;
         const item = ch.item;
 
-        if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
+        if (id === "activeWindow" && Config.bar.activeWindow.popoutMode === "hover") {
+            popouts.currentName = "activewindow";
+            popouts.currentCenter = item.mapToItem(root, 0, item.height / 2).y;
+            popouts.hasCurrent = true;
+        } else if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
             const items = item.items;
             const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
             if (icon) {
