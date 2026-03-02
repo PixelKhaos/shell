@@ -396,6 +396,9 @@ default, you must create it manually.
             "statusIcons": true,
             "tray": true
         },
+        "activeWindow": {
+            "popoutMode": "hover"
+        },
         "scrollActions": {
             "brightness": true,
             "workspaces": true,

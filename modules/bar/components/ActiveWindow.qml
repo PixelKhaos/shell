@@ -28,8 +28,42 @@ Item {
     readonly property int maxHeight: {
         const otherModules = bar.children.filter(c => c.id && c.item !== this && c.id !== "spacer");
         const otherHeight = otherModules.reduce((acc, curr) => acc + (curr.item.nonAnimHeight ?? curr.height), 0);
-        // Length - 2 cause repeater counts as a child
         return bar.height - otherHeight - bar.spacing * (bar.children.length - 1) - bar.vPadding * 2;
+    }
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        hoverEnabled: Config.bar.activeWindow.popoutMode === "hover"
+
+        onEntered: {
+            if (Config.bar.activeWindow.popoutMode === "hover") {
+                const name = "activewindow"
+                if (bar.popouts.currentName !== name || !bar.popouts.hasCurrent) {
+                    bar.popouts.currentName = name;
+                    bar.popouts.currentCenter = root.mapToItem(bar, 0, root.height / 2).y;
+                    bar.popouts.hasCurrent = true;
+                }
+            }
+        }
+
+        onExited: {
+            if (Config.bar.activeWindow.popoutMode === "hover") {
+                bar.popouts.hasCurrent = false;
+            }
+        }
+
+        onClicked: {
+            if (Config.bar.activeWindow.popoutMode === "click") {
+                const name = "activewindow"
+                if (bar.popouts.currentName === name && bar.popouts.hasCurrent) {
+                    bar.popouts.hasCurrent = false;
+                } else {
+                    bar.popouts.currentName = name;
+                    bar.popouts.currentCenter = root.mapToItem(bar, 0, root.height / 2).y;
+                    bar.popouts.hasCurrent = true;
+                }
+            }
+        }
     }
     property Title current: text1
 
