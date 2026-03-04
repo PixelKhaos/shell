@@ -129,7 +129,7 @@ Item {
             Component.onCompleted: {
                 wsId = modelData.id;
                 icon = Icons.getSpecialWsIcon(modelData.name);
-                hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && modelData.lastIpcObject.windows > 0;
+                hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && modelData.lastIpcObject?.windows > 0;
             }
 
             // Hacky thing cause modelData gets destroyed before the remove anim finishes
@@ -148,7 +148,7 @@ Item {
 
                 function onLastIpcObjectChanged(): void {
                     if (ws.modelData)
-                        ws.hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject.windows > 0;
+                        ws.hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject?.windows > 0;
                 }
             }
 
@@ -157,7 +157,7 @@ Item {
 
                 function onShowWindowsOnSpecialWorkspacesChanged(): void {
                     if (ws.modelData)
-                        ws.hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject.windows > 0;
+                        ws.hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject?.windows > 0;
                 }
             }
 
@@ -231,7 +231,7 @@ Item {
                             required property var modelData
 
                             grade: 0
-                            text: Icons.getAppCategoryIcon(modelData.lastIpcObject.class, "terminal")
+                            text: Icons.getAppCategoryIcon(modelData.lastIpcObject?.class, "terminal")
                             color: Colours.palette.m3onSurfaceVariant
                         }
                     }
