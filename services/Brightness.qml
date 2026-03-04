@@ -20,7 +20,10 @@ Singleton {
 
     function getMonitor(query: string): var {
         if (query === "active") {
-            return monitors.find(m => Hypr.monitorFor(m.modelData)?.focused);
+            return monitors.find(m => {
+                const mon = Hypr.monitorFor(m.modelData);
+                return mon?.focused ?? false;
+            });
         }
 
         if (query.startsWith("model:")) {
@@ -35,7 +38,10 @@ Singleton {
 
         if (query.startsWith("id:")) {
             const id = parseInt(query.slice(3), 10);
-            return monitors.find(m => Hypr.monitorFor(m.modelData)?.id === id);
+            return monitors.find(m => {
+                const mon = Hypr.monitorFor(m.modelData);
+                return mon?.id === id;
+            });
         }
 
         return monitors.find(m => m.modelData.name === query);

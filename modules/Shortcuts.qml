@@ -24,6 +24,8 @@ Scope {
             if (root.hasFullscreen)
                 return;
             const v = Visibilities.getForActive();
+            if (!v)
+                return;
             v.launcher = v.dashboard = v.osd = v.utilities = !(v.launcher || v.dashboard || v.osd || v.utilities);
         }
     }
@@ -35,6 +37,8 @@ Scope {
             if (root.hasFullscreen)
                 return;
             const visibilities = Visibilities.getForActive();
+            if (!visibilities)
+                return;
             visibilities.dashboard = !visibilities.dashboard;
         }
     }
@@ -46,6 +50,8 @@ Scope {
             if (root.hasFullscreen)
                 return;
             const visibilities = Visibilities.getForActive();
+            if (!visibilities)
+                return;
             visibilities.session = !visibilities.session;
         }
     }
@@ -57,7 +63,8 @@ Scope {
         onReleased: {
             if (!root.launcherInterrupted && !root.hasFullscreen) {
                 const visibilities = Visibilities.getForActive();
-                visibilities.launcher = !visibilities.launcher;
+                if (visibilities)
+                    visibilities.launcher = !visibilities.launcher;
             }
             root.launcherInterrupted = false;
         }
@@ -77,6 +84,8 @@ Scope {
             if (root.hasFullscreen)
                 return;
             const visibilities = Visibilities.getForActive();
+            if (!visibilities)
+                return;
             visibilities.sidebar = !visibilities.sidebar;
         }
     }
@@ -88,6 +97,8 @@ Scope {
             if (root.hasFullscreen)
                 return;
             const visibilities = Visibilities.getForActive();
+            if (!visibilities)
+                return;
             visibilities.utilities = !visibilities.utilities;
         }
     }
@@ -100,6 +111,8 @@ Scope {
                 if (root.hasFullscreen && ["launcher", "session", "dashboard"].includes(drawer))
                     return;
                 const visibilities = Visibilities.getForActive();
+                if (!visibilities)
+                    return;
                 visibilities[drawer] = !visibilities[drawer];
             } else {
                 console.warn(`[IPC] Drawer "${drawer}" does not exist`);
@@ -108,6 +121,8 @@ Scope {
 
         function list(): string {
             const visibilities = Visibilities.getForActive();
+            if (!visibilities)
+                return "";
             return Object.keys(visibilities).filter(k => typeof visibilities[k] === "boolean").join("\n");
         }
     }

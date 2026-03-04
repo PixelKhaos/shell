@@ -38,8 +38,11 @@ MouseArea {
         if (!mon)
             return [];
 
-        const special = mon.lastIpcObject.specialWorkspace;
-        const wsId = special.name ? special.id : mon.activeWorkspace.id;
+        const special = mon.lastIpcObject?.specialWorkspace;
+        const wsId = special?.name ? special.id : mon.activeWorkspace?.id;
+
+        if (!wsId)
+            return [];
 
         return Hypr.toplevels.values.filter(c => c.workspace?.id === wsId).sort((a, b) => {
             // Pinned first, then fullscreen, then floating, then any other

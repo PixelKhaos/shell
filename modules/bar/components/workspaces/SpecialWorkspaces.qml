@@ -14,7 +14,7 @@ Item {
     id: root
 
     required property ShellScreen screen
-    readonly property HyprlandMonitor monitor: Hypr.monitorFor(screen)
+    readonly property var monitor: Hypr.monitorFor(screen)
     readonly property string activeSpecial: (Config.bar.workspaces.perMonitorWorkspaces ? monitor : Hypr.focusedMonitor)?.lastIpcObject?.specialWorkspace?.name ?? ""
 
     layer.enabled: true
@@ -95,7 +95,7 @@ Item {
         onCurrentIndexChanged: currentIndex = Qt.binding(() => model.values.findIndex(w => w.name === root.activeSpecial))
 
         model: ScriptModel {
-            values: Hypr.workspaces.values.filter(w => w.name.startsWith("special:") && (!Config.bar.workspaces.perMonitorWorkspaces || w.monitor === root.monitor))
+            values: Hypr.workspaces.values.filter(w => w.name.startsWith("special:") && (!Config.bar.workspaces.perMonitorWorkspaces || (root.monitor && w.monitor === root.monitor)))
         }
 
         preferredHighlightBegin: 0

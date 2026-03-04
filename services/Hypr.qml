@@ -48,7 +48,7 @@ Singleton {
         if (openSpecials.length === 0)
             return;
 
-        const activeSpecial = focusedMonitor.lastIpcObject.specialWorkspace.name ?? "";
+        const activeSpecial = focusedMonitor?.lastIpcObject?.specialWorkspace?.name ?? "";
 
         if (!activeSpecial) {
             if (lastSpecialWorkspace) {
@@ -143,7 +143,7 @@ Singleton {
         target: root.focusedMonitor
 
         function onLastIpcObjectChanged(): void {
-            const specialName = root.focusedMonitor.lastIpcObject.specialWorkspace.name;
+            const specialName = root.focusedMonitor?.lastIpcObject?.specialWorkspace?.name;
 
             if (specialName && specialName.startsWith("special:")) {
                 root.lastSpecialWorkspace = specialName;
