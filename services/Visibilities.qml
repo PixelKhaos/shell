@@ -23,6 +23,16 @@ Singleton {
         }
     }
     
+    property int monitorCount: Hypr.monitors.values.length
+    
+    onMonitorCountChanged: {
+        // When monitors become available, reload the mappings
+        if (screens.size === 0 && screensByShellScreen.size > 0 && monitorCount > 0) {
+            console.log(`[Visibilities] Monitors became available (count: ${monitorCount}), reloading mappings`);
+            reloadMonitors();
+        }
+    }
+    
     function reloadMonitors(): void {
         console.log(`[Visibilities] reloadMonitors() - attempting to reload monitor mappings`);
         let reloaded = 0;
@@ -35,18 +45,6 @@ Singleton {
             }
         }
         console.log(`[Visibilities] Reload complete - ${reloaded} monitors mapped, total: ${screens.size}`);
-    }
-    
-    // Watch for monitor changes and reload mappings
-    Connections {
-        target: Hypr.monitors
-        
-        function onValuesChanged(): void {
-            if (screens.size === 0 && screensByShellScreen.size > 0) {
-                console.log(`[Visibilities] Monitors became available, reloading mappings`);
-                reloadMonitors();
-            }
-        }
     }
 
     function getForActive(): PersistentProperties {
