@@ -7,8 +7,21 @@ Singleton {
     property var screensByShellScreen: new Map()
     property var bars: new Map()
 
+    function findMonitorByName(name: string): var {
+        return Hypr.monitors.values.find(m => m.name === name);
+    }
+    
     function load(screen: ShellScreen, visibilities: var): void {
-        const monitor = Hypr.monitorFor(screen);
+        let monitor = Hypr.monitorFor(screen);
+        
+        // Workaround: if monitorFor() returns undefined, try matching by name
+        if (!monitor) {
+            monitor = findMonitorByName(screen.name);
+            if (monitor) {
+                console.log(`[Visibilities] monitorFor() failed, matched by name: ${screen.name} -> ${monitor.name}`);
+            }
+        }
+        
         console.log(`[Visibilities] load() - screen: ${screen.name}, monitor: ${monitor?.name ?? "undefined"}`);
         
         // Always store by ShellScreen as a reliable fallback
@@ -41,7 +54,13 @@ Singleton {
         
         let reloaded = 0;
         for (const [shellScreen, vis] of screensByShellScreen.entries()) {
-            const monitor = Hypr.monitorFor(shellScreen);
+            let monitor = Hypr.monitorFor(shellScreen);
+            
+            // Workaround: if monitorFor() returns undefined, try matching by name
+            if (!monitor) {
+                monitor = findMonitorByName(shellScreen.name);
+            }
+            
             console.log(`[Visibilities] Trying to map ${shellScreen.name} -> ${monitor?.name ?? "undefined"}`);
             if (monitor && !screens.has(monitor)) {
                 screens.set(monitor, vis);
