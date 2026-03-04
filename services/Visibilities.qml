@@ -33,18 +33,30 @@ Singleton {
             return visibilities;
         }
         
-        // Fallback 1: try first available screen from monitor map
-        console.warn(`[Visibilities] No visibilities for focused monitor, trying fallback 1`);
+        // Fallback 1: try to find the ShellScreen that matches the focused monitor's name
+        console.warn(`[Visibilities] No visibilities for focused monitor, trying fallback 1 (match by name)`);
+        if (Hypr.focusedMonitor) {
+            const focusedMonitorName = Hypr.focusedMonitor.name;
+            for (const [shellScreen, vis] of screensByShellScreen.entries()) {
+                if (shellScreen.name === focusedMonitorName) {
+                    console.log(`[Visibilities] Fallback 1 succeeded - matched ${focusedMonitorName}`);
+                    return vis;
+                }
+            }
+        }
+        
+        // Fallback 2: try first available screen from monitor map
+        console.warn(`[Visibilities] Fallback 1 failed, trying fallback 2`);
         const firstScreen = [...screens.values()][0];
         if (firstScreen) {
-            console.log(`[Visibilities] Fallback 1 succeeded`);
+            console.log(`[Visibilities] Fallback 2 succeeded`);
             return firstScreen;
         }
         
-        // Fallback 2: use ShellScreen map (always populated)
-        console.warn(`[Visibilities] Fallback 1 failed, trying fallback 2 (ShellScreen map)`);
+        // Fallback 3: use first ShellScreen (always populated)
+        console.warn(`[Visibilities] Fallback 2 failed, trying fallback 3 (first ShellScreen)`);
         const firstShellScreen = [...screensByShellScreen.values()][0];
-        console.log(`[Visibilities] Fallback 2: ${firstShellScreen ? "found" : "null"}`);
+        console.log(`[Visibilities] Fallback 3: ${firstShellScreen ? "found" : "null"}`);
         return firstShellScreen ?? null;
     }
 }
