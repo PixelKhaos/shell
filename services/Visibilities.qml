@@ -22,6 +22,32 @@ Singleton {
             console.warn(`[Visibilities] Could not load visibilities - monitor is undefined for screen: ${screen.name}`);
         }
     }
+    
+    function reloadMonitors(): void {
+        console.log(`[Visibilities] reloadMonitors() - attempting to reload monitor mappings`);
+        let reloaded = 0;
+        for (const [shellScreen, vis] of screensByShellScreen.entries()) {
+            const monitor = Hypr.monitorFor(shellScreen);
+            if (monitor && !screens.has(monitor)) {
+                screens.set(monitor, vis);
+                reloaded++;
+                console.log(`[Visibilities] Reloaded monitor mapping: ${shellScreen.name} -> ${monitor.name}`);
+            }
+        }
+        console.log(`[Visibilities] Reload complete - ${reloaded} monitors mapped, total: ${screens.size}`);
+    }
+    
+    // Watch for monitor changes and reload mappings
+    Connections {
+        target: Hypr.monitors
+        
+        function onValuesChanged(): void {
+            if (screens.size === 0 && screensByShellScreen.size > 0) {
+                console.log(`[Visibilities] Monitors became available, reloading mappings`);
+                reloadMonitors();
+            }
+        }
+    }
 
     function getForActive(): PersistentProperties {
         console.log(`[Visibilities] getForActive() - focusedMonitor: ${Hypr.focusedMonitor?.name ?? "undefined"}, screens.size: ${screens.size}, screensByShellScreen.size: ${screensByShellScreen.size}`);
