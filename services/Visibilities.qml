@@ -6,9 +6,18 @@ Singleton {
     property var screens: new Map()
     property var screensByShellScreen: new Map()
     property var bars: new Map()
+    property bool focusedMonitorRetried: false
 
     function findMonitorByName(name: string): var {
         return Hypr.monitors.values.find(m => m.name === name);
+    }
+    
+    // Reset retry flag when focusedMonitor changes
+    Connections {
+        target: Hypr
+        function onFocusedMonitorChanged(): void {
+            focusedMonitorRetried = false;
+        }
     }
     
     function load(screen: ShellScreen, visibilities: var): void {
@@ -78,7 +87,21 @@ Singleton {
         const visibilities = screens.get(Hypr.focusedMonitor);
         if (visibilities) {
             console.log(`[Visibilities] Found visibilities for focused monitor`);
+            focusedMonitorRetried = false;
             return visibilities;
+        }
+        
+        // If focusedMonitor is undefined and we haven't retried yet, wait a moment
+        if (!Hypr.focusedMonitor && !focusedMonitorRetried && screens.size > 0) {
+            console.warn(`[Visibilities] focusedMonitor undefined, scheduling retry...`);
+            focusedMonitorRetried = true;
+            Qt.callLater(() => {
+                // Force re-evaluation by checking again
+                const retryVis = screens.get(Hypr.focusedMonitor);
+                if (retryVis) {
+                    console.log(`[Visibilities] Retry succeeded - found focused monitor: ${Hypr.focusedMonitor.name}`);
+                }
+            });
         }
         
         // Fallback 1: if focusedMonitor is undefined, try using focusedWorkspace's monitor
