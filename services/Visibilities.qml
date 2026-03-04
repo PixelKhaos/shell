@@ -14,6 +14,12 @@ Singleton {
 
     function getForActive(): PersistentProperties {
         const visibilities = screens.get(Hypr.focusedMonitor);
-        return visibilities ?? null;
+        if (visibilities)
+            return visibilities;
+        
+        // Fallback: if focused monitor has no visibilities (e.g., disabled monitor),
+        // return the first available screen's visibilities
+        const firstScreen = [...screens.values()][0];
+        return firstScreen ?? null;
     }
 }
