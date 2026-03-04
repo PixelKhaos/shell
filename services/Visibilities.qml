@@ -35,9 +35,14 @@ Singleton {
     
     function reloadMonitors(): void {
         console.log(`[Visibilities] reloadMonitors() - attempting to reload monitor mappings`);
+        console.log(`[Visibilities] Hyprland.monitors.values.length: ${Hypr.monitors.values.length}`);
+        console.log(`[Visibilities] Hyprland monitors: ${Hypr.monitors.values.map(m => m.name).join(", ")}`);
+        console.log(`[Visibilities] ShellScreens: ${[...screensByShellScreen.keys()].map(s => s.name).join(", ")}`);
+        
         let reloaded = 0;
         for (const [shellScreen, vis] of screensByShellScreen.entries()) {
             const monitor = Hypr.monitorFor(shellScreen);
+            console.log(`[Visibilities] Trying to map ${shellScreen.name} -> ${monitor?.name ?? "undefined"}`);
             if (monitor && !screens.has(monitor)) {
                 screens.set(monitor, vis);
                 reloaded++;
