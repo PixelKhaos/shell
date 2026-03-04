@@ -81,15 +81,14 @@ Singleton {
             return visibilities;
         }
         
-        // Fallback 1: try to find the ShellScreen that matches the focused monitor's name
-        console.warn(`[Visibilities] No visibilities for focused monitor, trying fallback 1 (match by name)`);
-        if (Hypr.focusedMonitor) {
-            const focusedMonitorName = Hypr.focusedMonitor.name;
-            for (const [shellScreen, vis] of screensByShellScreen.entries()) {
-                if (shellScreen.name === focusedMonitorName) {
-                    console.log(`[Visibilities] Fallback 1 succeeded - matched ${focusedMonitorName}`);
-                    return vis;
-                }
+        // Fallback 1: if focusedMonitor is undefined, try using focusedWorkspace's monitor
+        console.warn(`[Visibilities] No visibilities for focused monitor, trying fallback 1 (workspace monitor)`);
+        const workspaceMonitor = Hypr.focusedWorkspace?.monitor;
+        if (workspaceMonitor) {
+            const workspaceVis = screens.get(workspaceMonitor);
+            if (workspaceVis) {
+                console.log(`[Visibilities] Fallback 1 succeeded - using workspace monitor: ${workspaceMonitor.name}`);
+                return workspaceVis;
             }
         }
         
