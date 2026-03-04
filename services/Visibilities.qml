@@ -12,14 +12,6 @@ Singleton {
         return Hypr.monitors.values.find(m => m.name === name);
     }
     
-    // Reset retry flag when focusedMonitor changes
-    Connections {
-        target: Hypr
-        function onFocusedMonitorChanged(): void {
-            focusedMonitorRetried = false;
-        }
-    }
-    
     function load(screen: ShellScreen, visibilities: var): void {
         let monitor = Hypr.monitorFor(screen);
         
@@ -87,7 +79,6 @@ Singleton {
         const visibilities = screens.get(Hypr.focusedMonitor);
         if (visibilities) {
             console.log(`[Visibilities] Found visibilities for focused monitor`);
-            focusedMonitorRetried = false;
             return visibilities;
         }
         
@@ -100,8 +91,12 @@ Singleton {
                 const retryVis = screens.get(Hypr.focusedMonitor);
                 if (retryVis) {
                     console.log(`[Visibilities] Retry succeeded - found focused monitor: ${Hypr.focusedMonitor.name}`);
+                    focusedMonitorRetried = false; // Reset for next time
                 }
             });
+        } else if (Hypr.focusedMonitor) {
+            // Reset retry flag when focusedMonitor becomes available again
+            focusedMonitorRetried = false;
         }
         
         // Fallback 1: if focusedMonitor is undefined, try using focusedWorkspace's monitor
