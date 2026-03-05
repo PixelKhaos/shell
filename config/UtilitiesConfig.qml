@@ -29,6 +29,7 @@ JsonObject {
         property bool vpnChanged: true
         property bool nowPlaying: false
         property bool nightLight: true
+        property bool lowPowerModeChanged: true
     }
 
     component Vpn: JsonObject {
