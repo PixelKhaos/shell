@@ -128,7 +128,12 @@ Item {
 
         Repeater {
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => !Config.bar.tray.hiddenIcons.includes(i.id))
+                values: {
+                    const filtered = SystemTray.items.values.filter(i => !Config.bar.tray.hiddenIcons.includes(i.id));
+                    const pinned = filtered.filter(i => Config.bar.tray.pinnedIcons.includes(i.id));
+                    const unpinned = filtered.filter(i => !Config.bar.tray.pinnedIcons.includes(i.id));
+                    return pinned.concat(unpinned);
+                }
             }
 
             Popout {

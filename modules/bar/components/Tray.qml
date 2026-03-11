@@ -63,19 +63,16 @@ StyledRect {
             }
         }
 
-        move: Transition {
-            NumberAnimation {
-                properties: "y"
-                duration: Appearance.anim.durations.expressiveEffects
-                easing.type: Easing.OutCubic
-            }
-        }
-
         Repeater {
             id: items
 
             model: ScriptModel {
-                values: SystemTray.items.values.filter(i => !Config.bar.tray.hiddenIcons.includes(i.id))
+                values: {
+                    const filtered = SystemTray.items.values.filter(i => !Config.bar.tray.hiddenIcons.includes(i.id));
+                    const pinned = filtered.filter(i => Config.bar.tray.pinnedIcons.includes(i.id));
+                    const unpinned = filtered.filter(i => !Config.bar.tray.pinnedIcons.includes(i.id));
+                    return pinned.concat(unpinned);
+                }
             }
 
             Item {
@@ -85,13 +82,15 @@ StyledRect {
 
                 implicitWidth: trayItem.implicitWidth
                 implicitHeight: trayItem.implicitHeight
-                visible: shouldShow || trayItem.opacity > 0.01
+                visible: shouldShow || trayItem.opacity > 0
+                clip: true
 
                 TrayItem {
                     id: trayItem
+                    anchors.centerIn: parent
                     modelData: parent.modelData
                     opacity: parent.shouldShow ? 1 : 0
-                    scale: parent.shouldShow ? 1 : 0.6
+                    scale: parent.shouldShow ? 1 : 0.5
                     transformOrigin: Item.Center
 
                     Behavior on opacity {
@@ -104,7 +103,7 @@ StyledRect {
                     Behavior on scale {
                         NumberAnimation {
                             duration: Appearance.anim.durations.small
-                            easing.type: Easing.OutBack
+                            easing.type: Easing.InOutQuad
                         }
                     }
                 }
