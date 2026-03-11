@@ -90,6 +90,7 @@ JsonObject {
         property bool compact: false
         property list<var> iconSubs: []
         property list<string> hiddenIcons: []
+        property list<string> pinnedIcons: []
     }
 
     component Status: JsonObject {

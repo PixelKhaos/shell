@@ -22,7 +22,7 @@ StyledRect {
     readonly property real nonAnimHeight: {
         if (!Config.bar.tray.compact)
             return layout.implicitHeight + padding * 2;
-        return (expanded ? expandIcon.implicitHeight + layout.implicitHeight + spacing : expandIcon.implicitHeight) + padding * 2;
+        return (expanded ? layout.implicitHeight : layout.pinnedHeight) + expandIcon.implicitHeight + spacing + padding * 2;
     }
 
     clip: true
@@ -37,30 +37,37 @@ StyledRect {
     Column {
         id: layout
 
+        property real pinnedHeight: {
+            let height = 0;
+            for (let i = 0; i < items.count; i++) {
+                const item = items.itemAt(i);
+                if (item && item.isPinned) {
+                    height += item.implicitHeight;
+                    if (height > 0)
+                        height += spacing;
+                }
+            }
+            return height > 0 ? height - spacing : 0;
+        }
+
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: root.padding
         spacing: Appearance.spacing.small
 
-        opacity: root.expanded || !Config.bar.tray.compact ? 1 : 0
-
         add: Transition {
             Anim {
-                properties: "scale"
+                properties: "opacity"
                 from: 0
                 to: 1
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
             }
         }
 
         move: Transition {
-            Anim {
-                properties: "scale"
-                to: 1
-                easing.bezierCurve: Appearance.anim.curves.standardDecel
-            }
-            Anim {
-                properties: "x,y"
+            NumberAnimation {
+                properties: "y"
+                duration: Appearance.anim.durations.expressiveEffects
+                easing.type: Easing.OutCubic
             }
         }
 
@@ -71,11 +78,37 @@ StyledRect {
                 values: SystemTray.items.values.filter(i => !Config.bar.tray.hiddenIcons.includes(i.id))
             }
 
-            TrayItem {}
-        }
+            Item {
+                required property var modelData
+                readonly property bool isPinned: Config.bar.tray.pinnedIcons.includes(modelData.id)
+                readonly property bool shouldShow: root.expanded || !Config.bar.tray.compact || isPinned
 
-        Behavior on opacity {
-            Anim {}
+                implicitWidth: trayItem.implicitWidth
+                implicitHeight: trayItem.implicitHeight
+                visible: shouldShow || trayItem.opacity > 0.01
+
+                TrayItem {
+                    id: trayItem
+                    modelData: parent.modelData
+                    opacity: parent.shouldShow ? 1 : 0
+                    scale: parent.shouldShow ? 1 : 0.6
+                    transformOrigin: Item.Center
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Appearance.anim.durations.small
+                            easing.type: Easing.InOutQuad
+                        }
+                    }
+
+                    Behavior on scale {
+                        NumberAnimation {
+                            duration: Appearance.anim.durations.small
+                            easing.type: Easing.OutBack
+                        }
+                    }
+                }
+            }
         }
     }
 
