@@ -82,7 +82,7 @@ ColumnLayout {
                     popouts.currentName = `traymenu${foundIndex}`;
                     popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
                     popouts.hasCurrent = true;
-                } else {
+                } else if (!item.expanded) {
                     popouts.hasCurrent = false;
                 }
             }

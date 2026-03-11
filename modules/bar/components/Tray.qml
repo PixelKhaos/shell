@@ -24,7 +24,8 @@ StyledRect {
             return layout.implicitHeight + padding * 2;
         const itemsHeight = expanded ? layout.implicitHeight : layout.pinnedHeight;
         const chevronHeight = items.count > 0 ? Appearance.font.size.normal * 1.25 : 0;
-        return itemsHeight + chevronHeight + padding * 4;
+        const hasPinnedItems = itemsHeight > 0;
+        return hasPinnedItems ? itemsHeight + chevronHeight + padding * 4 : chevronHeight + padding * 2.5;
     }
 
     clip: true
@@ -146,7 +147,7 @@ StyledRect {
         id: chevron
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: root.padding
+        anchors.bottomMargin: Appearance.padding.small
         width: parent.width
         height: icon.implicitHeight
         visible: Config.bar.tray.compact && items.count > 0
