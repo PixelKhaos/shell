@@ -29,8 +29,6 @@ Item {
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
 
-    Component.onCompleted: Visibilities.loadPanels(root.screen, root)
-
     anchors.fill: parent
     anchors.margins: Config.border.thickness
     anchors.leftMargin: bar.implicitWidth
