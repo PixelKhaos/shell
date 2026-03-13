@@ -9,7 +9,7 @@ import QtQuick
 Item {
     id: root
 
-    required property PersistentProperties visibilities
+    required property var visibilities
     required property var panels
     readonly property int padding: Appearance.padding.large
 
