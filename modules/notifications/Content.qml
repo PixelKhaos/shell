@@ -10,7 +10,7 @@ Item {
     id: root
 
     required property PersistentProperties visibilities
-    required property Item panels
+    required property var panels
     readonly property int padding: Appearance.padding.large
 
     anchors.top: parent.top

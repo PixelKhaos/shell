@@ -6,12 +6,14 @@ import "modules"
 import "modules/drawers"
 import "modules/background"
 import "modules/areapicker"
+import "modules/fullscreen"
 import "modules/lock"
 import Quickshell
 
 ShellRoot {
     Background {}
     Drawers {}
+    Overlay {}
     AreaPicker {}
     Lock {
         id: lock

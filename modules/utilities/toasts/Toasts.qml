@@ -9,8 +9,22 @@ import QtQuick
 Item {
     id: root
 
+    property bool fullscreenOnly
+    property bool hasFullscreen
     readonly property int spacing: Appearance.spacing.small
     property bool flag
+
+    function shouldShowToast(toast: Toast): bool {
+        if (!root.fullscreenOnly)
+            return true;
+        if (!root.hasFullscreen)
+            return false;
+        if (Config.utilities.toasts.fullscreen === "all")
+            return true;
+        if (Config.utilities.toasts.fullscreen === "important" || Config.utilities.toasts.fullscreen === "urgent")
+            return toast.type === Toast.Warning || toast.type === Toast.Error;
+        return false;
+    }
 
     implicitWidth: Config.utilities.sizes.toastWidth - Appearance.padding.normal * 2
     implicitHeight: {
@@ -31,6 +45,8 @@ Item {
                 const toasts = [];
                 let count = 0;
                 for (const toast of Toaster.toasts) {
+                    if (!root.shouldShowToast(toast))
+                        continue;
                     toasts.push(toast);
                     if (!toast.closed) {
                         count++;

@@ -1,4 +1,5 @@
 import qs.config
+import qs.services
 import qs.modules.osd as Osd
 import qs.modules.notifications as Notifications
 import qs.modules.session as Session
@@ -27,6 +28,8 @@ Item {
     readonly property alias utilities: utilities
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
+
+    Component.onCompleted: Visibilities.loadPanels(root.screen, root)
 
     anchors.fill: parent
     anchors.margins: Config.border.thickness
