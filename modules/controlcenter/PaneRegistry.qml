@@ -66,7 +66,7 @@ QtObject {
         return result;
     }
 
-    function getByIndex(index: int): var {
+    function getByIndex(index: int): QtObject {
         if (index >= 0 && index < panes.length) {
             return panes[index];
         }
@@ -82,12 +82,12 @@ QtObject {
         return -1;
     }
 
-    function getByLabel(label: string): var {
+    function getByLabel(label: string): QtObject {
         const index = getIndexByLabel(label);
         return getByIndex(index);
     }
 
-    function getById(id: string): var {
+    function getById(id: string): QtObject {
         for (let i = 0; i < panes.length; i++) {
             if (panes[i].id === id) {
                 return panes[i];
