@@ -50,6 +50,12 @@ QtObject {
             readonly property bool visible: true
         },
         QtObject {
+            readonly property string id: "notifications"
+            readonly property string label: "notifications"
+            readonly property string icon: "notifications"
+            readonly property string component: "notifications/NotificationsPane.qml"
+        },
+        QtObject {
             readonly property string id: "launcher"
             readonly property string label: "launcher"
             readonly property string icon: "apps"
