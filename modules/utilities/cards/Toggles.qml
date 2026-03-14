@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
 import qs.components.controls
 import qs.services
@@ -54,17 +56,19 @@ StyledRect {
             font.pointSize: Appearance.font.size.normal
         }
 
-        ToggleRow {
+        QuickToggleRow {
             rowModel: root.needExtraRow ? root.quickToggles.slice(0, root.splitIndex) : root.quickToggles
         }
 
-        ToggleRow {
+        QuickToggleRow {
             visible: root.needExtraRow
             rowModel: root.needExtraRow ? root.quickToggles.slice(root.splitIndex) : []
         }
     }
 
-    component ToggleRow: RowLayout {
+    component QuickToggleRow: RowLayout {
+        id: toggleRow
+
         property var rowModel: []
 
         Layout.fillWidth: true
@@ -72,7 +76,7 @@ StyledRect {
         spacing: Appearance.spacing.small
 
         Repeater {
-            model: rowModel
+            model: toggleRow.rowModel
 
             delegate: Loader {
                 required property var modelData

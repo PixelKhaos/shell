@@ -2,7 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components.containers
 import qs.components.misc
-import QtQuick
+import qs.services
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -18,7 +18,7 @@ Scope {
             // no-op
 
         Variants {
-            model: Quickshell.screens
+            model: Screens.screens
 
             StyledWindow {
                 id: win
