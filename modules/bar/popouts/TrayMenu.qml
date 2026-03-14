@@ -13,6 +13,7 @@ StackView {
 
     required property Item popouts
     required property QsMenuHandle trayItem
+    required property string trayItemId
 
     implicitWidth: currentItem.implicitWidth
     implicitHeight: currentItem.implicitHeight
@@ -62,6 +63,66 @@ StackView {
             id: menuOpener
 
             menu: menu.handle
+        }
+
+        StyledRect {
+            id: pinItem
+
+            readonly property bool isPinned: Config.bar.tray.pinnedIcons.includes(root.trayItemId)
+
+            implicitWidth: Config.bar.sizes.trayMenuWidth
+            implicitHeight: pinLabel.implicitHeight
+
+            radius: Appearance.rounding.full
+            color: "transparent"
+
+            StateLayer {
+                anchors.margins: -Appearance.padding.small / 2
+                anchors.leftMargin: -Appearance.padding.smaller
+                anchors.rightMargin: -Appearance.padding.smaller
+
+                radius: pinItem.radius
+
+                function onClicked(): void {
+                    const pinnedIcons = Config.bar.tray.pinnedIcons;
+                    const index = pinnedIcons.indexOf(root.trayItemId);
+                    
+                    if (index >= 0) {
+                        pinnedIcons.splice(index, 1);
+                    } else {
+                        pinnedIcons.push(root.trayItemId);
+                    }
+                    
+                    Config.bar.tray.pinnedIcons = pinnedIcons;
+                    Config.save();
+                    root.popouts.hasCurrent = false;
+                }
+            }
+
+            Row {
+                anchors.left: parent.left
+                spacing: Appearance.spacing.smaller
+
+                MaterialIcon {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: pinItem.isPinned ? "push_pin" : "keep"
+                    color: Colours.palette.m3onSurface
+                }
+
+                StyledText {
+                    id: pinLabel
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: pinItem.isPinned ? qsTr("Unpin from Tray") : qsTr("Pin to Tray")
+                    color: Colours.palette.m3onSurface
+                }
+            }
+        }
+
+        StyledRect {
+            implicitWidth: Config.bar.sizes.trayMenuWidth
+            implicitHeight: 1
+            radius: Appearance.rounding.full
+            color: Colours.palette.m3outlineVariant
         }
 
         Repeater {

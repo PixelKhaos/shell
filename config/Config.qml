@@ -307,8 +307,7 @@ Singleton {
         return {
             enabled: dashboard.enabled,
             showOnHover: dashboard.showOnHover,
-            mediaUpdateInterval: dashboard.mediaUpdateInterval,
-            resourceUpdateInterval: dashboard.resourceUpdateInterval,
+            updateInterval: dashboard.updateInterval,
             dragThreshold: dashboard.dragThreshold,
             performance: {
                 showBattery: dashboard.performance.showBattery,

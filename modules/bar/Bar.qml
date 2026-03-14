@@ -61,19 +61,37 @@ ColumnLayout {
                 popouts.hasCurrent = true;
             }
         } else if (id === "tray" && Config.bar.popouts.tray) {
-            if (!Config.bar.tray.compact || (item.expanded && !item.expandIcon.contains(mapToItem(item.expandIcon, item.implicitWidth / 2, y)))) {
-                const index = Math.floor(((y - top - item.padding * 2 + item.spacing) / item.layout.implicitHeight) * item.items.count);
-                const trayItem = item.items.itemAt(index);
-                if (trayItem) {
-                    popouts.currentName = `traymenu${index}`;
+            if (item.justExpanded) {
+                popouts.hasCurrent = false;
+            } else {
+                const relativeY = y - top - item.padding;
+                let foundIndex = -1;
+                let currentY = 0;
+                
+                for (let i = 0; i < item.items.count; i++) {
+                    const trayItem = item.items.itemAt(i);
+                    if (!trayItem) continue;
+                    
+                    const shouldShow = item.expanded || !Config.bar.tray.compact || trayItem.isPinned;
+                    if (!shouldShow) continue;
+                    
+                    const itemHeight = trayItem.implicitHeight;
+                    if (relativeY >= currentY && relativeY < currentY + itemHeight) {
+                        foundIndex = i;
+                        break;
+                    }
+                    
+                    currentY += itemHeight + item.spacing;
+                }
+                
+                if (foundIndex >= 0) {
+                    const trayItem = item.items.itemAt(foundIndex);
+                    popouts.currentName = `traymenu${foundIndex}`;
                     popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
                     popouts.hasCurrent = true;
-                } else {
+                } else if (!item.expanded) {
                     popouts.hasCurrent = false;
                 }
-            } else {
-                popouts.hasCurrent = false;
-                item.expanded = true;
             }
         }
     }
