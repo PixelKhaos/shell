@@ -66,15 +66,6 @@ JsonObject {
         {
             id: "vpn",
             enabled: false
-        },
-        {
-            id: "nightLight",
-            enabled: false
         }
     ]
-
-    component NightLight: JsonObject {
-        property bool enabled: false
-        property int temperature: 4500
-    }
 }

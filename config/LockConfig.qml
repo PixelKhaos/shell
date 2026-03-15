@@ -9,6 +9,7 @@ JsonObject {
     property list<string> excludedScreens
 
     property bool enableHowdy: true
+    property bool hideNotifs: false
     property Sizes sizes: Sizes {}
 
     component Sizes: JsonObject {

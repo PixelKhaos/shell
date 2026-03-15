@@ -599,6 +599,34 @@ Item {
                                 }
                             }
                         }
+
+                        SectionContainer {
+                            Layout.fillWidth: true
+                            alignTop: true
+
+                            StyledText {
+                                text: qsTr("Active window")
+                                font.pointSize: Appearance.font.size.normal
+                            }
+
+                            SwitchRow {
+                                label: qsTr("Compact")
+                                checked: root.activeWindowCompact
+                                onToggled: checked => {
+                                    root.activeWindowCompact = checked;
+                                    root.saveConfig();
+                                }
+                            }
+
+                            SwitchRow {
+                                label: qsTr("Inverted")
+                                checked: root.activeWindowInverted
+                                onToggled: checked => {
+                                    root.activeWindowInverted = checked;
+                                    root.saveConfig();
+                                }
+                            }
+                        }
                     }
 
                     ColumnLayout {
@@ -682,34 +710,6 @@ Item {
                                         }
                                     }
                                 ]
-                            }
-                        }
-
-                        SectionContainer {
-                            Layout.fillWidth: true
-                            alignTop: true
-
-                            StyledText {
-                                text: qsTr("Active window")
-                                font.pointSize: Appearance.font.size.normal
-                            }
-
-                            SwitchRow {
-                                label: qsTr("Compact")
-                                checked: root.activeWindowCompact
-                                onToggled: checked => {
-                                    root.activeWindowCompact = checked;
-                                    root.saveConfig();
-                                }
-                            }
-
-                            SwitchRow {
-                                label: qsTr("Inverted")
-                                checked: root.activeWindowInverted
-                                onToggled: checked => {
-                                    root.activeWindowInverted = checked;
-                                    root.saveConfig();
-                                }
                             }
                         }
 

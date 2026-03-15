@@ -22,13 +22,15 @@ StyledRect {
         return Config.utilities.quickToggles.filter(item => {
             if (!item.enabled)
                 return false;
-
+            
             if (seenIds.has(item.id)) {
                 return false;
             }
 
             if (item.id === "vpn") {
-                return Config.utilities.vpn.provider.some(p => typeof p === "object" ? (p.enabled === true) : false);
+                return Config.utilities.vpn.provider.some(p => 
+                    typeof p === "object" ? (p.enabled === true) : false
+                );
             }
 
             seenIds.add(item.id);
@@ -56,51 +58,95 @@ StyledRect {
             font.pointSize: Appearance.font.size.normal
         }
 
-        QuickToggleRow {
+        ToggleRow {
             rowModel: root.needExtraRow ? root.quickToggles.slice(0, root.splitIndex) : root.quickToggles
         }
 
-        QuickToggleRow {
+        ToggleRow {
             visible: root.needExtraRow
             rowModel: root.needExtraRow ? root.quickToggles.slice(root.splitIndex) : []
         }
     }
 
-    component QuickToggleRow: RowLayout {
-        id: toggleRow
-
+    component ToggleRow: RowLayout {
         property var rowModel: []
 
         Layout.fillWidth: true
-        Layout.alignment: Qt.AlignHCenter
         spacing: Appearance.spacing.small
 
         Repeater {
-            model: toggleRow.rowModel
+            model: parent.rowModel
 
-            delegate: Loader {
-                required property var modelData
+            delegate: DelegateChooser {
+                role: "id"
 
-                Layout.fillWidth: true
-
-                sourceComponent: {
-                    switch (modelData.id) {
-                    case "wifi":
-                        return wifiToggle;
-                    case "bluetooth":
-                        return bluetoothToggle;
-                    case "mic":
-                        return micToggle;
-                    case "settings":
-                        return settingsToggle;
-                    case "gameMode":
-                        return gameModeToggle;
-                    case "dnd":
-                        return dndToggle;
-                    case "vpn":
-                        return vpnToggle;
-                    default:
-                        return null;
+                DelegateChoice {
+                    roleValue: "wifi"
+                    delegate: Toggle {
+                        icon: "wifi"
+                        checked: Nmcli.wifiEnabled
+                        onClicked: Nmcli.toggleWifi()
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "bluetooth"
+                    delegate: Toggle {
+                        icon: "bluetooth"
+                        checked: Bluetooth.defaultAdapter?.enabled ?? false
+                        onClicked: {
+                            const adapter = Bluetooth.defaultAdapter;
+                            if (adapter)
+                                adapter.enabled = !adapter.enabled;
+                        }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "mic"
+                    delegate: Toggle {
+                        icon: "mic"
+                        checked: !Audio.sourceMuted
+                        onClicked: {
+                            const audio = Audio.source?.audio;
+                            if (audio)
+                                audio.muted = !audio.muted;
+                        }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "settings"
+                    delegate: Toggle {
+                        icon: "settings"
+                        inactiveOnColour: Colours.palette.m3onSurfaceVariant
+                        toggle: false
+                        onClicked: {
+                            root.visibilities.utilities = false;
+                            root.popouts.detach("network");
+                        }
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "gameMode"
+                    delegate: Toggle {
+                        icon: "gamepad"
+                        checked: GameMode.enabled
+                        onClicked: GameMode.enabled = !GameMode.enabled
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "dnd"
+                    delegate: Toggle {
+                        icon: "notifications_off"
+                        checked: Notifs.dnd
+                        onClicked: Notifs.dnd = !Notifs.dnd
+                    }
+                }
+                DelegateChoice {
+                    roleValue: "vpn"
+                    delegate: Toggle {
+                        icon: "vpn_key"
+                        checked: VPN.connected
+                        enabled: !VPN.connecting
+                        onClicked: VPN.toggle()
                     }
                 }
             }
