@@ -26,7 +26,7 @@ Singleton {
     property alias sidebar: adapter.sidebar
     property alias services: adapter.services
     property alias paths: adapter.paths
-    
+
     property bool recentlySaved: false
 
     function save(): void {
@@ -365,7 +365,7 @@ Singleton {
             recolourLogo: lock.recolourLogo,
             enableFprint: lock.enableFprint,
             maxFprintTries: lock.maxFprintTries,
-            hideNotifs: lock.hideNotifs
+            hideNotifs: lock.hideNotifs,
             verticalScreens: lock.verticalScreens,
             excludedScreens: lock.excludedScreens,
             sizes: {
@@ -399,8 +399,6 @@ Singleton {
             vpn: {
                 enabled: utilities.vpn.enabled,
                 provider: utilities.vpn.provider
-            },
-            quickToggles: utilities.quickToggles
             },
             nightLight: {
                 enabled: utilities.nightLight.enabled,
