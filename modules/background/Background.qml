@@ -16,7 +16,7 @@ Loader {
     property var lock
 
     sourceComponent: Variants {
-        model: Quickshell.screens
+        model: Screens.screens
 
         StyledWindow {
             id: win
