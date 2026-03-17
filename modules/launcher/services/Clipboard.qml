@@ -109,6 +109,9 @@ Singleton {
             onStreamFinished: {
                 if (text) {
                     root.history = text.trim().split('\n').map((line, index) => root.parseClipboardItem(line, index));
+                } else {
+                    // Empty clipboard - clear history
+                    root.history = [];
                 }
             }
         }
