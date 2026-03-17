@@ -21,12 +21,12 @@ Item {
         anchors.fill: parent
         radius: Appearance.rounding.normal
         color: {
-            if (GridView.isCurrentItem) return Colours.layer(Colours.palette.m3surfaceContainer, 3);
-            if (mouse.containsMouse) return Colours.layer(Colours.palette.m3surfaceContainer, 2);
+            if (mouse.containsMouse)
+                return Qt.alpha(Colours.palette.m3onSurface, 0.08);
+            if (GridView.isCurrentItem)
+                return Qt.alpha(Colours.palette.m3onSurface, 0.08);
             return "transparent";
         }
-
-        Behavior on color { CAnim {} }
 
         MouseArea {
             id: mouse
