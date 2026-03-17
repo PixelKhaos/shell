@@ -27,7 +27,7 @@ StyledListView {
     implicitHeight: {
         if (count === 0) return 0;
         const itemsToShow = Math.min(Config.launcher.maxShown, count);
-        return (Config.launcher.sizes.itemHeight + spacing) * itemsToShow - spacing + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
+        return (Config.launcher.sizes.itemHeight + spacing) * itemsToShow + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
     }
 
     preferredHighlightBegin: 0

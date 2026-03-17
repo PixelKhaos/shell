@@ -20,6 +20,21 @@ Item {
     anchors.left: parent?.left
     anchors.right: parent?.right
 
+    property bool isItemHovered: itemHoverHandler.hovered
+    readonly property bool isHovered: root.isItemHovered
+    readonly property bool isCurrent: ListView.isCurrentItem && root.ListView.view?.lastInteraction === "keyboard"
+
+    onIsItemHoveredChanged: {
+        if (isItemHovered) {
+            root.ListView.view.hoveredItem = root;
+            root.ListView.view.lastInteraction = "hover";
+        }
+    }
+
+    HoverHandler {
+        id: itemHoverHandler
+    }
+
     StyledRect {
         id: rect
 
@@ -27,29 +42,14 @@ Item {
         implicitHeight: content.implicitHeight + Appearance.padding.normal * 2
         radius: Appearance.rounding.normal
         color: {
-            if (ListView.isCurrentItem)
-                return Colours.layer(Colours.palette.m3surfaceContainer, 3);
-            if (mouse.containsMouse)
-                return Colours.layer(Colours.palette.m3surfaceContainer, 2);
+            if (root.isHovered || root.isCurrent)
+                return Qt.alpha(Colours.palette.m3onSurface, 0.08);
             return "transparent";
-        }
-
-        Behavior on color {
-            CAnim {}
         }
 
         MouseArea {
             id: mouse
             anchors.fill: parent
-            hoverEnabled: true
-            onContainsMouseChanged: {
-                if (containsMouse) {
-                    root.ListView.view.hoveredItem = root;
-                    root.ListView.view.lastInteraction = "hover";
-                } else if (root.ListView.view.hoveredItem === root) {
-                    root.ListView.view.hoveredItem = null;
-                }
-            }
             onClicked: {
                 root.ListView.view.currentIndex = root.index;
                 Clipboard.copyToClipboard(root.modelData);
@@ -82,7 +82,7 @@ Item {
                 StyledText {
                     Layout.fillWidth: true
                     text: root.modelData.content
-                    color: ListView.isCurrentItem ? Colours.palette.m3onSurface : Colours.palette.m3onSurfaceVariant
+                    color: root.isCurrent ? Colours.palette.m3onSurface : Colours.palette.m3onSurfaceVariant
                     font.pointSize: Appearance.font.size.normal
                     elide: Text.ElideRight
                 }
@@ -104,6 +104,7 @@ Item {
                 spacing: Appearance.spacing.small
 
                 IconButton {
+                    id: pinButton
                     icon: root.modelData.isPinned ? "push_pin" : "keep"
                     type: root.modelData.isPinned ? IconButton.Filled : IconButton.Text
                     radius: Appearance.rounding.small
@@ -114,6 +115,7 @@ Item {
                 }
 
                 IconButton {
+                    id: deleteButton
                     icon: "delete"
                     type: IconButton.Text
                     radius: Appearance.rounding.small

@@ -20,10 +20,19 @@ StyledListView {
     property string activeCategory: "all"
     property bool showClearConfirmation: false
     property var hoveredItem: null
-    property string lastInteraction: "keyboard" // "hover" or "keyboard"
+    property string lastInteraction: "keyboard"
 
     property bool isCategoryChange: false
     property int deletedItemIndex: -1
+
+    HoverHandler {
+        id: listHoverHandler
+        onHoveredChanged: {
+            if (!hovered) {
+                root.hoveredItem = null;
+            }
+        }
+    }
 
     model: ScriptModel {
         id: model
@@ -48,11 +57,19 @@ StyledListView {
         const itemsToShow = Math.min(Config.launcher.maxShown, count);
         const calculatedHeight = (Config.launcher.sizes.itemHeight + spacing) * itemsToShow - spacing + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
         const minHeight = 200;
+        
+        // For single items, use actual content height to prevent cutoff
+        if (itemsToShow === 1 && root.currentItem) {
+            return Math.max(minHeight, root.currentItem.implicitHeight + (itemsToShow > 0 ? Appearance.spacing.smaller : 0));
+        }
+        
         return Math.max(minHeight, calculatedHeight);
     }
 
     onCurrentIndexChanged: {
-        root.lastInteraction = "keyboard";
+        if (root.lastInteraction !== "hover") {
+            root.lastInteraction = "keyboard";
+        }
     }
 
     onContentYChanged: {
@@ -187,20 +204,17 @@ StyledListView {
         const query = root.search.text.replace(/^>clipboard\s*/i, "").trim();
         let items = Clipboard.history;
 
-        // Filter by category using consistent isImage property
         if (root.activeCategory === "images") {
             items = items.filter(item => item.isImage);
         } else if (root.activeCategory === "misc") {
             items = items.filter(item => !item.isImage);
         }
 
-        // Filter by search query
         if (query) {
             const lowerQuery = query.toLowerCase();
             items = items.filter(item => item.content.toLowerCase().includes(lowerQuery));
         }
 
-        // Sort: pinned items first, preserve original order otherwise
         items.sort((a, b) => {
             if (a.isPinned && !b.isPinned)
                 return -1;
@@ -221,9 +235,6 @@ StyledListView {
         updateModel();
     }
 
-    Behavior on scale {
-        Anim {}
-    }
 
     // Confirmation dialog overlay
     Rectangle {

@@ -29,21 +29,21 @@ Singleton {
     property string pendingImageUrl: ""
     property string pendingImageMime: ""
 
+    function getMimeTypeFromUrl(url): string {
+        if (url.match(/\.jpe?g$/i)) return "image/jpeg";
+        if (url.match(/\.png$/i)) return "image/png";
+        if (url.match(/\.gif$/i)) return "image/gif";
+        if (url.match(/\.webp$/i)) return "image/webp";
+        return "image/png";
+    }
+
     function copyImageFromUrl(url): void {
         if (copyImageProcess.running) {
             return;
         }
 
         const escapedUrl = url.replace(/'/g, "'\\''");
-        let mimeType = "image/png";
-        if (url.match(/\.jpe?g$/i))
-            mimeType = "image/jpeg";
-        else if (url.match(/\.png$/i))
-            mimeType = "image/png";
-        else if (url.match(/\.gif$/i))
-            mimeType = "image/gif";
-        else if (url.match(/\.webp$/i))
-            mimeType = "image/webp";
+        const mimeType = getMimeTypeFromUrl(url);
 
         root.pendingImageUrl = escapedUrl;
         root.pendingImageMime = mimeType;
@@ -77,15 +77,10 @@ Singleton {
     }
 
     function clearAll(category): void {
-        let itemsToDelete = root.history.filter(item => {
-            if (item.isPinned)
-                return false; // Never delete pinned items
-
-            if (category === "images") {
-                return item.isImage;
-            } else if (category === "misc") {
-                return !item.isImage;
-            }
+        const itemsToDelete = root.history.filter(item => {
+            if (item.isPinned) return false;
+            if (category === "images") return item.isImage;
+            if (category === "misc") return !item.isImage;
             return true;
         });
 
@@ -94,7 +89,6 @@ Singleton {
             return;
         }
 
-        // Build a shell script that deletes each item
         const deleteCommands = itemsToDelete.map(item => {
             const escapedId = item.id.replace(/'/g, "'\\''");
             return `printf '%s' '${escapedId}' | cliphist delete`;
@@ -114,32 +108,7 @@ Singleton {
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text) {
-                    const lines = text.trim().split('\n');
-                    root.history = lines.map((line, index) => {
-                        const parts = line.split('\t');
-                        const id = parts[0] || "";
-                        const content = parts.slice(1).join('\t') || line;
-
-                        const isImage = content.includes("[[ binary data");
-
-                        // Detect potential HTML images (content is truncated in list, so just check for <img tag)
-                        // We'll extract the actual URL later when needed
-                        const hasHtmlImage = !isImage && content.includes("<img");
-
-                        const isDirectImageUrl = !isImage && !hasHtmlImage && content.match(/^https?:\/\/.*\.(png|jpg|jpeg|gif|webp|bmp)/i);
-
-                        return {
-                            id: id,
-                            content: content,
-                            preview: content.substring(0, 100),
-                            isPinned: root.pinnedItems.includes(id),
-                            isImage: isImage,
-                            imageUrl: isDirectImageUrl ? content.trim() : "",
-                            hasImageUrl: hasHtmlImage || isDirectImageUrl,
-                            needsDecodeForUrl: hasHtmlImage,
-                            index: index
-                        };
-                    });
+                    root.history = text.trim().split('\n').map((line, index) => root.parseClipboardItem(line, index));
                 }
             }
         }
@@ -163,6 +132,27 @@ Singleton {
         id: deleteProcess
         stdout: StdioCollector {}
         onExited: root.refresh()
+    }
+
+    function parseClipboardItem(line, index): var {
+        const parts = line.split('\t');
+        const id = parts[0] || "";
+        const content = parts.slice(1).join('\t') || line;
+        const isImage = content.includes("[[ binary data");
+        const hasHtmlImage = !isImage && content.includes("<img");
+        const isDirectImageUrl = !isImage && !hasHtmlImage && content.match(/^https?:\/\/.*\.(png|jpg|jpeg|gif|webp|bmp)/i);
+
+        return {
+            id: id,
+            content: content,
+            preview: content.substring(0, 100),
+            isPinned: root.pinnedItems.includes(id),
+            isImage: isImage,
+            imageUrl: isDirectImageUrl ? content.trim() : "",
+            hasImageUrl: hasHtmlImage || isDirectImageUrl,
+            needsDecodeForUrl: hasHtmlImage,
+            index: index
+        };
     }
 
     Component.onCompleted: {
