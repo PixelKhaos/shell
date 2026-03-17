@@ -15,9 +15,6 @@ Item {
     required property var modelData
     required property PersistentProperties visibilities
 
-    implicitWidth: 80
-    implicitHeight: 80
-
     StyledRect {
         id: rect
 
@@ -41,25 +38,30 @@ Item {
             }
         }
 
-    ColumnLayout {
-        anchors.centerIn: parent
-        spacing: Appearance.spacing.smaller
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.smaller / 2
+            spacing: Appearance.spacing.smaller
 
-        StyledText {
-            Layout.alignment: Qt.AlignHCenter
-            text: root.modelData.emoji
-            font.pointSize: Appearance.font.size.extraLarge * 1.5
-        }
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.fillWidth: true
+                text: root.modelData.emoji
+                font.pointSize: Appearance.font.size.extraLarge * 1.2
+                horizontalAlignment: Text.AlignHCenter
+            }
 
-        StyledText {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.maximumWidth: root.width - Appearance.padding.small * 2
-            text: root.modelData.name
-            color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.smaller
-            elide: Text.ElideRight
-            horizontalAlignment: Text.AlignHCenter
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.fillWidth: true
+                Layout.maximumWidth: rect.width - Appearance.padding.small * 2
+                text: root.modelData.name
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.NoWrap
+            }
         }
-    }
     }
 }

@@ -19,24 +19,26 @@ Item {
 
     property string activeCategory: "people"
 
-    readonly property int cellSize: 80
+    readonly property int columns: 5
+    readonly property int cellSize: Math.floor((Config.launcher.sizes.itemWidth - Appearance.padding.normal * 2) / columns)
     readonly property alias currentItem: grid.currentItem
     readonly property alias count: grid.count
-    readonly property int columns: Math.max(1, Math.floor(grid.width / cellSize))
     property int currentIndex: 0
 
-    implicitWidth: Config.launcher.sizes.width
+    implicitWidth: Config.launcher.sizes.itemWidth
     implicitHeight: 100
     
     Binding {
         target: root
         property: "implicitHeight"
-        value: categoryBar.height + grid.height + Appearance.spacing.normal
+        value: categoryBar.height + grid.height + Appearance.padding.large
         when: categoryBar.height > 0 && grid.height > 0
     }
 
     onCurrentIndexChanged: {
-        grid.currentIndex = currentIndex;
+        if (grid.currentIndex !== currentIndex) {
+            grid.currentIndex = currentIndex;
+        }
     }
 
     function incrementCurrentIndex(): void {
@@ -99,13 +101,17 @@ Item {
         anchors.top: categoryBar.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.topMargin: Appearance.spacing.normal
+        anchors.leftMargin: Appearance.padding.normal
+        anchors.rightMargin: Appearance.padding.normal
+        anchors.topMargin: Appearance.padding.large
         
-        height: Math.min(contentHeight, 400)
+        height: Math.min(Math.max(contentHeight, root.cellSize * 3), 400)
         clip: true
 
         cellWidth: root.cellSize
         cellHeight: root.cellSize
+        
+        verticalLayoutDirection: GridView.TopToBottom
         
         highlight: Rectangle {
             color: Qt.alpha(Colours.palette.m3onSurface, 0.08)
@@ -117,6 +123,7 @@ Item {
             id: model
 
             onValuesChanged: {
+                grid.currentIndex = 0;
                 root.currentIndex = 0;
             }
         }
@@ -134,34 +141,34 @@ Item {
         }
 
         Keys.onLeftPressed: {
-            if (currentIndex % 5 === 0) {
+            if (currentIndex % root.columns === 0) {
                 event.accepted = false;
             } else {
-                decrementCurrentIndex();
+                root.moveLeft();
             }
         }
 
         Keys.onRightPressed: {
-            if (currentIndex % 5 === 4) {
+            if (currentIndex % root.columns === root.columns - 1) {
                 event.accepted = false;
             } else {
-                incrementCurrentIndex();
+                root.moveRight();
             }
         }
 
         Keys.onUpPressed: {
-            if (currentIndex < 5) {
+            if (currentIndex < root.columns) {
                 event.accepted = false;
             } else {
-                currentIndex -= 5;
+                currentIndex -= root.columns;
             }
         }
 
         Keys.onDownPressed: {
-            if (currentIndex >= count - 5) {
+            if (currentIndex >= count - root.columns) {
                 event.accepted = false;
             } else {
-                currentIndex += 5;
+                currentIndex += root.columns;
             }
         }
     }

@@ -82,7 +82,7 @@ Item {
             name: "emoji"
 
             PropertyChanges {
-                root.implicitWidth: Math.max(Config.launcher.sizes.itemWidth * 1.2, emojiList.implicitWidth)
+                root.implicitWidth: Config.launcher.sizes.itemWidth
                 root.implicitHeight: Math.min(root.maxHeight, emojiList.implicitHeight > 0 ? emojiList.implicitHeight : empty.implicitHeight)
                 emojiList.active: true
             }
