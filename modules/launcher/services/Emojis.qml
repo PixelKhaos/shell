@@ -11,6 +11,7 @@ Singleton {
 
     property var emojis: []
     property var categories: [
+        { id: "all", name: "All Emojis", icon: "grid_view" },
         { id: "recent", name: "Recently Used", icon: "history" },
         { id: "people", name: "Smileys & People", icon: "sentiment_satisfied" },
         { id: "animals", name: "Animals & Nature", icon: "pets" },
@@ -55,6 +56,9 @@ Singleton {
     }
 
     function filterByCategory(category: string): var {
+        if (category === "all") {
+            return root.emojis;
+        }
         if (category === "recent") {
             return root.recentEmojis.map(emoji => {
                 return root.emojis.find(e => e.emoji === emoji);

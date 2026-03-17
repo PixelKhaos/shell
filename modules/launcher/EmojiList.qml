@@ -17,7 +17,7 @@ Item {
     required property StyledTextField search
     required property PersistentProperties visibilities
 
-    property string activeCategory: "people"
+    property string activeCategory: "all"
 
     readonly property int columns: 5
     readonly property int cellSize: Math.floor((Config.launcher.sizes.itemWidth - Appearance.padding.normal * 2) / columns)
