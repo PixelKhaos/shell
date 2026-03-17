@@ -1,3 +1,4 @@
+import qs.components
 import qs.config
 import qs.modules.osd as Osd
 import qs.modules.notifications as Notifications
@@ -32,6 +33,14 @@ Item {
     anchors.fill: parent
     anchors.margins: root.borderThickness
     anchors.leftMargin: bar.implicitWidth
+
+    Behavior on anchors.margins {
+        Anim {}
+    }
+
+    Behavior on anchors.leftMargin {
+        Anim {}
+    }
 
     Osd.Wrapper {
         id: osd
