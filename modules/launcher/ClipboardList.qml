@@ -240,8 +240,7 @@ StyledListView {
     Rectangle {
         anchors.fill: parent
         color: Qt.alpha(Colours.palette.m3scrim, 0.5)
-        visible: opacity > 0
-        opacity: root.showClearConfirmation ? 1 : 0
+        visible: root.showClearConfirmation
         z: 1000
 
         Behavior on opacity {

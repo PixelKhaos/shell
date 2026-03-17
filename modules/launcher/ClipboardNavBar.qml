@@ -152,17 +152,5 @@ StyledRect {
                 }
             }
         }
-
-        IconButton {
-            icon: "delete_sweep"
-            type: IconButton.Text
-            radius: Appearance.rounding.small
-            padding: Appearance.padding.small
-            onClicked: {
-                if (root.clipboardList) {
-                    root.clipboardList.showClearConfirmation = true;
-                }
-            }
-        }
     }
 }

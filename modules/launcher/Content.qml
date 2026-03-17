@@ -174,7 +174,7 @@ Item {
                 StyledText {
                     id: countText
                     anchors.centerIn: parent
-                    text: list.currentList ? qsTr("%1 items").arg(list.currentList.count) : ""
+                    text: list.currentList ? qsTr("%n item(s)", "", list.currentList.count) : ""
                     font.pointSize: Appearance.font.size.small
                     color: Colours.palette.m3onSurfaceVariant
                     opacity: list.currentList?.count > 0 ? 1 : 0
@@ -193,8 +193,9 @@ Item {
                 type: IconButton.Text
                 radius: Appearance.rounding.small
                 padding: Appearance.padding.small
+                disabled: !list.currentList || list.currentList.count === 0
                 onClicked: {
-                    if (list.currentList) {
+                    if (list.currentList && list.currentList.count > 0) {
                         list.currentList.showClearConfirmation = true;
                     }
                 }
