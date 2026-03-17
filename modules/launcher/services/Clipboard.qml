@@ -18,12 +18,8 @@ Singleton {
     }
 
     function savePinnedItems(): void {
-        const configPath = `${Quickshell.env("HOME")}/.config/caelestia/shell.json`;
-        const pinnedJson = JSON.stringify(root.pinnedItems);
-
-        // update the config file
-        const cmd = `jq '.launcher.pinnedClipboardItems = ${pinnedJson}' "${configPath}" > "${configPath}.tmp" && mv "${configPath}.tmp" "${configPath}"`;
-        Quickshell.execDetached(["sh", "-c", cmd]);
+        Config.launcher.pinnedClipboardItems = root.pinnedItems;
+        Config.save();
     }
 
     function refresh(): void {

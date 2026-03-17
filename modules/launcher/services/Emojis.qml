@@ -32,12 +32,8 @@ Singleton {
     }
     
     function saveFrequentEmojis(): void {
-        const configPath = `${Quickshell.env("HOME")}/.config/caelestia/shell.json`;
-        const frequentJson = JSON.stringify(root.recentEmojis);
-        
-        // Use jq to update the config file
-        const cmd = `jq '.launcher.frequentEmojis = ${frequentJson}' "${configPath}" > "${configPath}.tmp" && mv "${configPath}.tmp" "${configPath}"`;
-        Quickshell.execDetached(["sh", "-c", cmd]);
+        Config.launcher.frequentEmojis = root.recentEmojis;
+        Config.save();
     }
 
     FileView {
