@@ -16,18 +16,27 @@ Item {
     required property PersistentProperties visibilities
     required property var panels
     required property real maxHeight
+    property string initialSearchText: ""
 
     readonly property int padding: Appearance.padding.large
     readonly property int rounding: Appearance.rounding.large
     readonly property alias search: search
     readonly property alias list: list
     readonly property bool showClipboardNav: list.showClipboard
+    property bool loadedWithInitialText: false
 
     implicitWidth: list.width + padding * 2
-    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + clipboardNav.implicitHeight + (root.showClipboardNav ? padding : 0) + padding * 2
+    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + clipboardNav.height + (showClipboardNav ? padding : 0) + padding * 2
 
     Component.onCompleted: {
         LauncherIpc.register(root.screen, root);
+        if (initialSearchText) {
+            loadedWithInitialText = true;
+            search.text = initialSearchText;
+            Qt.callLater(() => {
+                loadedWithInitialText = false;
+            });
+        }
     }
 
     StyledRect {
@@ -43,19 +52,15 @@ Item {
         anchors.rightMargin: root.padding
         anchors.topMargin: root.padding
         
-        visible: opacity > 0
-        opacity: root.showClipboardNav ? 1 : 0
-        implicitHeight: root.showClipboardNav ? tabsRow.height + Appearance.padding.small + Appearance.padding.normal : 0
+        visible: height > 0
+        property real targetHeight: root.showClipboardNav ? Math.max(tabsRow.height, tabsRow.implicitHeight) + Appearance.padding.small + Appearance.padding.normal : 0
+        height: targetHeight
+        implicitHeight: targetHeight
         clip: true
+        opacity: height / Math.max(1, targetHeight)
         
-        Behavior on opacity {
-            Anim {
-                duration: Appearance.anim.durations.normal
-                easing.bezierCurve: Appearance.anim.curves.standard
-            }
-        }
-        
-        Behavior on implicitHeight {
+        Behavior on height {
+            enabled: !root.loadedWithInitialText
             Anim {
                 duration: Appearance.anim.durations.normal
                 easing.bezierCurve: Appearance.anim.curves.emphasized
@@ -67,9 +72,25 @@ Item {
             anchors.fill: parent
             anchors.leftMargin: Appearance.padding.normal
             anchors.rightMargin: Appearance.padding.normal
-            anchors.topMargin: Appearance.padding.small
-            anchors.bottomMargin: Appearance.padding.smaller
+            anchors.topMargin: clipboardNav.targetHeight > 0 ? Appearance.padding.small : 0
+            anchors.bottomMargin: clipboardNav.targetHeight > 0 ? Appearance.padding.smaller : 0
             spacing: Appearance.spacing.small
+            
+            Behavior on anchors.topMargin {
+                NumberAnimation {
+                    duration: Appearance.anim.durations.normal
+                    easing.type: Easing.Bezier
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
+                }
+            }
+            
+            Behavior on anchors.bottomMargin {
+                NumberAnimation {
+                    duration: Appearance.anim.durations.normal
+                    easing.type: Easing.Bezier
+                    easing.bezierCurve: Appearance.anim.curves.emphasized
+                }
+            }
             
             Item {
                 Layout.fillWidth: true
@@ -211,18 +232,11 @@ Item {
         anchors.bottom: searchWrapper.top
         anchors.topMargin: root.showClipboardNav ? root.padding : 0
         anchors.bottomMargin: root.padding
-        
-        Behavior on anchors.topMargin {
-            Anim {
-                duration: Appearance.anim.durations.normal
-                easing.bezierCurve: Appearance.anim.curves.emphasized
-            }
-        }
 
         content: root
         visibilities: root.visibilities
         panels: root.panels
-        maxHeight: root.maxHeight - searchWrapper.implicitHeight - clipboardNav.height - (root.showClipboardNav ? root.padding : 0) - root.padding * 3
+        maxHeight: root.maxHeight - searchWrapper.implicitHeight - clipboardNav.implicitHeight - (root.showClipboardNav ? root.padding : 0) - root.padding * 3
         search: search
         padding: root.padding
         rounding: root.rounding

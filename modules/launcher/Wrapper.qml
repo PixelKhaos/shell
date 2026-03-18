@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components
 import qs.config
+import qs.services
 import Quickshell
 import QtQuick
 
@@ -14,6 +15,9 @@ Item {
 
     readonly property bool shouldBeActive: visibilities.launcher && Config.launcher.enabled
     property int contentHeight
+    property string pendingSearchText: ""
+
+    Component.onCompleted: LauncherWrappers.register(root.screen, root)
     
     readonly property var currentClipboardItem: {
         const list = content.item?.list?.currentList;
@@ -136,8 +140,12 @@ Item {
             visibilities: root.visibilities
             panels: root.panels
             maxHeight: root.maxHeight
+            initialSearchText: root.pendingSearchText
 
-            Component.onCompleted: root.contentHeight = implicitHeight
+            Component.onCompleted: {
+                root.contentHeight = implicitHeight;
+                root.pendingSearchText = "";
+            }
         }
     }
 }

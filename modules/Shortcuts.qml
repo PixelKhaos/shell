@@ -120,11 +120,13 @@ Scope {
             if (root.hasFullscreen)
                 return;
             const visibilities = Visibilities.getForActive();
+            const wrapper = LauncherWrappers.getForActive();
+            if (wrapper) {
+                wrapper.pendingSearchText = Config.launcher.actionPrefix + "clipboard ";
+            }
             visibilities.launcher = true;
-            // Set the launcher text to trigger clipboard view
             const launcher = LauncherIpc.getForActive();
             if (launcher) {
-                launcher.search.text = Config.launcher.actionPrefix + "clipboard ";
                 launcher.search.forceActiveFocus();
             }
         }
@@ -138,10 +140,9 @@ Scope {
                 return;
             const visibilities = Visibilities.getForActive();
             visibilities.launcher = true;
-            // Set the launcher text to trigger emoji view
             const launcher = LauncherIpc.getForActive();
             if (launcher) {
-                launcher.search.text = ">emoji ";
+                launcher.search.text = Config.launcher.actionPrefix + "emoji ";
                 launcher.search.forceActiveFocus();
             }
         }

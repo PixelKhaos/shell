@@ -190,7 +190,8 @@ Item {
     }
 
     function updateGrid(): void {
-        const query = root.search.text.replace(/^>emoji\s*/i, "").trim();
+        const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "emoji\\s*", "i");
+        const query = root.search.text.replace(pattern, "").trim();
         
         let items;
         

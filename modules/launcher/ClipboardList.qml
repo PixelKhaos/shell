@@ -38,9 +38,7 @@ StyledListView {
         id: model
 
         onValuesChanged: {
-            // After deletion, adjust currentIndex if needed
             if (root.deletedItemIndex >= 0) {
-                // If we deleted an item before or at current position, move back
                 if (root.deletedItemIndex <= root.currentIndex) {
                     root.currentIndex = Math.max(0, root.currentIndex - 1);
                 }
@@ -55,15 +53,8 @@ StyledListView {
         if (count === 0)
             return 0;
         const itemsToShow = Math.min(Config.launcher.maxShown, count);
-        const calculatedHeight = (Config.launcher.sizes.itemHeight + spacing) * itemsToShow - spacing + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
-        const minHeight = 200;
-        
-        // For single items, use actual content height to prevent cutoff
-        if (itemsToShow === 1 && root.currentItem) {
-            return Math.max(minHeight, root.currentItem.implicitHeight + (itemsToShow > 0 ? Appearance.spacing.smaller : 0));
-        }
-        
-        return Math.max(minHeight, calculatedHeight);
+        const baseHeight = (Config.launcher.sizes.itemHeight + spacing) * itemsToShow;
+        return baseHeight + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
     }
 
     onCurrentIndexChanged: {

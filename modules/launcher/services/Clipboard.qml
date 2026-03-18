@@ -60,8 +60,8 @@ Singleton {
     }
 
     function deleteItem(item): void {
-        const input = item.id + "\t" + item.content;
-        deleteProcess.command = ["sh", "-c", `echo '${input}' | cliphist delete`];
+        const escapedId = item.id.replace(/'/g, "'\\''");
+        deleteProcess.command = ["sh", "-c", `printf '%s' '${escapedId}' | cliphist delete`];
         deleteProcess.running = true;
     }
 
