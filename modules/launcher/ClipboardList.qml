@@ -131,7 +131,7 @@ StyledListView {
         target: root
 
         function onActiveCategoryChanged(): void {
-            if (previousCategory !== root.activeCategory && root.search.text.startsWith(">clipboard")) {
+            if (previousCategory !== root.activeCategory && root.search.text.startsWith(Config.launcher.actionPrefix + "clipboard")) {
                 if (categoryChangeAnimation.running) {
                     categoryChangeAnimation.stop();
                     root.opacity = 1;
@@ -201,7 +201,8 @@ StyledListView {
     }
 
     function filterAndSortItems(): var {
-        const query = root.search.text.replace(/^>clipboard\s*/i, "").trim();
+        const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "clipboard\\s*", "i");
+        const query = root.search.text.replace(pattern, "").trim();
         let items = Clipboard.history;
 
         if (root.activeCategory === "images") {

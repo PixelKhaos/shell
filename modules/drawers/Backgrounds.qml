@@ -51,6 +51,13 @@ Shape {
         startY: root.height
     }
 
+    Launcher.ClipboardPreviewBackground {
+        clipboardPreview: root.panels.clipboardPreview
+
+        startX: (root.width - root.panels.launcher.width) / 2 - rounding + root.panels.launcher.width + Appearance.spacing.large + 4
+        startY: root.height + (clipboardPreview.visible ? 0 : rounding * 2)
+    }
+
     Dashboard.Background {
         wrapper: root.panels.dashboard
 

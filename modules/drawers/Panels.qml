@@ -27,6 +27,7 @@ Item {
     readonly property alias utilities: utilities
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
+    readonly property alias clipboardPreview: clipboardPreview
 
     anchors.fill: parent
     anchors.margins: Config.border.thickness

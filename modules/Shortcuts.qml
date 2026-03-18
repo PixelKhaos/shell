@@ -1,6 +1,7 @@
 import qs.components.misc
 import qs.modules.controlcenter
 import qs.services
+import qs.config
 import Caelestia
 import Quickshell
 import Quickshell.Io
@@ -123,7 +124,7 @@ Scope {
             // Set the launcher text to trigger clipboard view
             const launcher = LauncherIpc.getForActive();
             if (launcher) {
-                launcher.search.text = ">clipboard ";
+                launcher.search.text = Config.launcher.actionPrefix + "clipboard ";
                 launcher.search.forceActiveFocus();
             }
         }
