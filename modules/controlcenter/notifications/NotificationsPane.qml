@@ -105,7 +105,7 @@ Item {
                 flickable: notificationsFlickable
             }
 
-            ColumnLayout {
+            RowLayout {
                 id: notificationsLayout
 
                 anchors.left: parent.left
@@ -113,32 +113,19 @@ Item {
                 anchors.top: parent.top
                 spacing: Appearance.spacing.normal
 
-                RowLayout {
-                    spacing: Appearance.spacing.smaller
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    Layout.maximumWidth: 500
+                    Layout.alignment: Qt.AlignTop
+                    spacing: Appearance.spacing.normal
 
-                    StyledText {
-                        text: qsTr("Notifications")
-                        font.pointSize: Appearance.font.size.large
-                        font.weight: 500
-                    }
-                }
-
-                SectionContainer {
+                    SectionContainer {
                     Layout.fillWidth: true
                     alignTop: true
 
                     StyledText {
-                        text: qsTr("Popup notifications")
+                        text: qsTr("Notifications")
                         font.pointSize: Appearance.font.size.normal
-                    }
-
-                    SwitchRow {
-                        label: qsTr("Expire automatically")
-                        checked: root.notificationsExpire
-                        onToggled: checked => {
-                            root.notificationsExpire = checked;
-                            root.saveConfig();
-                        }
                     }
 
                     SplitButtonRow {
@@ -188,6 +175,15 @@ Item {
                     }
 
                     SwitchRow {
+                        label: qsTr("Expire automatically")
+                        checked: root.notificationsExpire
+                        onToggled: checked => {
+                            root.notificationsExpire = checked;
+                            root.saveConfig();
+                        }
+                    }
+
+                    SwitchRow {
                         label: qsTr("Open expanded")
                         checked: root.notificationsOpenExpanded
                         onToggled: checked => {
@@ -219,26 +215,28 @@ Item {
                             root.saveConfig();
                         }
                     }
+                    }
                 }
 
-                SectionContainer {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    alignTop: true
+                    Layout.alignment: Qt.AlignTop
+                    spacing: Appearance.spacing.normal
 
-                    StyledText {
-                        text: qsTr("Toasts")
-                        font.pointSize: Appearance.font.size.normal
-                    }
-
-                    RowLayout {
+                    SectionContainer {
                         Layout.fillWidth: true
-                        spacing: Appearance.spacing.normal
-                        z: toastFullscreenSelector.expanded ? 100 : 0
+                        alignTop: true
+
+                        StyledText {
+                            text: qsTr("Toast settings")
+                            font.pointSize: Appearance.font.size.normal
+                        }
 
                         SplitButtonRow {
                             id: toastFullscreenSelector
 
                             Layout.fillWidth: true
+                            z: expanded ? 100 : 0
                             label: qsTr("Show in fullscreen")
                             menuItems: [
                                 toastFullscreenOffItem,
@@ -316,111 +314,111 @@ Item {
                                 root.saveConfig();
                             }
                         }
-                    }
 
-                    GridLayout {
-                        Layout.fillWidth: true
-                        columns: 3
-                        columnSpacing: Appearance.spacing.normal
-                        rowSpacing: Appearance.spacing.normal
-
-                        SwitchRow {
+                        GridLayout {
                             Layout.fillWidth: true
-                            label: qsTr("Charging changes")
-                            checked: root.chargingChanged
-                            onToggled: checked => {
-                                root.chargingChanged = checked;
-                                root.saveConfig();
+                            columns: 2
+                            columnSpacing: Appearance.spacing.normal
+                            rowSpacing: Appearance.spacing.normal
+
+                            SwitchRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Charging changes")
+                                checked: root.chargingChanged
+                                onToggled: checked => {
+                                    root.chargingChanged = checked;
+                                    root.saveConfig();
+                                }
                             }
-                        }
 
-                        SwitchRow {
-                            Layout.fillWidth: true
-                            label: qsTr("Game mode changes")
-                            checked: root.gameModeChanged
-                            onToggled: checked => {
-                                root.gameModeChanged = checked;
-                                root.saveConfig();
+                            SwitchRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Game mode changes")
+                                checked: root.gameModeChanged
+                                onToggled: checked => {
+                                    root.gameModeChanged = checked;
+                                    root.saveConfig();
+                                }
                             }
-                        }
 
-                        SwitchRow {
-                            Layout.fillWidth: true
-                            label: qsTr("Do not disturb")
-                            checked: root.dndChanged
-                            onToggled: checked => {
-                                root.dndChanged = checked;
-                                root.saveConfig();
+                            SwitchRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Do not disturb")
+                                checked: root.dndChanged
+                                onToggled: checked => {
+                                    root.dndChanged = checked;
+                                    root.saveConfig();
+                                }
                             }
-                        }
 
-                        SwitchRow {
-                            Layout.fillWidth: true
-                            label: qsTr("Audio output changes")
-                            checked: root.audioOutputChanged
-                            onToggled: checked => {
-                                root.audioOutputChanged = checked;
-                                root.saveConfig();
+                            SwitchRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Audio output changes")
+                                checked: root.audioOutputChanged
+                                onToggled: checked => {
+                                    root.audioOutputChanged = checked;
+                                    root.saveConfig();
+                                }
                             }
-                        }
 
-                        SwitchRow {
-                            Layout.fillWidth: true
-                            label: qsTr("Audio input changes")
-                            checked: root.audioInputChanged
-                            onToggled: checked => {
-                                root.audioInputChanged = checked;
-                                root.saveConfig();
+                            SwitchRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Audio input changes")
+                                checked: root.audioInputChanged
+                                onToggled: checked => {
+                                    root.audioInputChanged = checked;
+                                    root.saveConfig();
+                                }
                             }
-                        }
 
-                        SwitchRow {
-                            Layout.fillWidth: true
-                            label: qsTr("Caps lock changes")
-                            checked: root.capsLockChanged
-                            onToggled: checked => {
-                                root.capsLockChanged = checked;
-                                root.saveConfig();
+                            SwitchRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Caps lock changes")
+                                checked: root.capsLockChanged
+                                onToggled: checked => {
+                                    root.capsLockChanged = checked;
+                                    root.saveConfig();
+                                }
                             }
-                        }
 
-                        SwitchRow {
-                            Layout.fillWidth: true
-                            label: qsTr("Num lock changes")
-                            checked: root.numLockChanged
-                            onToggled: checked => {
-                                root.numLockChanged = checked;
-                                root.saveConfig();
+                            SwitchRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Num lock changes")
+                                checked: root.numLockChanged
+                                onToggled: checked => {
+                                    root.numLockChanged = checked;
+                                    root.saveConfig();
+                                }
                             }
-                        }
 
-                        SwitchRow {
-                            Layout.fillWidth: true
-                            label: qsTr("Keyboard layout changes")
-                            checked: root.kbLayoutChanged
-                            onToggled: checked => {
-                                root.kbLayoutChanged = checked;
-                                root.saveConfig();
+                            SwitchRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Keyboard layout changes")
+                                checked: root.kbLayoutChanged
+                                onToggled: checked => {
+                                    root.kbLayoutChanged = checked;
+                                    root.saveConfig();
+                                }
                             }
-                        }
 
-                        SwitchRow {
-                            Layout.fillWidth: true
-                            label: qsTr("VPN changes")
-                            checked: root.vpnChanged
-                            onToggled: checked => {
-                                root.vpnChanged = checked;
-                                root.saveConfig();
+                            SwitchRow {
+                                Layout.fillWidth: true
+                                label: qsTr("VPN changes")
+                                checked: root.vpnChanged
+                                onToggled: checked => {
+                                    root.vpnChanged = checked;
+                                    root.saveConfig();
+                                }
                             }
-                        }
 
-                        SwitchRow {
-                            Layout.fillWidth: true
-                            label: qsTr("Now playing")
-                            checked: root.nowPlaying
-                            onToggled: checked => {
-                                root.nowPlaying = checked;
-                                root.saveConfig();
+                            SwitchRow {
+                                Layout.fillWidth: true
+                                label: qsTr("Now playing")
+                                checked: root.nowPlaying
+                                onToggled: checked => {
+                                    root.nowPlaying = checked;
+                                    root.saveConfig();
+                                }
                             }
                         }
                     }
