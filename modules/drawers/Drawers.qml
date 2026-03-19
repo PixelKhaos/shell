@@ -61,11 +61,11 @@ Variants {
             screen: scope.modelData
             name: "drawers"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.layer: hasActualFullscreen ? WlrLayer.Overlay : WlrLayer.Top
+            WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || panels.dashboard.needsKeyboard ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             Behavior on borderThickness {
-                NumberAnimation {
+                Anim {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.type: Easing.BezierSpline
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
@@ -73,7 +73,7 @@ Variants {
             }
 
             Behavior on borderRounding {
-                NumberAnimation {
+                Anim {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.type: Easing.BezierSpline
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
@@ -81,7 +81,7 @@ Variants {
             }
 
             Behavior on shadowOpacity {
-                NumberAnimation {
+                Anim {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.type: Easing.BezierSpline
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
