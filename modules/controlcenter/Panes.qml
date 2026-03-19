@@ -130,6 +130,7 @@ ClippingRectangle {
             id: loader
 
             anchors.fill: parent
+            asynchronous: true
             clip: false
             active: false
 
