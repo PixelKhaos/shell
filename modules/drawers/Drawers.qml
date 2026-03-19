@@ -71,10 +71,10 @@ Variants {
             }
 
             mask: Region {
-                x: bar.implicitWidth + win.dragMaskPadding
-                y: win.borderLayoutThickness + win.dragMaskPadding
-                width: win.width - bar.implicitWidth - win.borderLayoutThickness - win.dragMaskPadding * 2
-                height: win.height - win.borderLayoutThickness * 2 - win.dragMaskPadding * 2
+                x: bar.clampedWidth + win.dragMaskPadding
+                y: Config.border.clampedThickness + win.dragMaskPadding
+                width: win.width - bar.clampedWidth - Config.border.clampedThickness - win.dragMaskPadding * 2
+                height: win.height - Config.border.clampedThickness * 2 - win.dragMaskPadding * 2
                 intersection: Intersection.Xor
 
                 regions: regions.instances
