@@ -11,6 +11,7 @@ Item {
 
     required property Item bar
     required property real borderThickness
+    required property real borderRounding
 
     anchors.fill: parent
 
@@ -39,7 +40,7 @@ Item {
             anchors.fill: parent
             anchors.margins: root.borderThickness
             anchors.leftMargin: root.bar.implicitWidth
-            radius: Config.border.rounding
+            radius: root.borderRounding
         }
     }
 }

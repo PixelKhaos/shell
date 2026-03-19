@@ -17,6 +17,7 @@ Shape {
     required property Panels panels
     required property Item bar
     required property real borderThickness
+    required property real borderRounding
 
     anchors.fill: parent
     anchors.margins: root.borderThickness
@@ -25,6 +26,7 @@ Shape {
 
     Osd.Background {
         wrapper: root.panels.osd
+        rounding: Config.border.rounding
 
         startX: root.width - root.panels.session.width - root.panels.sidebar.width
         startY: (root.height - wrapper.height) / 2 - rounding
@@ -33,6 +35,7 @@ Shape {
     Notifications.Background {
         wrapper: root.panels.notifications
         sidebar: sidebar
+        rounding: Config.border.rounding
 
         startX: root.width
         startY: 0
@@ -70,6 +73,7 @@ Shape {
     Utilities.Background {
         wrapper: root.panels.utilities
         sidebar: sidebar
+        rounding: root.borderRounding
 
         startX: root.width
         startY: root.height
@@ -80,6 +84,7 @@ Shape {
 
         wrapper: root.panels.sidebar
         panels: root.panels
+        rounding: root.borderRounding
 
         startX: root.width
         startY: root.panels.notifications.height

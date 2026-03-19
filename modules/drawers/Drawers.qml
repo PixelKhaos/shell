@@ -36,6 +36,8 @@ Variants {
             readonly property bool hasFullscreen: hasActualFullscreen && !hasSpecialWorkspace
             property real borderThickness: hasFullscreen ? 0 : Config.border.thickness
             readonly property real borderLayoutThickness: hasFullscreen ? 0 : Config.border.thickness
+            property real borderRounding: hasFullscreen ? 0 : Config.border.rounding
+            property real shadowOpacity: hasFullscreen ? 0 : 0.7
             readonly property int dragMaskPadding: {
                 if (focusGrab.active || panels.popouts.isDetached)
                     return 0;
@@ -63,6 +65,22 @@ Variants {
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             Behavior on borderThickness {
+                NumberAnimation {
+                    duration: Appearance.anim.durations.expressiveDefaultSpatial
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                }
+            }
+
+            Behavior on borderRounding {
+                NumberAnimation {
+                    duration: Appearance.anim.durations.expressiveDefaultSpatial
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                }
+            }
+
+            Behavior on shadowOpacity {
                 NumberAnimation {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.type: Easing.BezierSpline
@@ -133,18 +151,20 @@ Variants {
                 layer.effect: MultiEffect {
                     shadowEnabled: true
                     blurMax: 15
-                    shadowColor: Qt.alpha(Colours.palette.m3shadow, 0.7)
+                    shadowColor: Qt.alpha(Colours.palette.m3shadow, Math.max(0, win.shadowOpacity))
                 }
 
                 Border {
                     bar: bar
                     borderThickness: win.borderThickness
+                    borderRounding: win.borderRounding
                 }
 
                 Backgrounds {
                     panels: panels
                     bar: bar
                     borderThickness: win.borderThickness
+                    borderRounding: win.borderRounding
                 }
             }
 
