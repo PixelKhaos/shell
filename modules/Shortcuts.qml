@@ -70,6 +70,17 @@ Scope {
         onPressed: root.launcherInterrupted = true
     }
 
+    CustomShortcut {
+        name: "clipboard"
+        description: "Open clipboard manager"
+        onPressed: clipboardIpc.toggle()
+    }
+
+    CustomShortcut {
+        name: "emoji"
+        description: "Open emoji picker"
+        onPressed: emojiIpc.toggle()
+    }
 
     CustomShortcut {
         name: "sidebar"
@@ -114,37 +125,58 @@ Scope {
     }
 
     IpcHandler {
+        id: clipboardIpc
         target: "clipboard"
 
         function toggle(): void {
             if (root.hasFullscreen)
                 return;
+            
             const visibilities = Visibilities.getForActive();
+            const launcher = LauncherIpc.getForActive();
             const wrapper = LauncherWrappers.getForActive();
-            if (wrapper) {
-                wrapper.pendingSearchText = Config.launcher.actionPrefix + "clipboard ";
+            const searchText = Config.launcher.actionPrefix + "clipboard ";
+            
+            if (visibilities.launcher && launcher?.search.text === searchText) {
+                visibilities.launcher = false;
+                return;
+            }
+            
+            if (launcher?.search) {
+                launcher.search.text = searchText;
+                launcher.search.forceActiveFocus();
+            } else if (wrapper) {
+                wrapper.pendingSearchText = searchText;
             }
             visibilities.launcher = true;
-            const launcher = LauncherIpc.getForActive();
-            if (launcher) {
-                launcher.search.forceActiveFocus();
-            }
         }
     }
 
     IpcHandler {
+        id: emojiIpc
         target: "emoji"
 
         function toggle(): void {
             if (root.hasFullscreen)
                 return;
+            
             const visibilities = Visibilities.getForActive();
-            visibilities.launcher = true;
             const launcher = LauncherIpc.getForActive();
-            if (launcher) {
-                launcher.search.text = Config.launcher.actionPrefix + "emoji ";
-                launcher.search.forceActiveFocus();
+            const wrapper = LauncherWrappers.getForActive();
+            const searchText = Config.launcher.actionPrefix + "emoji ";
+            
+            if (visibilities.launcher && launcher?.search.text === searchText) {
+                visibilities.launcher = false;
+                return;
             }
+            
+            if (launcher?.search) {
+                launcher.search.text = searchText;
+                launcher.search.forceActiveFocus();
+            } else if (wrapper) {
+                wrapper.pendingSearchText = searchText;
+            }
+            visibilities.launcher = true;
         }
     }
 
