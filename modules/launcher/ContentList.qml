@@ -95,6 +95,8 @@ Item {
     ]
 
     Behavior on state {
+        enabled: !root.content.loadedWithInitialText
+
         SequentialAnimation {
             Anim {
                 target: root
@@ -245,7 +247,7 @@ Item {
     }
 
     Behavior on implicitHeight {
-        enabled: root.visibilities.launcher
+        enabled: root.visibilities.launcher && !root.content.loadedWithInitialText
 
         Anim {
             duration: Appearance.anim.durations.large

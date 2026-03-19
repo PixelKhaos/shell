@@ -16,6 +16,7 @@ Item {
     readonly property bool shouldBeActive: visibilities.launcher && Config.launcher.enabled
     property int contentHeight
     property string pendingSearchText: ""
+    property bool _showAnimRetarget: false
 
     Component.onCompleted: LauncherWrappers.register(root.screen, root)
     
@@ -48,8 +49,15 @@ Item {
         if (shouldBeActive) {
             timer.stop();
             hideAnim.stop();
-            showAnim.start();
+            if (pendingSearchText) {
+                content.active = false;
+                content.active = Qt.binding(() => root.shouldBeActive || root.visible);
+            } else {
+                showAnim.start();
+            }
         } else {
+            retargetTimer.stop();
+            root._showAnimRetarget = false;
             showAnim.stop();
             hideAnim.start();
         }
@@ -66,7 +74,34 @@ Item {
             easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
         }
         ScriptAction {
-            script: root.implicitHeight = Qt.binding(() => content.implicitHeight)
+            script: {
+                root._showAnimRetarget = false;
+                root.implicitHeight = Qt.binding(() => content.implicitHeight);
+            }
+        }
+    }
+
+    Timer {
+        id: retargetTimer
+        interval: 40
+        onTriggered: {
+            if (showAnim.running) {
+                showAnim.stop();
+            }
+            showAnim.start();
+        }
+    }
+
+    Connections {
+        target: content
+        enabled: root._showAnimRetarget
+
+        function onImplicitHeightChanged(): void {
+            const h = Math.min(root.maxHeight, content.implicitHeight);
+            if (h !== root.contentHeight && h > 0) {
+                root.contentHeight = h;
+                retargetTimer.restart();
+            }
         }
     }
 
@@ -143,8 +178,21 @@ Item {
             initialSearchText: root.pendingSearchText
 
             Component.onCompleted: {
-                root.contentHeight = implicitHeight;
+                const hadSearchText = root.pendingSearchText !== "";
                 root.pendingSearchText = "";
+                root.contentHeight = Math.min(root.maxHeight, implicitHeight);
+                if (root.shouldBeActive) {
+                    if (hadSearchText) {
+                        // IPC: defer start so async clipboard data + layout settle first
+                        root._showAnimRetarget = true;
+                        retargetTimer.start();
+                    } else {
+                        if (showAnim.running) {
+                            showAnim.stop();
+                        }
+                        showAnim.start();
+                    }
+                }
             }
         }
     }

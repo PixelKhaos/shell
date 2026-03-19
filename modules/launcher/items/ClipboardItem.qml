@@ -16,7 +16,7 @@ Item {
     required property int index
     required property PersistentProperties visibilities
 
-    implicitHeight: rect.implicitHeight
+    implicitHeight: Config.launcher.sizes.itemHeight
     anchors.left: parent?.left
     anchors.right: parent?.right
 
@@ -59,8 +59,11 @@ Item {
 
         RowLayout {
             id: content
-            anchors.fill: parent
-            anchors.margins: Appearance.padding.normal
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: Appearance.padding.normal
+            anchors.rightMargin: Appearance.padding.normal
             spacing: Appearance.spacing.normal
 
             MaterialIcon {

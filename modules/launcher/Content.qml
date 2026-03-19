@@ -236,7 +236,7 @@ Item {
         content: root
         visibilities: root.visibilities
         panels: root.panels
-        maxHeight: root.maxHeight - searchWrapper.implicitHeight - clipboardNav.implicitHeight - (root.showClipboardNav ? root.padding : 0) - root.padding * 3
+        maxHeight: root.maxHeight - searchWrapper.implicitHeight - clipboardNav.height - (root.showClipboardNav ? root.padding : 0) - root.padding * 3
         search: search
         padding: root.padding
         rounding: root.rounding
