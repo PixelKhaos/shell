@@ -363,15 +363,12 @@ Singleton {
             smartScheme: services.smartScheme,
             defaultPlayer: services.defaultPlayer,
             playerAliases: services.playerAliases,
-<<<<<<< HEAD
             sunsetService: {
                 manualEnabled: services.sunsetService.manualEnabled,
                 temperature: services.sunsetService.temperature,
                 preferredBackend: services.sunsetService.preferredBackend
-            }
-=======
+            },
             showLyrics: services.showLyrics
->>>>>>> origin/main
         };
     }
 
