@@ -214,8 +214,6 @@ CustomMouseArea {
 
     // Monitor individual visibility changes
     Connections {
-        target: root.visibilities
-
         function onLauncherChanged() {
             // If launcher is hidden, clear shortcut flags for dashboard and OSD
             if (!root.visibilities.launcher) {
@@ -275,5 +273,7 @@ CustomMouseArea {
                 root.utilitiesShortcutActive = false;
             }
         }
+
+        target: root.visibilities
     }
 }
