@@ -23,9 +23,12 @@ Item {
     readonly property bool showClipboard: search.text.startsWith(`${Config.launcher.actionPrefix}clipboard `)
     readonly property bool showEmoji: search.text.startsWith(`${Config.launcher.actionPrefix}emoji `)
     readonly property Item currentList: {
-        if (showWallpapers) return wallpaperList.item;
-        if (showClipboard) return clipboardList.item;
-        if (showEmoji) return emojiList.item;
+        if (showWallpapers)
+            return wallpaperList.item;
+        if (showClipboard)
+            return clipboardList.item;
+        if (showEmoji)
+            return emojiList.item;
         return appList.item;
     }
 
@@ -34,9 +37,12 @@ Item {
 
     clip: true
     state: {
-        if (showWallpapers) return "wallpapers";
-        if (showClipboard) return "clipboard";
-        if (showEmoji) return "emoji";
+        if (showWallpapers)
+            return "wallpapers";
+        if (showClipboard)
+            return "clipboard";
+        if (showEmoji)
+            return "emoji";
         return "apps";
     }
 
@@ -188,9 +194,12 @@ Item {
 
         MaterialIcon {
             text: {
-                if (root.state === "wallpapers") return "wallpaper_slideshow";
-                if (root.state === "clipboard") return "content_paste";
-                if (root.state === "emoji") return "sentiment_satisfied";
+                if (root.state === "wallpapers")
+                    return "wallpaper_slideshow";
+                if (root.state === "clipboard")
+                    return "content_paste";
+                if (root.state === "emoji")
+                    return "sentiment_satisfied";
                 return "manage_search";
             }
             color: Colours.palette.m3onSurfaceVariant
@@ -204,9 +213,12 @@ Item {
 
             StyledText {
                 text: {
-                    if (root.state === "wallpapers") return qsTr("No wallpapers found");
-                    if (root.state === "clipboard") return qsTr("No clipboard history");
-                    if (root.state === "emoji") return qsTr("No emojis found");
+                    if (root.state === "wallpapers")
+                        return qsTr("No wallpapers found");
+                    if (root.state === "clipboard")
+                        return qsTr("No clipboard history");
+                    if (root.state === "emoji")
+                        return qsTr("No emojis found");
                     return qsTr("No results");
                 }
                 color: Colours.palette.m3onSurfaceVariant

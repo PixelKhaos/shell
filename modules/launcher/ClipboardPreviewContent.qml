@@ -29,6 +29,8 @@ Item {
     property bool loadingImage: false
     property bool decodingHtml: false
 
+    property string extractedImageUrl: ""
+
     readonly property string imageSource: {
         if (!currentItem?.modelData)
             return "";
@@ -40,30 +42,6 @@ Item {
             return extractedImageUrl || data.imageUrl || "";
 
         return "";
-    }
-
-    property string extractedImageUrl: ""
-
-    onCurrentItemChanged: {
-        imageDataUrl = "";
-        loadingImage = false;
-        extractedImageUrl = "";
-        imageLoadError = false;
-        decodingHtml = false;
-
-        if (currentItem && currentItem.modelData) {
-            const data = currentItem.modelData;
-            if (data.isImage === true) {
-                loadingImage = true;
-                decodeImageToDataUrl();
-            } else if (data.needsDecodeForUrl === true) {
-                // Need to decode full HTML to extract image URL
-                decodingHtml = true;
-                decodeHtmlForImageUrl();
-            } else if (data.imageUrl) {
-                extractedImageUrl = data.imageUrl;
-            }
-        }
     }
 
     function decodeImageToDataUrl(): void {
@@ -84,8 +62,30 @@ Item {
         decodeHtmlProcess.running = true;
     }
 
+    onCurrentItemChanged: {
+        imageDataUrl = "";
+        loadingImage = false;
+        extractedImageUrl = "";
+        imageLoadError = false;
+        decodingHtml = false;
+
+        if (currentItem && currentItem.modelData) {
+            const data = currentItem.modelData;
+            if (data.isImage === true) {
+                loadingImage = true;
+                decodeImageToDataUrl();
+            } else if (data.needsDecodeForUrl === true) {
+                decodingHtml = true;
+                decodeHtmlForImageUrl();
+            } else if (data.imageUrl) {
+                extractedImageUrl = data.imageUrl;
+            }
+        }
+    }
+
     Process {
         id: decodeProcess
+
         stdout: StdioCollector {}
 
         onExited: {
@@ -100,6 +100,7 @@ Item {
 
     Process {
         id: copyGrabbedImageProcess
+
         stdout: StdioCollector {}
 
         onExited: (exitCode, exitStatus) => {
@@ -115,6 +116,7 @@ Item {
 
     Process {
         id: decodeHtmlProcess
+
         stdout: StdioCollector {}
 
         onExited: {
@@ -176,6 +178,7 @@ Item {
 
             Image {
                 id: previewImage
+
                 anchors.fill: parent
                 source: root.imageSource
                 fillMode: Image.PreserveAspectFit

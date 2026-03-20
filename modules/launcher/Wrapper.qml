@@ -18,18 +18,18 @@ Item {
     property string pendingSearchText: ""
     property bool _showAnimRetarget: false
 
-    Component.onCompleted: LauncherWrappers.register(root.screen, root)
-    
     readonly property var currentClipboardItem: {
         const list = content.item?.list?.currentList;
-        if (!list) return null;
-        
+        if (!list)
+            return null;
+
         // Use last interaction type to determine priority
         if (list.lastInteraction === "hover" && list.hoveredItem) {
             return list.hoveredItem;
         }
         return list.currentItem;
     }
+
     readonly property bool showingClipboard: content.item?.list?.showClipboard ?? false
 
     readonly property real maxHeight: {
@@ -38,6 +38,8 @@ Item {
             max -= panels.dashboard.nonAnimHeight;
         return max;
     }
+
+    Component.onCompleted: LauncherWrappers.register(root.screen, root)
 
     onMaxHeightChanged: timer.start()
 
@@ -83,6 +85,7 @@ Item {
 
     Timer {
         id: retargetTimer
+
         interval: 40
         onTriggered: {
             if (showAnim.running) {
@@ -93,9 +96,6 @@ Item {
     }
 
     Connections {
-        target: content
-        enabled: root._showAnimRetarget
-
         function onImplicitHeightChanged(): void {
             const h = Math.min(root.maxHeight, content.implicitHeight);
             if (h !== root.contentHeight && h > 0) {
@@ -103,6 +103,9 @@ Item {
                 retargetTimer.restart();
             }
         }
+
+        target: content
+        enabled: root._showAnimRetarget
     }
 
     SequentialAnimation {

@@ -27,18 +27,12 @@ Item {
 
     implicitWidth: Config.launcher.sizes.itemWidth
     implicitHeight: 100
-    
+
     Binding {
         target: root
         property: "implicitHeight"
         value: categoryBar.height + grid.height + Appearance.padding.large
         when: categoryBar.height > 0 && grid.height > 0
-    }
-
-    onCurrentIndexChanged: {
-        if (grid.currentIndex !== currentIndex) {
-            grid.currentIndex = currentIndex;
-        }
     }
 
     function incrementCurrentIndex(): void {
@@ -71,8 +65,15 @@ Item {
         }
     }
 
+    onCurrentIndexChanged: {
+        if (grid.currentIndex !== currentIndex) {
+            grid.currentIndex = currentIndex;
+        }
+    }
+
     RowLayout {
         id: categoryBar
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -104,15 +105,15 @@ Item {
         anchors.leftMargin: Appearance.padding.normal
         anchors.rightMargin: Appearance.padding.normal
         anchors.topMargin: Appearance.padding.large
-        
+
         height: Math.min(Math.max(contentHeight, root.cellSize * 3), 400)
         clip: true
 
         cellWidth: root.cellSize
         cellHeight: root.cellSize
-        
+
         verticalLayoutDirection: GridView.TopToBottom
-        
+
         highlight: Rectangle {
             color: Qt.alpha(Colours.palette.m3onSurface, 0.08)
             radius: Appearance.rounding.normal
@@ -174,27 +175,27 @@ Item {
     }
 
     Connections {
-        target: Emojis
-
         function onEmojisLoaded(): void {
             updateGrid();
         }
+
+        target: Emojis
     }
 
     Connections {
-        target: root.search
-
         function onTextChanged(): void {
             updateGrid();
         }
+
+        target: root.search
     }
 
     function updateGrid(): void {
         const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "emoji\\s*", "i");
         const query = root.search.text.replace(pattern, "").trim();
-        
+
         let items;
-        
+
         if (query) {
             // Search mode - ignore category
             items = Emojis.search(query);

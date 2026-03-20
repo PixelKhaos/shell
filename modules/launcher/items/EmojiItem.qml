@@ -30,6 +30,7 @@ Item {
 
         MouseArea {
             id: mouse
+
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {

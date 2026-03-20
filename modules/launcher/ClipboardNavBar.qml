@@ -38,6 +38,7 @@ StyledRect {
 
     RowLayout {
         id: navContent
+
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.normal
         anchors.rightMargin: Appearance.padding.normal
@@ -89,14 +90,17 @@ StyledRect {
 
             Row {
                 id: tabsRow
+
                 spacing: Appearance.spacing.small
 
                 Repeater {
                     id: tabsRepeater
+
                     model: root.categoryList
 
                     delegate: Item {
                         id: tabDelegate
+
                         required property var modelData
                         required property int index
 
@@ -106,17 +110,19 @@ StyledRect {
                         implicitHeight: tabContent.height + Appearance.padding.smaller * 2
 
                         StateLayer {
-                            anchors.fill: parent
-                            radius: 6
                             function onClicked(): void {
                                 if (root.clipboardList) {
                                     root.clipboardList.activeCategory = tabDelegate.modelData.id;
                                 }
                             }
+
+                            anchors.fill: parent
+                            radius: 6
                         }
 
                         Row {
                             id: tabContent
+
                             anchors.centerIn: parent
                             spacing: Appearance.spacing.smaller
 

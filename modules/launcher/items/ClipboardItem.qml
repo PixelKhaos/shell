@@ -16,13 +16,13 @@ Item {
     required property int index
     required property PersistentProperties visibilities
 
-    implicitHeight: Config.launcher.sizes.itemHeight
-    anchors.left: parent?.left
-    anchors.right: parent?.right
-
     property bool isItemHovered: itemHoverHandler.hovered
     readonly property bool isHovered: root.isItemHovered
     readonly property bool isCurrent: ListView.isCurrentItem && root.ListView.view?.lastInteraction === "keyboard"
+
+    implicitHeight: Config.launcher.sizes.itemHeight
+    anchors.left: parent?.left
+    anchors.right: parent?.right
 
     onIsItemHoveredChanged: {
         if (isItemHovered) {
@@ -49,6 +49,7 @@ Item {
 
         MouseArea {
             id: mouse
+
             anchors.fill: parent
             onClicked: {
                 root.ListView.view.currentIndex = root.index;
@@ -59,6 +60,7 @@ Item {
 
         RowLayout {
             id: content
+
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
@@ -104,10 +106,12 @@ Item {
 
             Row {
                 id: buttonsRow
+
                 spacing: Appearance.spacing.small
 
                 IconButton {
                     id: pinButton
+
                     icon: root.modelData.isPinned ? "push_pin" : "keep"
                     type: root.modelData.isPinned ? IconButton.Filled : IconButton.Text
                     radius: Appearance.rounding.small
@@ -119,6 +123,7 @@ Item {
 
                 IconButton {
                     id: deleteButton
+
                     icon: "delete"
                     type: IconButton.Text
                     radius: Appearance.rounding.small

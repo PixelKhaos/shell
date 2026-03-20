@@ -27,6 +27,7 @@ StyledListView {
 
     HoverHandler {
         id: listHoverHandler
+
         onHoveredChanged: {
             if (!hovered) {
                 root.hoveredItem = null;
@@ -100,27 +101,26 @@ StyledListView {
         }
     }
 
-    Connections {
-        target: Clipboard
-        function onHistoryChanged(): void {
-            root.updateModel();
-        }
-    }
-
-    Connections {
-        target: root.search
-
-        function onTextChanged(): void {
-            root.updateModel();
-        }
-    }
-
     property string previousCategory: "all"
     property var pendingModelUpdate: null
 
     Connections {
-        target: root
+        function onHistoryChanged(): void {
+            root.updateModel();
+        }
 
+        target: Clipboard
+    }
+
+    Connections {
+        function onTextChanged(): void {
+            root.updateModel();
+        }
+
+        target: root.search
+    }
+
+    Connections {
         function onActiveCategoryChanged(): void {
             if (previousCategory !== root.activeCategory && root.search.text.startsWith(Config.launcher.actionPrefix + "clipboard")) {
                 if (categoryChangeAnimation.running) {
@@ -227,7 +227,6 @@ StyledListView {
         updateModel();
     }
 
-
     // Confirmation dialog overlay
     Rectangle {
         anchors.fill: parent
@@ -273,6 +272,7 @@ StyledListView {
 
             ColumnLayout {
                 id: confirmContent
+
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top

@@ -44,6 +44,20 @@ Item {
         return "";
     }
 
+    function decodeImageToDataUrl(): void {
+        if (!currentItem?.modelData?.isImage)
+            return;
+        decodeProcess.command = ["sh", "-c", `cliphist decode ${currentItem.modelData.id} | base64 -w 0`];
+        decodeProcess.running = true;
+    }
+
+    function decodeHtmlForImageUrl(): void {
+        if (!currentItem?.modelData?.needsDecodeForUrl)
+            return;
+        decodeHtmlProcess.command = ["cliphist", "decode", currentItem.modelData.id];
+        decodeHtmlProcess.running = true;
+    }
+
     onCurrentItemChanged: {
         const wasImage = imageDataUrl !== "" || extractedImageUrl !== "";
         const isImage = currentItem?.modelData?.isImage === true || currentItem?.modelData?.hasImageUrl === true || currentItem?.modelData?.imageUrl;
@@ -71,22 +85,9 @@ Item {
         }
     }
 
-    function decodeImageToDataUrl(): void {
-        if (!currentItem?.modelData?.isImage)
-            return;
-        decodeProcess.command = ["sh", "-c", `cliphist decode ${currentItem.modelData.id} | base64 -w 0`];
-        decodeProcess.running = true;
-    }
-
-    function decodeHtmlForImageUrl(): void {
-        if (!currentItem?.modelData?.needsDecodeForUrl)
-            return;
-        decodeHtmlProcess.command = ["cliphist", "decode", currentItem.modelData.id];
-        decodeHtmlProcess.running = true;
-    }
-
     Process {
         id: decodeProcess
+
         stdout: StdioCollector {}
         onExited: {
             if (root.currentItem?.modelData?.isImage) {
@@ -100,6 +101,7 @@ Item {
 
     Process {
         id: decodeHtmlProcess
+
         stdout: StdioCollector {}
         onExited: {
             root.decodingHtml = false;
@@ -113,6 +115,7 @@ Item {
 
     Process {
         id: copyGrabbedImageProcess
+
         stdout: StdioCollector {}
         onExited: (exitCode, exitStatus) => {
             if (exitCode === 0) {
@@ -154,6 +157,7 @@ Item {
 
     Behavior on height {
         enabled: targetHeight === 0 || height === 0 || Math.abs(targetHeight - height) > 5
+
         Anim {
             duration: Appearance.anim.durations.expressiveDefaultSpatial
             easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
@@ -167,6 +171,7 @@ Item {
 
         Item {
             id: imageContainer
+
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -174,6 +179,7 @@ Item {
 
             Image {
                 id: previewImage
+
                 anchors.fill: parent
                 fillMode: Image.PreserveAspectFit
                 asynchronous: true
@@ -200,10 +206,11 @@ Item {
             }
 
             Connections {
-                target: root
                 function onImageSourceChanged() {
                     imageContainer.pendingSource = root.imageSource;
                 }
+
+                target: root
             }
 
             SequentialAnimation {

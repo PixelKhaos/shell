@@ -11,6 +11,8 @@ Singleton {
 
     property var history: []
     property var pinnedItems: []
+    property string pendingImageUrl: ""
+    property string pendingImageMime: ""
 
     function loadPinnedItems(): void {
         const pinned = Config.launcher.pinnedClipboardItems || [];
@@ -26,14 +28,15 @@ Singleton {
         cliphistProcess.running = true;
     }
 
-    property string pendingImageUrl: ""
-    property string pendingImageMime: ""
-
     function getMimeTypeFromUrl(url): string {
-        if (url.match(/\.jpe?g$/i)) return "image/jpeg";
-        if (url.match(/\.png$/i)) return "image/png";
-        if (url.match(/\.gif$/i)) return "image/gif";
-        if (url.match(/\.webp$/i)) return "image/webp";
+        if (url.match(/\.jpe?g$/i))
+            return "image/jpeg";
+        if (url.match(/\.png$/i))
+            return "image/png";
+        if (url.match(/\.gif$/i))
+            return "image/gif";
+        if (url.match(/\.webp$/i))
+            return "image/webp";
         return "image/png";
     }
 
@@ -78,9 +81,12 @@ Singleton {
 
     function clearAll(category): void {
         const itemsToDelete = root.history.filter(item => {
-            if (item.isPinned) return false;
-            if (category === "images") return item.isImage;
-            if (category === "misc") return !item.isImage;
+            if (item.isPinned)
+                return false;
+            if (category === "images")
+                return item.isImage;
+            if (category === "misc")
+                return !item.isImage;
             return true;
         });
 
@@ -104,6 +110,7 @@ Singleton {
 
     Process {
         id: cliphistProcess
+
         command: ["cliphist", "list"]
         stdout: StdioCollector {
             onStreamFinished: {
@@ -119,6 +126,7 @@ Singleton {
 
     Process {
         id: copyImageProcess
+
         stdout: StdioCollector {}
 
         onExited: (exitCode, exitStatus) => {
@@ -133,6 +141,7 @@ Singleton {
 
     Process {
         id: deleteProcess
+
         stdout: StdioCollector {}
         onExited: root.refresh()
     }
