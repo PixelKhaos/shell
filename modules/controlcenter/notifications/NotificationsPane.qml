@@ -141,11 +141,11 @@ Item {
                             Component.onCompleted: syncActiveItem()
 
                             Connections {
-                                target: root
-
                                 function onNotificationsFullscreenChanged(): void {
                                     notificationsFullscreenSelector.syncActiveItem();
                                 }
+
+                                target: root
                             }
 
                             MenuItem {
@@ -256,11 +256,11 @@ Item {
                             Component.onCompleted: syncActiveItem()
 
                             Connections {
-                                target: root
-
                                 function onToastsFullscreenChanged(): void {
                                     toastFullscreenSelector.syncActiveItem();
                                 }
+
+                                target: root
                             }
 
                             MenuItem {
