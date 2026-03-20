@@ -9,10 +9,11 @@ import Quickshell.Wayland
 import QtQuick
 
 Loader {
+    asynchronous: true
     active: Config.background.enabled
 
     sourceComponent: Variants {
-        model: Quickshell.screens
+        model: Screens.screens
 
         StyledWindow {
             id: win
@@ -39,6 +40,8 @@ Loader {
                 Loader {
                     id: wallpaper
 
+                    asynchronous: true
+
                     anchors.fill: parent
                     active: Config.background.wallpaperEnabled
 
@@ -54,6 +57,8 @@ Loader {
 
             Loader {
                 id: clockLoader
+
+                asynchronous: true
                 active: Config.background.desktopClock.enabled
 
                 anchors.margins: Appearance.padding.large * 2
