@@ -32,8 +32,16 @@ Variants {
 
             readonly property var monitor: Hypr.monitorFor(screen)
             readonly property bool hasSpecialWorkspace: (monitor?.lastIpcObject?.specialWorkspace?.name.length ?? 0) > 0
-            readonly property bool hasActualFullscreen: monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false
-            readonly property bool hasFullscreen: hasActualFullscreen && !hasSpecialWorkspace
+            readonly property bool hasFullscreen: {
+                if (hasSpecialWorkspace) {
+                    const specialName = monitor?.lastIpcObject?.specialWorkspace?.name;
+                    if (!specialName)
+                        return false;
+                    const specialWs = Hypr.workspaces.values.find(ws => ws.name === specialName);
+                    return specialWs?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false;
+                }
+                return monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false;
+            }
             property real borderThickness: hasFullscreen ? 0 : Config.border.thickness
             readonly property real borderLayoutThickness: hasFullscreen ? 0 : Config.border.thickness
             property real borderRounding: hasFullscreen ? 0 : Config.border.rounding
