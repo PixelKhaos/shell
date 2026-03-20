@@ -120,101 +120,98 @@ Item {
                     spacing: Appearance.spacing.normal
 
                     SectionContainer {
-                    Layout.fillWidth: true
-                    alignTop: true
+                        Layout.fillWidth: true
+                        alignTop: true
 
-                    StyledText {
-                        text: qsTr("Notifications")
-                        font.pointSize: Appearance.font.size.normal
-                    }
-
-                    SplitButtonRow {
-                        id: notificationsFullscreenSelector
-
-                        label: qsTr("Show in fullscreen")
-                        menuItems: [
-                            notificationsFullscreenOffItem,
-                            notificationsFullscreenOnItem
-                        ]
-
-                        function syncActiveItem(): void {
-                            active = root.notificationsFullscreen === "off" ? notificationsFullscreenOffItem : notificationsFullscreenOnItem;
+                        StyledText {
+                            text: qsTr("Notifications")
+                            font.pointSize: Appearance.font.size.normal
                         }
 
-                        Component.onCompleted: syncActiveItem()
+                        SplitButtonRow {
+                            id: notificationsFullscreenSelector
 
-                        Connections {
-                            target: root
+                            label: qsTr("Show in fullscreen")
+                            menuItems: [notificationsFullscreenOffItem, notificationsFullscreenOnItem]
 
-                            function onNotificationsFullscreenChanged(): void {
-                                notificationsFullscreenSelector.syncActiveItem();
+                            function syncActiveItem(): void {
+                                active = root.notificationsFullscreen === "off" ? notificationsFullscreenOffItem : notificationsFullscreenOnItem;
+                            }
+
+                            Component.onCompleted: syncActiveItem()
+
+                            Connections {
+                                target: root
+
+                                function onNotificationsFullscreenChanged(): void {
+                                    notificationsFullscreenSelector.syncActiveItem();
+                                }
+                            }
+
+                            MenuItem {
+                                id: notificationsFullscreenOffItem
+                                text: qsTr("Off")
+                                icon: "notifications_off"
+                                activeText: qsTr("Off")
+                                onClicked: {
+                                    root.notificationsFullscreen = "off";
+                                    root.saveConfig();
+                                }
+                            }
+
+                            MenuItem {
+                                id: notificationsFullscreenOnItem
+                                text: qsTr("On")
+                                icon: "notifications"
+                                activeText: qsTr("On")
+                                onClicked: {
+                                    root.notificationsFullscreen = "on";
+                                    root.saveConfig();
+                                }
                             }
                         }
 
-                        MenuItem {
-                            id: notificationsFullscreenOffItem
-                            text: qsTr("Off")
-                            icon: "notifications_off"
-                            activeText: qsTr("Off")
-                            onClicked: {
-                                root.notificationsFullscreen = "off";
+                        SwitchRow {
+                            label: qsTr("Expire automatically")
+                            checked: root.notificationsExpire
+                            onToggled: checked => {
+                                root.notificationsExpire = checked;
                                 root.saveConfig();
                             }
                         }
 
-                        MenuItem {
-                            id: notificationsFullscreenOnItem
-                            text: qsTr("On")
-                            icon: "notifications"
-                            activeText: qsTr("On")
-                            onClicked: {
-                                root.notificationsFullscreen = "on";
+                        SwitchRow {
+                            label: qsTr("Open expanded")
+                            checked: root.notificationsOpenExpanded
+                            onToggled: checked => {
+                                root.notificationsOpenExpanded = checked;
                                 root.saveConfig();
                             }
                         }
-                    }
 
-                    SwitchRow {
-                        label: qsTr("Expire automatically")
-                        checked: root.notificationsExpire
-                        onToggled: checked => {
-                            root.notificationsExpire = checked;
-                            root.saveConfig();
+                        SpinBoxRow {
+                            label: qsTr("Default timeout")
+                            value: root.notificationsDefaultExpireTimeout
+                            min: 1000
+                            max: 60000
+                            step: 500
+                            onValueModified: value => {
+                                root.notificationsDefaultExpireTimeout = value;
+                                root.saveConfig();
+                            }
                         }
-                    }
 
-                    SwitchRow {
-                        label: qsTr("Open expanded")
-                        checked: root.notificationsOpenExpanded
-                        onToggled: checked => {
-                            root.notificationsOpenExpanded = checked;
-                            root.saveConfig();
+                        SpinBoxRow {
+                            label: qsTr("Group preview count")
+                            value: root.notificationsGroupPreviewNum
+                            min: 1
+                            max: 10
+                            step: 1
+                            onValueModified: value => {
+                                root.notificationsGroupPreviewNum = value;
+                                root.saveConfig();
+                            }
                         }
-                    }
-
-                    SpinBoxRow {
-                        label: qsTr("Default timeout")
-                        value: root.notificationsDefaultExpireTimeout
-                        min: 1000
-                        max: 60000
-                        step: 500
-                        onValueModified: value => {
-                            root.notificationsDefaultExpireTimeout = value;
-                            root.saveConfig();
-                        }
-                    }
-
-                    SpinBoxRow {
-                        label: qsTr("Group preview count")
-                        value: root.notificationsGroupPreviewNum
-                        min: 1
-                        max: 10
-                        step: 1
-                        onValueModified: value => {
-                            root.notificationsGroupPreviewNum = value;
-                            root.saveConfig();
-                        }
-                    }
                     }
                 }
 
@@ -238,11 +235,7 @@ Item {
                             Layout.fillWidth: true
                             z: expanded ? 100 : 0
                             label: qsTr("Show in fullscreen")
-                            menuItems: [
-                                toastFullscreenOffItem,
-                                toastFullscreenImportantItem,
-                                toastFullscreenAllItem
-                            ]
+                            menuItems: [toastFullscreenOffItem, toastFullscreenImportantItem, toastFullscreenAllItem]
 
                             function syncActiveItem(): void {
                                 if (root.toastsFullscreen === "all") {
