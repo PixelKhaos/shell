@@ -37,8 +37,6 @@ Item {
     property bool vpnChanged: Config.utilities.toasts.vpnChanged ?? true
     property bool nowPlaying: Config.utilities.toasts.nowPlaying ?? false
 
-    anchors.fill: parent
-
     function saveConfig(): void {
         Config.notifs.expire = root.notificationsExpire;
         Config.notifs.fullscreen = root.notificationsFullscreen;
@@ -61,6 +59,8 @@ Item {
 
         Config.save();
     }
+
+    anchors.fill: parent
 
     ClippingRectangle {
         id: notificationsClippingRect
@@ -131,12 +131,12 @@ Item {
                         SplitButtonRow {
                             id: notificationsFullscreenSelector
 
-                            label: qsTr("Show in fullscreen")
-                            menuItems: [notificationsFullscreenOffItem, notificationsFullscreenOnItem]
-
                             function syncActiveItem(): void {
                                 active = root.notificationsFullscreen === "off" ? notificationsFullscreenOffItem : notificationsFullscreenOnItem;
                             }
+
+                            label: qsTr("Show in fullscreen")
+                            menuItems: [notificationsFullscreenOffItem, notificationsFullscreenOnItem]
 
                             Component.onCompleted: syncActiveItem()
 
@@ -150,6 +150,7 @@ Item {
 
                             MenuItem {
                                 id: notificationsFullscreenOffItem
+
                                 text: qsTr("Off")
                                 icon: "notifications_off"
                                 activeText: qsTr("Off")
@@ -161,6 +162,7 @@ Item {
 
                             MenuItem {
                                 id: notificationsFullscreenOnItem
+
                                 text: qsTr("On")
                                 icon: "notifications"
                                 activeText: qsTr("On")
@@ -232,11 +234,6 @@ Item {
                         SplitButtonRow {
                             id: toastFullscreenSelector
 
-                            Layout.fillWidth: true
-                            z: expanded ? 100 : 0
-                            label: qsTr("Show in fullscreen")
-                            menuItems: [toastFullscreenOffItem, toastFullscreenImportantItem, toastFullscreenAllItem]
-
                             function syncActiveItem(): void {
                                 if (root.toastsFullscreen === "all") {
                                     active = toastFullscreenAllItem;
@@ -251,6 +248,11 @@ Item {
                                 active = toastFullscreenOffItem;
                             }
 
+                            Layout.fillWidth: true
+                            z: expanded ? 100 : 0
+                            label: qsTr("Show in fullscreen")
+                            menuItems: [toastFullscreenOffItem, toastFullscreenImportantItem, toastFullscreenAllItem]
+
                             Component.onCompleted: syncActiveItem()
 
                             Connections {
@@ -263,6 +265,7 @@ Item {
 
                             MenuItem {
                                 id: toastFullscreenOffItem
+
                                 text: qsTr("Off")
                                 icon: "notifications_off"
                                 activeText: qsTr("Off")
@@ -274,6 +277,7 @@ Item {
 
                             MenuItem {
                                 id: toastFullscreenImportantItem
+
                                 text: qsTr("Important")
                                 icon: "priority_high"
                                 activeText: qsTr("Important")
@@ -285,6 +289,7 @@ Item {
 
                             MenuItem {
                                 id: toastFullscreenAllItem
+
                                 text: qsTr("On")
                                 icon: "notifications"
                                 activeText: qsTr("On")
