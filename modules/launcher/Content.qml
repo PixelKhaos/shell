@@ -348,8 +348,6 @@ Item {
             Component.onCompleted: forceActiveFocus()
 
             Connections {
-                target: root.visibilities
-
                 function onLauncherChanged(): void {
                     if (!root.visibilities.launcher)
                         search.text = "";
@@ -359,6 +357,8 @@ Item {
                     if (!root.visibilities.session)
                         search.forceActiveFocus();
                 }
+
+                target: root.visibilities
             }
         }
 

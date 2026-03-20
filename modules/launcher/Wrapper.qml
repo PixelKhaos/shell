@@ -120,8 +120,6 @@ Item {
     }
 
     Connections {
-        target: Config.launcher
-
         function onEnabledChanged(): void {
             timer.start();
         }
@@ -129,15 +127,17 @@ Item {
         function onMaxShownChanged(): void {
             timer.start();
         }
+
+        target: Config.launcher
     }
 
     Connections {
-        target: DesktopEntries.applications
-
         function onValuesChanged(): void {
             if (DesktopEntries.applications.values.length < Config.launcher.maxShown)
                 timer.start();
         }
+
+        target: DesktopEntries.applications
     }
 
     Timer {
