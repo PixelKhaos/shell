@@ -36,7 +36,7 @@ Item {
 
     clip: true
     visible: width > 0
-    implicitWidth: 0
+    implicitWidth: fullscreen ? 0 : Config.border.thickness
 
     states: State {
         name: "visible"
