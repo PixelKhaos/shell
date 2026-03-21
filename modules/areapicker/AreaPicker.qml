@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 
 import qs.components.containers
 import qs.components.misc
+import qs.services
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Io
@@ -15,7 +16,7 @@ Scope {
         property bool clipboardOnly
 
         Variants {
-            model: Quickshell.screens
+            model: Screens.screens
 
             StyledWindow {
                 id: win
@@ -47,8 +48,6 @@ Scope {
     }
 
     IpcHandler {
-        target: "picker"
-
         function open(): void {
             root.freeze = false;
             root.closing = false;
@@ -76,6 +75,8 @@ Scope {
             root.clipboardOnly = true;
             root.activeAsync = true;
         }
+
+        target: "picker"
     }
 
     CustomShortcut {

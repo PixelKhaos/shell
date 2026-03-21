@@ -53,6 +53,7 @@ CollapsibleSection {
 
                 Timer {
                     id: reloadTimer
+
                     interval: 300
                     onTriggered: {
                         Schemes.reload();
@@ -82,6 +83,7 @@ CollapsibleSection {
 
                         MaterialIcon {
                             id: iconPlaceholder
+
                             visible: false
                             text: "circle"
                             font.pointSize: Appearance.font.size.large
@@ -128,6 +130,7 @@ CollapsibleSection {
                     }
 
                     Loader {
+                        asynchronous: true
                         active: isCurrent
 
                         sourceComponent: MaterialIcon {

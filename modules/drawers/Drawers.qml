@@ -4,6 +4,7 @@ import qs.components
 import qs.components.containers
 import qs.services
 import qs.config
+import qs.utils
 import qs.modules.bar
 import Quickshell
 import Quickshell.Wayland
@@ -12,26 +13,13 @@ import QtQuick
 import QtQuick.Effects
 
 Variants {
-    model: Quickshell.screens
+    model: Screens.screens
 
     Scope {
         id: scope
 
         required property ShellScreen modelData
-        readonly property bool barDisabled: {
-            const regexChecker = /^\^.*\$$/;
-            for (const filter of Config.bar.excludedScreens) {
-                // If filter is a regex
-                if (regexChecker.test(filter)) {
-                    if ((new RegExp(filter)).test(modelData.name))
-                        return true;
-                } else {
-                    if (filter === modelData.name)
-                        return true;
-                }
-            }
-            return false;
-        }
+        readonly property bool barDisabled: Strings.testRegexList(Config.bar.excludedScreens, modelData.name)
 
         Exclusions {
             screen: scope.modelData
@@ -66,13 +54,13 @@ Variants {
             screen: scope.modelData
             name: "drawers"
             WlrLayershell.exclusionMode: ExclusionMode.Ignore
-            WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || panels.dashboard.needsKeyboard ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
             mask: Region {
-                x: bar.implicitWidth + win.dragMaskPadding
-                y: Config.border.thickness + win.dragMaskPadding
-                width: win.width - bar.implicitWidth - Config.border.thickness - win.dragMaskPadding * 2
-                height: win.height - Config.border.thickness * 2 - win.dragMaskPadding * 2
+                x: bar.clampedWidth + win.dragMaskPadding
+                y: Config.border.clampedThickness + win.dragMaskPadding
+                width: win.width - bar.clampedWidth - Config.border.clampedThickness - win.dragMaskPadding * 2
+                height: win.height - Config.border.clampedThickness * 2 - win.dragMaskPadding * 2
                 intersection: Intersection.Xor
 
                 regions: regions.instances

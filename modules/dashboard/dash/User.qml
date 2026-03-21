@@ -32,6 +32,7 @@ Row {
             fill: 1
             grade: 200
             font.pointSize: Math.floor(info.implicitHeight / 2) || 1
+            visible: pfp.status !== Image.Ready
         }
 
         CachingImage {
@@ -70,12 +71,12 @@ Row {
                 opacity: parent.containsMouse ? 1 : 0
 
                 StateLayer {
-                    color: Colours.palette.m3onPrimary
-
                     function onClicked(): void {
                         root.visibilities.launcher = false;
                         root.facePicker.open();
                     }
+
+                    color: Colours.palette.m3onPrimary
                 }
 
                 MaterialIcon {

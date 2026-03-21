@@ -24,12 +24,10 @@ Singleton {
     property var wifiConnectionQueue: []
     property int currentSsidQueryIndex: 0
     property var pendingConnection: null
-    signal connectionFailed(string ssid)
     property var wirelessDeviceDetails: null
     property var ethernetDeviceDetails: null
     property list<var> ethernetDevices: []
     readonly property var activeEthernet: ethernetDevices.find(d => d.connected) ?? null
-
     property list<var> activeProcesses: []
 
     // Constants
@@ -54,6 +52,8 @@ Singleton {
     readonly property string connectionParamSsid: "ssid"
     readonly property string connectionParamPassword: "password"
     readonly property string connectionParamBssid: "802-11-wireless.bssid"
+
+    signal connectionFailed(string ssid)
 
     function detectPasswordRequired(error: string): bool {
         if (!error || error.length === 0) {
@@ -751,17 +751,25 @@ Singleton {
             const networks = deduplicateNetworks(allNetworks);
             const rNetworks = root.networks;
 
-            const destroyed = rNetworks.filter(rn => !networks.find(n => n.frequency === rn.frequency && n.ssid === rn.ssid && n.bssid === rn.bssid));
-            for (const network of destroyed) {
-                const index = rNetworks.indexOf(network);
-                if (index >= 0) {
-                    rNetworks.splice(index, 1);
-                    network.destroy();
+            const newMap = new Map();
+            for (const n of networks)
+                newMap.set(`${n.frequency}:${n.ssid}:${n.bssid}`, n);
+
+            for (let i = rNetworks.length - 1; i >= 0; i--) {
+                const rn = rNetworks[i];
+                const key = `${rn.frequency}:${rn.ssid}:${rn.bssid}`;
+                if (!newMap.has(key)) {
+                    rNetworks.splice(i, 1);
+                    rn.destroy();
                 }
             }
 
-            for (const network of networks) {
-                const match = rNetworks.find(n => n.frequency === network.frequency && n.ssid === network.ssid && n.bssid === network.bssid);
+            const existingMap = new Map();
+            for (const rn of rNetworks)
+                existingMap.set(`${rn.frequency}:${rn.ssid}:${rn.bssid}`, rn);
+
+            for (const [key, network] of newMap) {
+                const match = existingMap.get(key);
                 if (match) {
                     match.lastIpcObject = network;
                 } else {
@@ -1277,6 +1285,7 @@ Singleton {
 
     Timer {
         id: monitorRestartTimer
+
         interval: 2000
         onTriggered: {
             monitorProc.running = true;

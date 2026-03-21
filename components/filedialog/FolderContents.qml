@@ -47,6 +47,7 @@ Item {
     }
 
     Loader {
+        asynchronous: true
         anchors.centerIn: parent
 
         opacity: view.count === 0 ? 1 : 0
@@ -128,15 +129,15 @@ Item {
             clip: true
 
             StateLayer {
+                function onClicked(): void {
+                    view.currentIndex = item.index;
+                }
+
                 onDoubleClicked: {
                     if (item.modelData.isDir)
                         root.dialog.cwd.push(item.modelData.name);
                     else if (root.dialog.selectionValid)
                         root.dialog.accepted(item.modelData.path);
-                }
-
-                function onClicked(): void {
-                    view.currentIndex = item.index;
                 }
             }
 

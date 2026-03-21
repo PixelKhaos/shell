@@ -69,9 +69,29 @@ Scope {
         onPressed: root.launcherInterrupted = true
     }
 
-    IpcHandler {
-        target: "drawers"
+    CustomShortcut {
+        name: "sidebar"
+        description: "Toggle sidebar"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            const visibilities = Visibilities.getForActive();
+            visibilities.sidebar = !visibilities.sidebar;
+        }
+    }
 
+    CustomShortcut {
+        name: "utilities"
+        description: "Toggle utilities"
+        onPressed: {
+            if (root.hasFullscreen)
+                return;
+            const visibilities = Visibilities.getForActive();
+            visibilities.utilities = !visibilities.utilities;
+        }
+    }
+
+    IpcHandler {
         function toggle(drawer: string): void {
             if (list().split("\n").includes(drawer)) {
                 if (root.hasFullscreen && ["launcher", "session", "dashboard"].includes(drawer))
@@ -87,19 +107,19 @@ Scope {
             const visibilities = Visibilities.getForActive();
             return Object.keys(visibilities).filter(k => typeof visibilities[k] === "boolean").join("\n");
         }
+
+        target: "drawers"
     }
 
     IpcHandler {
-        target: "controlCenter"
-
         function open(): void {
             WindowFactory.create();
         }
+
+        target: "controlCenter"
     }
 
     IpcHandler {
-        target: "toaster"
-
         function info(title: string, message: string, icon: string): void {
             Toaster.toast(title, message, icon, Toast.Info);
         }
@@ -115,5 +135,7 @@ Scope {
         function error(title: string, message: string, icon: string): void {
             Toaster.toast(title, message, icon, Toast.Error);
         }
+
+        target: "toaster"
     }
 }

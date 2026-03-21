@@ -233,6 +233,10 @@ DeviceDetails {
         property string displayName: ""
         property string interfaceName: ""
 
+        function closeWithAnimation(): void {
+            close();
+        }
+
         parent: Overlay.overlay
         anchors.centerIn: parent
         width: Math.min(400, parent.width - Appearance.padding.large * 2)
@@ -276,10 +280,6 @@ DeviceDetails {
                 duration: Appearance.anim.durations.expressiveFastSpatial
                 easing.bezierCurve: Appearance.anim.curves.expressiveFastSpatial
             }
-        }
-
-        function closeWithAnimation(): void {
-            close();
         }
 
         Overlay.modal: Rectangle {
@@ -334,6 +334,7 @@ DeviceDetails {
 
                     StyledTextField {
                         id: displayNameField
+
                         anchors.centerIn: parent
                         width: parent.width - Appearance.padding.normal
                         horizontalAlignment: TextInput.AlignLeft
@@ -370,6 +371,7 @@ DeviceDetails {
 
                     StyledTextField {
                         id: interfaceNameField
+
                         anchors.centerIn: parent
                         width: parent.width - Appearance.padding.normal
                         horizontalAlignment: TextInput.AlignLeft

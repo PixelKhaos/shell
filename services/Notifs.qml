@@ -114,8 +114,6 @@ Singleton {
     }
 
     IpcHandler {
-        target: "notifs"
-
         function clear(): void {
             for (const notif of root.list.slice())
                 notif.close();
@@ -136,6 +134,8 @@ Singleton {
         function disableDnd(): void {
             props.dnd = false;
         }
+
+        target: "notifs"
     }
 
     component Notif: QtObject {
@@ -146,21 +146,13 @@ Singleton {
         property var locks: new Set()
 
         property date time: new Date()
-        readonly property string timeStr: {
-            const diff = Time.date.getTime() - time.getTime();
-            const m = Math.floor(diff / 60000);
+        property string timeStr: qsTr("now")
 
-            if (m < 1)
-                return qsTr("now");
-
-            const h = Math.floor(m / 60);
-            const d = Math.floor(h / 24);
-
-            if (d > 0)
-                return `${d}d`;
-            if (h > 0)
-                return `${h}h`;
-            return `${m}m`;
+        readonly property Timer timeStrTimer: Timer {
+            running: !notif.closed
+            repeat: true
+            interval: 5000
+            onTriggered: notif.updateTimeStr()
         }
 
         property Notification notification
@@ -170,6 +162,7 @@ Singleton {
         property string appIcon
         property string appName
         property string image
+        property var hints // Hints are not persisted across restarts
         property real expireTimeout: Config.notifs.defaultExpireTimeout
         property int urgency: NotificationUrgency.Normal
         property bool resident
@@ -234,8 +227,6 @@ Singleton {
         }
 
         readonly property Connections conn: Connections {
-            target: notif.notification
-
             function onClosed(): void {
                 notif.close();
             }
@@ -285,6 +276,36 @@ Singleton {
                             invoke: () => a.invoke()
                         }));
             }
+
+            function onHintsChanged(): void {
+                notif.hints = notif.notification.hints;
+            }
+
+            target: notif.notification
+        }
+
+        function updateTimeStr(): void {
+            const diff = Date.now() - time.getTime();
+            const m = Math.floor(diff / 60000);
+
+            if (m < 1) {
+                timeStr = qsTr("now");
+                timeStrTimer.interval = 5000;
+            } else {
+                const h = Math.floor(m / 60);
+                const d = Math.floor(h / 24);
+
+                if (d > 0) {
+                    timeStr = `${d}d`;
+                    timeStrTimer.interval = 3600000;
+                } else if (h > 0) {
+                    timeStr = `${h}h`;
+                    timeStrTimer.interval = 300000;
+                } else {
+                    timeStr = `${m}m`;
+                    timeStrTimer.interval = m < 10 ? 30000 : 60000;
+                }
+            }
         }
 
         function lock(item: Item): void {
@@ -319,6 +340,7 @@ Singleton {
             if (notification?.image)
                 dummyImageLoader.active = true;
             expireTimeout = notification.expireTimeout;
+            hints = notification.hints;
             urgency = notification.urgency;
             resident = notification.resident;
             hasActionIcons = notification.hasActionIcons;

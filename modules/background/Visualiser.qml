@@ -13,7 +13,7 @@ Item {
     id: root
 
     required property ShellScreen screen
-    required property Wallpaper wallpaper
+    required property Item wallpaper
 
     readonly property bool shouldBeActive: Config.background.visualiser.enabled && (!Config.background.visualiser.autoHide || (Hypr.monitorFor(screen)?.activeWorkspace?.toplevels?.values.every(t => t.lastIpcObject?.floating) ?? true))
     property real offset: shouldBeActive ? 0 : screen.height * 0.2
@@ -21,6 +21,7 @@ Item {
     opacity: shouldBeActive ? 1 : 0
 
     Loader {
+        asynchronous: true
         anchors.fill: parent
         active: root.opacity > 0 && Config.background.visualiser.blur
 
@@ -42,6 +43,7 @@ Item {
         layer.enabled: true
 
         Loader {
+            asynchronous: true
             anchors.fill: parent
             anchors.topMargin: root.offset
             anchors.bottomMargin: -root.offset

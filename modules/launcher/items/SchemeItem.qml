@@ -16,11 +16,11 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.normal
-
         function onClicked(): void {
             root.modelData?.onClicked(root.list);
         }
+
+        radius: Appearance.rounding.normal
     }
 
     Item {
@@ -89,6 +89,7 @@ Item {
         Loader {
             id: current
 
+            asynchronous: true
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
 

@@ -134,8 +134,6 @@ Item {
 
             // Hacky thing cause modelData gets destroyed before the remove anim finishes
             Connections {
-                target: ws.modelData
-
                 function onIdChanged(): void {
                     if (ws.modelData)
                         ws.wsId = ws.modelData.id;
@@ -150,19 +148,23 @@ Item {
                     if (ws.modelData)
                         ws.hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject.windows > 0;
                 }
+
+                target: ws.modelData
             }
 
             Connections {
-                target: Config.bar.workspaces
-
                 function onShowWindowsOnSpecialWorkspacesChanged(): void {
                     if (ws.modelData)
                         ws.hasWindows = Config.bar.workspaces.showWindowsOnSpecialWorkspaces && ws.modelData.lastIpcObject.windows > 0;
                 }
+
+                target: Config.bar.workspaces
             }
 
             Loader {
                 id: label
+
+                asynchronous: true
 
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignTop
                 Layout.preferredHeight: Config.bar.sizes.innerWidth - Appearance.padding.small * 2
@@ -191,6 +193,8 @@ Item {
 
             Loader {
                 id: windows
+
+                asynchronous: true
 
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillHeight: true
@@ -224,7 +228,11 @@ Item {
 
                     Repeater {
                         model: ScriptModel {
-                            values: Hypr.toplevels.values.filter(c => c.workspace?.id === ws.wsId)
+                            values: {
+                                const windows = Hypr.toplevels.values.filter(c => c.workspace?.id === ws.wsId);
+                                const maxIcons = Config.bar.workspaces.maxWindowIcons;
+                                return maxIcons > 0 ? windows.slice(0, maxIcons) : windows;
+                            }
                         }
 
                         MaterialIcon {
@@ -289,6 +297,7 @@ Item {
     }
 
     Loader {
+        asynchronous: true
         active: Config.bar.workspaces.activeIndicator
         anchors.fill: parent
 

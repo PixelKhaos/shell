@@ -14,8 +14,8 @@ StackView {
     required property Item popouts
     required property QsMenuHandle trayItem
 
-    implicitWidth: currentItem.implicitWidth
-    implicitHeight: currentItem.implicitHeight
+    implicitWidth: currentItem?.implicitWidth ?? 0
+    implicitHeight: currentItem?.implicitHeight ?? 0
 
     initialItem: SubMenu {
         handle: root.trayItem
@@ -81,6 +81,7 @@ StackView {
                 Loader {
                     id: children
 
+                    asynchronous: true
                     anchors.left: parent.left
                     anchors.right: parent.right
 
@@ -90,13 +91,6 @@ StackView {
                         implicitHeight: label.implicitHeight
 
                         StateLayer {
-                            anchors.margins: -Appearance.padding.small / 2
-                            anchors.leftMargin: -Appearance.padding.smaller
-                            anchors.rightMargin: -Appearance.padding.smaller
-
-                            radius: item.radius
-                            disabled: !item.modelData.enabled
-
                             function onClicked(): void {
                                 const entry = item.modelData;
                                 if (entry.hasChildren)
@@ -109,16 +103,25 @@ StackView {
                                     root.popouts.hasCurrent = false;
                                 }
                             }
+
+                            anchors.margins: -Appearance.padding.small / 2
+                            anchors.leftMargin: -Appearance.padding.smaller
+                            anchors.rightMargin: -Appearance.padding.smaller
+
+                            radius: item.radius
+                            disabled: !item.modelData.enabled
                         }
 
                         Loader {
                             id: icon
 
+                            asynchronous: true
                             anchors.left: parent.left
 
                             active: item.modelData.icon !== ""
 
                             sourceComponent: IconImage {
+                                asynchronous: true
                                 implicitSize: label.implicitHeight
 
                                 source: item.modelData.icon
@@ -149,6 +152,7 @@ StackView {
                         Loader {
                             id: expand
 
+                            asynchronous: true
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.right: parent.right
 
@@ -165,6 +169,7 @@ StackView {
         }
 
         Loader {
+            asynchronous: true
             active: menu.isSubMenu
 
             sourceComponent: Item {
@@ -186,12 +191,12 @@ StackView {
                         color: Colours.palette.m3secondaryContainer
 
                         StateLayer {
-                            radius: parent.radius
-                            color: Colours.palette.m3onSecondaryContainer
-
                             function onClicked(): void {
                                 root.pop();
                             }
+
+                            radius: parent.radius
+                            color: Colours.palette.m3onSecondaryContainer
                         }
                     }
 

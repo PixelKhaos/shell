@@ -16,7 +16,7 @@ Item {
 
     property real scale: Config.background.desktopClock.scale
     readonly property bool bgEnabled: Config.background.desktopClock.background.enabled
-    readonly property bool blurEnabled: bgEnabled && Config.background.desktopClock.background.blur
+    readonly property bool blurEnabled: bgEnabled && Config.background.desktopClock.background.blur && !GameMode.enabled
     readonly property bool invertColors: Config.background.desktopClock.invertColors
     readonly property bool useLightSet: Colours.light ? !invertColors : invertColors
     readonly property color safePrimary: useLightSet ? Colours.palette.m3primaryContainer : Colours.palette.m3primary
@@ -40,6 +40,7 @@ Item {
         }
 
         Loader {
+            asynchronous: true
             anchors.fill: parent
             active: root.blurEnabled
 
@@ -101,6 +102,7 @@ Item {
                 }
 
                 Loader {
+                    asynchronous: true
                     Layout.alignment: Qt.AlignTop
                     Layout.topMargin: Appearance.padding.large * 1.4 * root.scale
 

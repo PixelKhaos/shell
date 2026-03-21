@@ -31,6 +31,7 @@ Item {
             IconImage {
                 id: icon
 
+                asynchronous: true
                 Layout.alignment: Qt.AlignVCenter
                 implicitSize: details.implicitHeight
                 source: Icons.getAppIcon(Hypr.activeToplevel?.lastIpcObject.class ?? "", "image-missing")
@@ -64,11 +65,11 @@ Item {
                 Layout.alignment: Qt.AlignVCenter
 
                 StateLayer {
-                    radius: Appearance.rounding.normal
-
                     function onClicked(): void {
                         root.wrapper.detach("winfo");
                     }
+
+                    radius: Appearance.rounding.normal
                 }
 
                 MaterialIcon {
