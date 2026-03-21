@@ -105,7 +105,7 @@ Item {
         model: FileSystemModel {
             path: {
                 if (root.dialog.cwd[0] === "Home")
-                    return `${Paths.home}/${root.dialog.cwd.slice(1).join("/")}`;
+                    return Paths.home + `/${root.dialog.cwd.slice(1).join("/")}`;
                 else
                     return root.dialog.cwd.join("/");
             }

@@ -1,9 +1,9 @@
+pragma ComponentBehavior: Bound
+
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
-import qs.modules.controlcenter
-import Quickshell
 import Quickshell.Bluetooth
 import QtQuick
 import QtQuick.Layouts

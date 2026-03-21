@@ -4,14 +4,13 @@ import qs.components.images
 import qs.services
 import qs.config
 import Caelestia.Models
-import Quickshell
 import QtQuick
 
 Item {
     id: root
 
     required property FileSystemEntry modelData
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
 
     scale: 0.5
     opacity: 0

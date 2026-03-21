@@ -4,10 +4,8 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import qs.components
-import qs.components.controls
 import qs.services
 import qs.config
-import qs.utils
 
 import "."
 
@@ -87,6 +85,8 @@ ColumnLayout {
         }
 
         delegate: Item {
+            id: kbDelegate
+
             required property int layoutIndex
             required property string label
             readonly property bool isDisabled: layoutIndex > 3
@@ -100,8 +100,8 @@ ColumnLayout {
                 id: layer
 
                 function onClicked(): void {
-                    if (!isDisabled)
-                        kb.switchTo(layoutIndex);
+                    if (!kbDelegate.isDisabled)
+                        kb.switchTo(kbDelegate.layoutIndex);
                 }
 
                 anchors.left: parent.left
@@ -109,7 +109,7 @@ ColumnLayout {
                 anchors.verticalCenter: parent.verticalCenter
                 implicitHeight: parent.height - 4
                 radius: Appearance.rounding.full
-                enabled: !isDisabled
+                enabled: !kbDelegate.isDisabled
             }
 
             StyledText {
@@ -120,9 +120,9 @@ ColumnLayout {
                 anchors.right: layer.right
                 anchors.leftMargin: Appearance.padding.small
                 anchors.rightMargin: Appearance.padding.small
-                text: label
+                text: kbDelegate.label
                 elide: Text.ElideRight
-                opacity: isDisabled ? 0.4 : 1.0
+                opacity: kbDelegate.isDisabled ? 0.4 : 1.0
             }
         }
     }

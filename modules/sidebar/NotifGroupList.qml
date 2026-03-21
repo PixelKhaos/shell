@@ -1,8 +1,8 @@
 pragma ComponentBehavior: Bound
 
 import qs.components
-import qs.services
 import qs.config
+import qs.services
 import Quickshell
 import QtQuick
 import QtQuick.Layouts
@@ -63,7 +63,7 @@ Item {
             id: notif
 
             required property int index
-            required property Notifs.Notif modelData
+            required property NotifData modelData
 
             readonly property alias nonAnimHeight: notifInner.nonAnimHeight
             readonly property bool previewHidden: {

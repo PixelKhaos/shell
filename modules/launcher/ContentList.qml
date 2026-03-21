@@ -5,14 +5,13 @@ import qs.components.controls
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
 import QtQuick
 
 Item {
     id: root
 
     required property var content
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     required property var panels
     required property real maxHeight
     required property StyledTextField search

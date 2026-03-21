@@ -1,3 +1,4 @@
+import qs.components
 import qs.components.containers
 import qs.components.widgets
 import qs.services
@@ -9,7 +10,7 @@ import QtQuick
 Item {
     id: root
 
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     required property Item panels
     readonly property int padding: Appearance.padding.large
 
@@ -67,7 +68,7 @@ Item {
             delegate: Item {
                 id: wrapper
 
-                required property Notifs.Notif modelData
+                required property NotifData modelData
                 required property int index
                 readonly property alias nonAnimHeight: notif.nonAnimHeight
                 property int idx
