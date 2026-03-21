@@ -335,7 +335,7 @@ Singleton {
             }
             vpnProviders.push(provider);
         }
-        
+
         return {
             enabled: utilities.enabled,
             maxToasts: utilities.maxToasts,
