@@ -37,6 +37,7 @@ StyledClippingRect {
         anchors.fill: parent
         scale: root.onSpecial ? 0.8 : 1
         opacity: root.onSpecial ? 0.5 : 1
+        visible: !root.fullscreen
 
         layer.enabled: root.blur > 0
         layer.effect: MultiEffect {

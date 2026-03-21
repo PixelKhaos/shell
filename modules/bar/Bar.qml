@@ -137,6 +137,7 @@ ColumnLayout {
                 roleValue: "activeWindow"
                 delegate: WrappedLoader {
                     Layout.fillWidth: true
+                    visible: !root.fullscreen
                     sourceComponent: ActiveWindow {
                         bar: root
                         monitor: Brightness.getMonitorForScreen(root.screen)
@@ -146,18 +147,21 @@ ColumnLayout {
             DelegateChoice {
                 roleValue: "tray"
                 delegate: WrappedLoader {
+                    visible: !root.fullscreen
                     sourceComponent: Tray {}
                 }
             }
             DelegateChoice {
                 roleValue: "clock"
                 delegate: WrappedLoader {
+                    visible: !root.fullscreen
                     sourceComponent: Clock {}
                 }
             }
             DelegateChoice {
                 roleValue: "statusIcons"
                 delegate: WrappedLoader {
+                    visible: !root.fullscreen
                     sourceComponent: StatusIcons {}
                 }
             }
