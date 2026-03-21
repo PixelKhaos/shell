@@ -109,10 +109,13 @@ DeviceDetails {
                             inactiveOnColour: Colours.palette.m3onSecondaryContainer
 
                             onClicked: {
+                                const provider = Config.utilities.vpn.provider[root.vpnProvider.index];
                                 editVpnDialog.editIndex = root.vpnProvider.index;
                                 editVpnDialog.providerName = root.vpnProvider.name;
                                 editVpnDialog.displayName = root.vpnProvider.displayName;
                                 editVpnDialog.interfaceName = root.vpnProvider.interface;
+                                editVpnDialog.connectCmd = (provider && provider.connectCmd) ? provider.connectCmd.join(" ") : "";
+                                editVpnDialog.disconnectCmd = (provider && provider.disconnectCmd) ? provider.disconnectCmd.join(" ") : "";
                                 editVpnDialog.open();
                             }
                         }
@@ -148,6 +151,17 @@ DeviceDetails {
                         onClicked: {
                             Qt.openUrlExternally(VPN.status.authUrl);
                         }
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        Layout.topMargin: Appearance.spacing.normal
+                        visible: root.providerEnabled && VPN.status.state === "needs-auth" && VPN.status.authUrl === ""
+                        text: qsTr("Click 'Connect' to generate authentication URL")
+                        font.pointSize: Appearance.font.size.small
+                        color: Colours.palette.m3onSurfaceVariant
+                        horizontalAlignment: Text.AlignHCenter
+                        wrapMode: Text.WordWrap
                     }
                 }
             }
@@ -232,6 +246,8 @@ DeviceDetails {
         property string providerName: ""
         property string displayName: ""
         property string interfaceName: ""
+        property string connectCmd: ""
+        property string disconnectCmd: ""
 
         function closeWithAnimation(): void {
             close();
@@ -381,6 +397,82 @@ DeviceDetails {
                 }
             }
 
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.smaller / 2
+                visible: editVpnDialog.connectCmd.length > 0
+
+                StyledText {
+                    text: qsTr("Connect Command")
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
+                StyledRect {
+                    Layout.fillWidth: true
+                    implicitHeight: 40
+                    color: connectCmdFieldEdit.activeFocus ? Colours.layer(Colours.palette.m3surfaceContainer, 3) : Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                    radius: Appearance.rounding.small
+                    border.width: 1
+                    border.color: connectCmdFieldEdit.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
+
+                    Behavior on color {
+                        CAnim {}
+                    }
+                    Behavior on border.color {
+                        CAnim {}
+                    }
+
+                    StyledTextField {
+                        id: connectCmdFieldEdit
+
+                        anchors.centerIn: parent
+                        width: parent.width - Appearance.padding.normal
+                        horizontalAlignment: TextInput.AlignLeft
+                        text: editVpnDialog.connectCmd
+                        onTextChanged: editVpnDialog.connectCmd = text
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Appearance.spacing.smaller / 2
+                visible: editVpnDialog.disconnectCmd.length > 0
+
+                StyledText {
+                    text: qsTr("Disconnect Command")
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                }
+
+                StyledRect {
+                    Layout.fillWidth: true
+                    implicitHeight: 40
+                    color: disconnectCmdFieldEdit.activeFocus ? Colours.layer(Colours.palette.m3surfaceContainer, 3) : Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                    radius: Appearance.rounding.small
+                    border.width: 1
+                    border.color: disconnectCmdFieldEdit.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
+
+                    Behavior on color {
+                        CAnim {}
+                    }
+                    Behavior on border.color {
+                        CAnim {}
+                    }
+
+                    StyledTextField {
+                        id: disconnectCmdFieldEdit
+
+                        anchors.centerIn: parent
+                        width: parent.width - Appearance.padding.normal
+                        horizontalAlignment: TextInput.AlignLeft
+                        text: editVpnDialog.disconnectCmd
+                        onTextChanged: editVpnDialog.disconnectCmd = text
+                    }
+                }
+            }
+
             RowLayout {
                 Layout.topMargin: Appearance.spacing.normal
                 Layout.fillWidth: true
@@ -408,12 +500,23 @@ DeviceDetails {
 
                         for (let i = 0; i < Config.utilities.vpn.provider.length; i++) {
                             if (i === editVpnDialog.editIndex) {
-                                providers.push({
-                                    name: editVpnDialog.providerName,
+                                const hasCommands = editVpnDialog.connectCmd.length > 0 && editVpnDialog.disconnectCmd.length > 0;
+                                const newProvider = {
                                     displayName: editVpnDialog.displayName || editVpnDialog.interfaceName,
-                                    interface: editVpnDialog.interfaceName,
-                                    enabled: wasEnabled
-                                });
+                                    enabled: wasEnabled,
+                                    iface: editVpnDialog.interfaceName,
+                                    name: editVpnDialog.providerName,
+                                    connectCmd: hasCommands ? editVpnDialog.connectCmd.split(" ").filter(s => s.length > 0) : undefined,
+                                    disconnectCmd: hasCommands ? editVpnDialog.disconnectCmd.split(" ").filter(s => s.length > 0) : undefined
+                                };
+                                
+                                // Remove undefined properties
+                                if (!hasCommands) {
+                                    delete newProvider.connectCmd;
+                                    delete newProvider.disconnectCmd;
+                                }
+                                
+                                providers.push(newProvider);
                             } else {
                                 providers.push(Config.utilities.vpn.provider[i]);
                             }

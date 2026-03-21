@@ -25,7 +25,7 @@ Singleton {
     }
     readonly property bool isCustomProvider: typeof providerInput === "object"
     readonly property string providerName: isCustomProvider ? (providerInput.name || "custom") : String(providerInput)
-    readonly property string interfaceName: isCustomProvider ? (providerInput.interface || "") : ""
+    readonly property string interfaceName: isCustomProvider ? (providerInput.iface || "") : ""
     readonly property var currentConfig: {
         const name = providerName;
         const iface = interfaceName;
@@ -36,7 +36,7 @@ Singleton {
             return {
                 connectCmd: custom.connectCmd || defaults.connectCmd,
                 disconnectCmd: custom.disconnectCmd || defaults.disconnectCmd,
-                interface: custom.interface || defaults.interface,
+                interface: custom.iface || defaults.interface,
                 displayName: custom.displayName || defaults.displayName
             };
         }
@@ -81,7 +81,7 @@ Singleton {
     }
 
     function connect(): void {
-        if (status.state === "needs-auth") {
+        if (status.state === "needs-auth" && status.authUrl) {
             emitStatusToast(status);
             return;
         }
@@ -123,6 +123,20 @@ Singleton {
 
     function parseTailscaleStatus(output: string): var {
         const status = { connected: false, state: "disconnected", reason: "", authUrl: "" };
+        
+        // Handle empty or whitespace-only output
+        if (!output || output.trim().length === 0) {
+            return status;
+        }
+        
+        // Check for common non-JSON states first
+        if (output.includes("Logged out") || output.includes("Stopped") || 
+            output.includes("not running") || output.includes("Tailscale is not running")) {
+            status.state = "disconnected";
+            return status;
+        }
+        
+        // Try to parse as JSON
         try {
             const data = JSON.parse(output);
             const backendState = data.BackendState || "";
@@ -138,8 +152,13 @@ Singleton {
                 status.authUrl = data.AuthURL || "";
             }
         } catch (e) {
-            status.state = "error";
-            status.reason = "Failed to parse status";
+            // JSON parsing failed - treat as disconnected unless it looks like an error
+            if (output.includes("error") || output.includes("Error") || output.includes("failed")) {
+                status.state = "disconnected";
+                status.reason = "Tailscale may not be running";
+            } else {
+                status.state = "disconnected";
+            }
         }
         return status;
     }
@@ -226,6 +245,9 @@ Singleton {
 
     function updateStatus(newStatus: var): void {
         const oldState = status.state;
+        if (newStatus.state === "needs-auth" && !newStatus.authUrl && status.authUrl) {
+            newStatus.authUrl = status.authUrl;
+        }
         status = newStatus;
         root.connected = newStatus.connected;
 
@@ -288,13 +310,48 @@ Singleton {
                 updateStatus(newStatus);
             }
         }
+        stderr: StdioCollector {
+            onStreamFinished: {
+                if (text.trim().length > 0) {
+                    if (text.includes("doesn't appear to be running") ||
+                        text.includes("failed to connect to local tailscaled") ||
+                        text.includes("daemon is not running") ||
+                        text.includes("not running") && (text.includes("netbird") || text.includes("warp"))) {
+                        let cmd = "sudo systemctl start ";
+                        switch (providerName) {
+                            case "tailscale": cmd += "tailscaled"; break;
+                            case "netbird": cmd += "netbird"; break;
+                            case "warp": cmd += "warp-svc"; break;
+                            default: cmd += providerName + "d"; break;
+                        }
+                        const errorStatus = {
+                            connected: false,
+                            state: "disconnected",
+                            reason: `Service not running (run: ${cmd})`,
+                            authUrl: ""
+                        };
+                        updateStatus(errorStatus);
+                    }
+                }
+            }
+        }
     }
 
     Process {
         id: connectProc
 
         onExited: (exitCode) => {
-            if (status.state !== "needs-auth") {
+            if (exitCode !== 0) {
+                return;
+            }
+            
+            if (providerName === "tailscale") {
+                Qt.callLater(() => {
+                    if (status.state !== "needs-auth") {
+                        statusCheckTimer.start();
+                    }
+                });
+            } else if (status.state !== "needs-auth") {
                 statusCheckTimer.start();
             }
         }
@@ -309,6 +366,29 @@ Singleton {
         stderr: StdioCollector {
             onStreamFinished: {
                 const error = text.trim();
+                
+                if (error.includes("Access denied") || error.includes("checkprefs access denied")) {
+                    const errorStatus = {
+                        connected: false,
+                        state: "disconnected",
+                        reason: "Permission denied. Run in terminal: sudo tailscale set --operator=$USER",
+                        authUrl: ""
+                    };
+                    updateStatus(errorStatus);
+                    return;
+                }
+                
+                if (error.includes("Unknown device type") || error.includes("Protocol not supported")) {
+                    const errorStatus = {
+                        connected: false,
+                        state: "disconnected",
+                        reason: "WireGuard module not loaded. Run: sudo modprobe wireguard",
+                        authUrl: ""
+                    };
+                    updateStatus(errorStatus);
+                    return;
+                }
+                
                 const authUrl = extractAuthUrl(error);
 
                 if (authUrl) {

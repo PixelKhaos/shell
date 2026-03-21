@@ -289,6 +289,8 @@ ColumnLayout {
         property string providerName: ""
         property string displayName: ""
         property string interfaceName: ""
+        property string connectCmd: ""
+        property string disconnectCmd: ""
 
         function showProviderSelection(): void {
             currentState = "selection";
@@ -304,6 +306,8 @@ ColumnLayout {
             providerName = providerType;
             displayName = defaultDisplayName;
             interfaceName = "";
+            connectCmd = "";
+            disconnectCmd = "";
 
             if (currentState === "selection") {
                 transitionToForm.start();
@@ -322,6 +326,8 @@ ColumnLayout {
             providerName = isObject ? (provider.name || "custom") : String(provider);
             displayName = isObject ? (provider.displayName || providerName) : providerName;
             interfaceName = isObject ? (provider.interface || "") : "";
+            connectCmd = isObject && provider.connectCmd ? provider.connectCmd.join(" ") : "";
+            disconnectCmd = isObject && provider.disconnectCmd ? provider.disconnectCmd.join(" ") : "";
 
             currentState = "form";
             open();
@@ -509,11 +515,21 @@ ColumnLayout {
 
                 TextButton {
                     Layout.fillWidth: true
-                    text: qsTr("WireGuard (Custom)")
+                    text: qsTr("WireGuard")
                     inactiveColour: Colours.tPalette.m3surfaceContainerHigh
                     inactiveOnColour: Colours.palette.m3onSurface
                     onClicked: {
                         vpnDialog.showAddForm("wireguard", "WireGuard");
+                    }
+                }
+
+                TextButton {
+                    Layout.fillWidth: true
+                    text: qsTr("Custom")
+                    inactiveColour: Colours.tPalette.m3surfaceContainerHigh
+                    inactiveOnColour: Colours.palette.m3onSurface
+                    onClicked: {
+                        vpnDialog.showAddForm("custom", "Custom VPN");
                     }
                 }
 
@@ -622,6 +638,82 @@ ColumnLayout {
                     }
                 }
 
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Appearance.spacing.smaller / 2
+                    visible: vpnDialog.editIndex >= 0 ? (vpnDialog.connectCmd.length > 0) : (vpnDialog.providerName === "custom")
+
+                    StyledText {
+                        text: qsTr("Connect Command (e.g., wg-quick up wg0)")
+                        font.pointSize: Appearance.font.size.small
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: 40
+                        color: connectCmdField.activeFocus ? Colours.layer(Colours.palette.m3surfaceContainer, 3) : Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                        radius: Appearance.rounding.small
+                        border.width: 1
+                        border.color: connectCmdField.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
+
+                        Behavior on color {
+                            CAnim {}
+                        }
+                        Behavior on border.color {
+                            CAnim {}
+                        }
+
+                        StyledTextField {
+                            id: connectCmdField
+
+                            anchors.centerIn: parent
+                            width: parent.width - Appearance.padding.normal
+                            horizontalAlignment: TextInput.AlignLeft
+                            text: vpnDialog.connectCmd
+                            onTextChanged: vpnDialog.connectCmd = text
+                        }
+                    }
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Appearance.spacing.smaller / 2
+                    visible: vpnDialog.editIndex >= 0 ? (vpnDialog.connectCmd.length > 0) : (vpnDialog.providerName === "custom")
+
+                    StyledText {
+                        text: qsTr("Disconnect Command (e.g., wg-quick down wg0)")
+                        font.pointSize: Appearance.font.size.small
+                        color: Colours.palette.m3onSurfaceVariant
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: 40
+                        color: disconnectCmdField.activeFocus ? Colours.layer(Colours.palette.m3surfaceContainer, 3) : Colours.layer(Colours.palette.m3surfaceContainer, 2)
+                        radius: Appearance.rounding.small
+                        border.width: 1
+                        border.color: disconnectCmdField.activeFocus ? Colours.palette.m3primary : Qt.alpha(Colours.palette.m3outline, 0.3)
+
+                        Behavior on color {
+                            CAnim {}
+                        }
+                        Behavior on border.color {
+                            CAnim {}
+                        }
+
+                        StyledTextField {
+                            id: disconnectCmdField
+
+                            anchors.centerIn: parent
+                            width: parent.width - Appearance.padding.normal
+                            horizontalAlignment: TextInput.AlignLeft
+                            text: vpnDialog.disconnectCmd
+                            onTextChanged: vpnDialog.disconnectCmd = text
+                        }
+                    }
+                }
+
                 RowLayout {
                     Layout.topMargin: Appearance.spacing.normal
                     Layout.fillWidth: true
@@ -638,19 +730,39 @@ ColumnLayout {
                     TextButton {
                         Layout.fillWidth: true
                         text: qsTr("Save")
-                        enabled: vpnDialog.interfaceName.length > 0
+                        enabled: {
+                            const hasCommands = vpnDialog.connectCmd.length > 0 || vpnDialog.disconnectCmd.length > 0;
+                            if (hasCommands) {
+                                return vpnDialog.interfaceName.length > 0 && 
+                                       vpnDialog.connectCmd.length > 0 && 
+                                       vpnDialog.disconnectCmd.length > 0;
+                            }
+                            return vpnDialog.interfaceName.length > 0;
+                        }
                         inactiveColour: Colours.palette.m3primaryContainer
                         inactiveOnColour: Colours.palette.m3onPrimaryContainer
 
                         onClicked: {
                             const providers = [];
+                            const hasCommands = vpnDialog.connectCmd.length > 0 && vpnDialog.disconnectCmd.length > 0;
                             const newProvider = {
-                                name: vpnDialog.providerName,
                                 displayName: vpnDialog.displayName || vpnDialog.interfaceName,
-                                interface: vpnDialog.interfaceName
+                                enabled: false,
+                                interface: vpnDialog.interfaceName,
+                                name: vpnDialog.providerName
                             };
 
+                            if (hasCommands) {
+                                newProvider.connectCmd = vpnDialog.connectCmd.split(" ").filter(s => s.length > 0);
+                                newProvider.disconnectCmd = vpnDialog.disconnectCmd.split(" ").filter(s => s.length > 0);
+                            }
+
                             if (vpnDialog.editIndex >= 0) {
+                                const oldProvider = Config.utilities.vpn.provider[vpnDialog.editIndex];
+                                if (typeof oldProvider === "object" && oldProvider.enabled !== undefined) {
+                                    newProvider.enabled = oldProvider.enabled;
+                                }
+                                
                                 for (let i = 0; i < Config.utilities.vpn.provider.length; i++) {
                                     if (i === vpnDialog.editIndex) {
                                         providers.push(newProvider);
