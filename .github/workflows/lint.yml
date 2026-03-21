@@ -18,8 +18,8 @@ jobs:
 
       - name: Build
         run: |
-          # Use fake version for CI build
-          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clazy -DCMAKE_CXX_FLAGS=-Werror -DVERSION=v0.0.0
+          # Set version and git rev for CI build so we don't call git
+          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=clazy -DCMAKE_CXX_FLAGS=-Werror -DVERSION= -DGIT_REVISION=
           cmake --build build
 
       - name: Lint QML
@@ -39,5 +39,5 @@ jobs:
           set -l qml_files (string match -vr '(build|modules/controlcenter)/.*' **.qml)
 
           # Lint
-          set -l lint_out (qmllint --import disable $args $qml_files 2>&1 | tee /dev/stderr)
+          set -l lint_out (/usr/lib/qt6/bin/qmllint --import disable $args $qml_files 2>&1 | tee /dev/stderr)
           test -z "$lint_out" || exit 1
