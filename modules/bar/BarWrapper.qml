@@ -84,7 +84,7 @@ Item {
             width: root.contentWidth
             screen: root.screen
             visibilities: root.visibilities
-            popouts: root.popouts
+            popouts: root.popouts // qmllint disable incompatible-type
             fullscreen: root.fullscreen
         }
     }
