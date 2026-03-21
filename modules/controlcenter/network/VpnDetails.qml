@@ -199,24 +199,24 @@ DeviceDetails {
                         showTopMargin: true
                         label: qsTr("Status")
                         value: {
-                            if (!root.providerEnabled) 
+                            if (!root.providerEnabled)
                                 return qsTr("Disabled");
-                            if (VPN.connecting) 
+                            if (VPN.connecting)
                                 return qsTr("Connecting...");
-                            
+
                             switch (VPN.status.state) {
-                                case "connected": 
-                                    return qsTr("Connected");
-                                case "disconnected": 
-                                    return qsTr("Disconnected");
-                                case "connecting": 
-                                    return qsTr("Connecting...");
-                                case "needs-auth": 
-                                    return qsTr("Authentication required");
-                                case "error": 
-                                    return qsTr("Error");
-                                default: 
-                                    return qsTr("Unknown");
+                            case "connected":
+                                return qsTr("Connected");
+                            case "disconnected":
+                                return qsTr("Disconnected");
+                            case "connecting":
+                                return qsTr("Connecting...");
+                            case "needs-auth":
+                                return qsTr("Authentication required");
+                            case "error":
+                                return qsTr("Error");
+                            default:
+                                return qsTr("Unknown");
                             }
                         }
                     }
@@ -509,13 +509,13 @@ DeviceDetails {
                                     connectCmd: hasCommands ? editVpnDialog.connectCmd.split(" ").filter(s => s.length > 0) : undefined,
                                     disconnectCmd: hasCommands ? editVpnDialog.disconnectCmd.split(" ").filter(s => s.length > 0) : undefined
                                 };
-                                
+
                                 // Remove undefined properties
                                 if (!hasCommands) {
                                     delete newProvider.connectCmd;
                                     delete newProvider.disconnectCmd;
                                 }
-                                
+
                                 providers.push(newProvider);
                             } else {
                                 providers.push(Config.utilities.vpn.provider[i]);

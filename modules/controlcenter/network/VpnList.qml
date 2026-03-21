@@ -158,29 +158,35 @@ ColumnLayout {
                             StyledText {
                                 Layout.fillWidth: true
                                 text: {
-                                    if (!modelData.enabled) 
+                                    if (!modelData.enabled)
                                         return qsTr("Disabled");
-                                        
-                                    if (VPN.connecting) 
+
+                                    if (VPN.connecting)
                                         return qsTr("Connecting...");
-                                    
+
                                     switch (VPN.status.state) {
-                                        case "connected": return qsTr("Connected");
-                                        case "disconnected": return qsTr("Enabled");
-                                        case "connecting": return qsTr("Connecting...");
-                                        case "needs-auth": return qsTr("Auth required");
-                                        case "error": return qsTr("Error");
-                                        default: return qsTr("Enabled");
+                                    case "connected":
+                                        return qsTr("Connected");
+                                    case "disconnected":
+                                        return qsTr("Enabled");
+                                    case "connecting":
+                                        return qsTr("Connecting...");
+                                    case "needs-auth":
+                                        return qsTr("Auth required");
+                                    case "error":
+                                        return qsTr("Error");
+                                    default:
+                                        return qsTr("Enabled");
                                     }
                                 }
                                 color: {
-                                    if (!modelData.enabled) 
+                                    if (!modelData.enabled)
                                         return Colours.palette.m3outline;
-                                    if (VPN.status.state === "connected") 
+                                    if (VPN.status.state === "connected")
                                         return Colours.palette.m3primary;
-                                    if (VPN.status.state === "error") 
+                                    if (VPN.status.state === "error")
                                         return Colours.palette.m3error;
-                                    if (VPN.status.state === "needs-auth") 
+                                    if (VPN.status.state === "needs-auth")
                                         return Colours.palette.m3tertiary;
                                     return Colours.palette.m3onSurface;
                                 }
@@ -733,9 +739,7 @@ ColumnLayout {
                         enabled: {
                             const hasCommands = vpnDialog.connectCmd.length > 0 || vpnDialog.disconnectCmd.length > 0;
                             if (hasCommands) {
-                                return vpnDialog.interfaceName.length > 0 && 
-                                       vpnDialog.connectCmd.length > 0 && 
-                                       vpnDialog.disconnectCmd.length > 0;
+                                return vpnDialog.interfaceName.length > 0 && vpnDialog.connectCmd.length > 0 && vpnDialog.disconnectCmd.length > 0;
                             }
                             return vpnDialog.interfaceName.length > 0;
                         }
@@ -762,7 +766,7 @@ ColumnLayout {
                                 if (typeof oldProvider === "object" && oldProvider.enabled !== undefined) {
                                     newProvider.enabled = oldProvider.enabled;
                                 }
-                                
+
                                 for (let i = 0; i < Config.utilities.vpn.provider.length; i++) {
                                     if (i === vpnDialog.editIndex) {
                                         providers.push(newProvider);
