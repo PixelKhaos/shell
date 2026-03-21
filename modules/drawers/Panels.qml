@@ -5,6 +5,7 @@ import qs.modules.notifications as Notifications
 import qs.modules.session as Session
 import qs.modules.launcher as Launcher
 import qs.modules.dashboard as Dashboard
+import qs.modules.bar as Bar
 import qs.modules.bar.popouts as BarPopouts
 import qs.modules.utilities as Utilities
 import qs.modules.utilities.toasts as Toasts
@@ -16,8 +17,8 @@ Item {
     id: root
 
     required property ShellScreen screen
-    required property PersistentProperties visibilities
-    required property Item bar
+    required property DrawerVisibilities visibilities
+    required property Bar.BarWrapper bar
     required property real borderThickness
 
     readonly property alias osd: osd
@@ -58,7 +59,9 @@ Item {
         id: notifications
 
         visibilities: root.visibilities
-        panels: root
+        sidebarPanel: sidebar
+        osdPanel: osd
+        sessionPanel: session
 
         anchors.top: parent.top
         anchors.right: parent.right

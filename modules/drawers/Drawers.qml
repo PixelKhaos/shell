@@ -10,6 +10,7 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Effects
 
 Variants {
@@ -50,7 +51,12 @@ Variants {
                 if (focusGrab.active || panels.popouts.isDetached)
                     return 0;
 
+<<<<<<< HEAD
                 if (monitor?.lastIpcObject?.specialWorkspace?.name || monitor?.activeWorkspace?.lastIpcObject?.windows > 0)
+=======
+                const mon = Hypr.monitorFor(screen);
+                if (mon?.lastIpcObject.specialWorkspace?.name || mon?.activeWorkspace?.lastIpcObject.windows > 0)
+>>>>>>> upstream
                     return 0;
 
                 const thresholds = [];
@@ -130,7 +136,7 @@ Variants {
             HyprlandFocusGrab {
                 id: focusGrab
 
-                active: (visibilities.launcher && Config.launcher.enabled) || (visibilities.session && Config.session.enabled) || (visibilities.sidebar && Config.sidebar.enabled) || (!Config.dashboard.showOnHover && visibilities.dashboard && Config.dashboard.enabled) || (panels.popouts.currentName.startsWith("traymenu") && panels.popouts.current?.depth > 1)
+                active: (visibilities.launcher && Config.launcher.enabled) || (visibilities.session && Config.session.enabled) || (visibilities.sidebar && Config.sidebar.enabled) || (!Config.dashboard.showOnHover && visibilities.dashboard && Config.dashboard.enabled) || (panels.popouts.currentName.startsWith("traymenu") && (panels.popouts.current as StackView)?.depth > 1)
                 windows: [win]
                 onCleared: {
                     visibilities.launcher = false;
@@ -176,16 +182,8 @@ Variants {
                 }
             }
 
-            PersistentProperties {
+            DrawerVisibilities {
                 id: visibilities
-
-                property bool bar
-                property bool osd
-                property bool session
-                property bool launcher
-                property bool dashboard
-                property bool utilities
-                property bool sidebar
 
                 Component.onCompleted: Visibilities.load(scope.modelData, this)
             }
