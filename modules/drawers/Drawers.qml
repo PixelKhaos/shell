@@ -51,12 +51,8 @@ Variants {
                 if (focusGrab.active || panels.popouts.isDetached)
                     return 0;
 
-<<<<<<< HEAD
-                if (monitor?.lastIpcObject?.specialWorkspace?.name || monitor?.activeWorkspace?.lastIpcObject?.windows > 0)
-=======
                 const mon = Hypr.monitorFor(screen);
-                if (mon?.lastIpcObject.specialWorkspace?.name || mon?.activeWorkspace?.lastIpcObject.windows > 0)
->>>>>>> upstream
+                if (mon?.lastIpcObject?.specialWorkspace?.name || mon?.activeWorkspace?.lastIpcObject?.windows > 0)
                     return 0;
 
                 const thresholds = [];
