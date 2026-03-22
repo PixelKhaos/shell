@@ -136,7 +136,7 @@ Item {
         stdout: StdioCollector {}
         onExited: { // qmllint disable signal-handler-parameters
             root.decodingHtml = false;
-            if (root.currentItem?.modelData?.needsDecodeForUrl) { 
+            if (root.currentItem?.modelData?.needsDecodeForUrl) {
                 const srcMatch = String(stdout.text).match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i); // qmllint disable missing-property
                 if (srcMatch?.[1])
                     root.extractedImageUrl = srcMatch[1];
