@@ -306,6 +306,23 @@ Singleton {
         }
     }
 
+    onStatusChanged: {
+        if (providerName === "warp" && status.state === "needs-auth" && status.reason.includes("registration")) {
+            warpRegisterProc.exec(["warp-cli", "registration", "new"]);
+        }
+    }
+
+    onProviderNameChanged: {
+        status = {
+            connected: false,
+            state: "disconnected",
+            reason: "",
+            authUrl: ""
+        };
+        root.connected = false;
+        statusCheckTimer.start();
+    }
+
     Component.onCompleted: root.enabled && statusCheckTimer.start()
 
     Process {
@@ -458,22 +475,5 @@ Singleton {
 
         interval: 500
         onTriggered: root.checkStatus()
-    }
-
-    onStatusChanged: {
-        if (providerName === "warp" && status.state === "needs-auth" && status.reason.includes("registration")) {
-            warpRegisterProc.exec(["warp-cli", "registration", "new"]);
-        }
-    }
-
-    onProviderNameChanged: {
-        status = {
-            connected: false,
-            state: "disconnected",
-            reason: "",
-            authUrl: ""
-        };
-        root.connected = false;
-        statusCheckTimer.start();
     }
 }
