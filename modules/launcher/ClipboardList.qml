@@ -1,5 +1,8 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
 import "items"
 import "services"
 import qs.components
@@ -7,9 +10,6 @@ import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
 
 StyledListView {
     id: root
@@ -49,7 +49,9 @@ StyledListView {
     }
 
     spacing: Appearance.spacing.small
+
     orientation: Qt.Vertical
+
     implicitHeight: {
         if (count === 0)
             return 0;
@@ -70,10 +72,13 @@ StyledListView {
     }
 
     preferredHighlightBegin: 0
+
     preferredHighlightEnd: height
+
     highlightRangeMode: ListView.ApplyRange
 
     highlightFollowsCurrentItem: false
+
     highlight: StyledRect {
         radius: Appearance.rounding.normal
         color: Colours.palette.m3onSurface
@@ -102,6 +107,7 @@ StyledListView {
     }
 
     property string previousCategory: "all"
+
     property var pendingModelUpdate: null
 
     Connections {

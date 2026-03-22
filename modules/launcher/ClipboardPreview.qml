@@ -1,16 +1,16 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import QtQuick.Shapes
+import Quickshell
+import Quickshell.Io
+import Caelestia
 import "services"
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
-import Quickshell
-import Quickshell.Io
-import Caelestia
-import QtQuick
-import QtQuick.Layouts
-import QtQuick.Shapes
 
 Item {
     id: root
@@ -128,6 +128,7 @@ Item {
     }
 
     readonly property real rounding: Config.border.rounding
+
     property real lastValidHeight: 0
 
     readonly property real targetHeight: {
@@ -150,9 +151,13 @@ Item {
     }
 
     width: 400
+
     height: targetHeight
+
     enabled: shouldShow && hasImage
+
     visible: height > (rounding * 2)
+
     clip: false
 
     Behavior on height {

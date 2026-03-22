@@ -62,7 +62,7 @@ Item {
 
         Behavior on height {
             enabled: !root.loadedWithInitialText
-            
+
             Anim {
                 duration: Appearance.anim.durations.normal
                 easing.bezierCurve: Appearance.anim.curves.emphasized

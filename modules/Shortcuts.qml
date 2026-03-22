@@ -150,17 +150,17 @@ Scope {
         function toggle(): void {
             if (root.hasFullscreen)
                 return;
-            
+
             const visibilities = Visibilities.getForActive();
             const launcher = LauncherIpc.getForActive();
             const wrapper = LauncherWrappers.getForActive();
             const searchText = Config.launcher.actionPrefix + "clipboard ";
-            
+
             if (visibilities.launcher && launcher?.search.text === searchText) {
                 visibilities.launcher = false;
                 return;
             }
-            
+
             if (launcher?.search) {
                 launcher.search.text = searchText;
                 launcher.search.forceActiveFocus();
@@ -179,17 +179,17 @@ Scope {
         function toggle(): void {
             if (root.hasFullscreen)
                 return;
-            
+
             const visibilities = Visibilities.getForActive();
             const launcher = LauncherIpc.getForActive();
             const wrapper = LauncherWrappers.getForActive();
             const searchText = Config.launcher.actionPrefix + "emoji ";
-            
+
             if (visibilities.launcher && launcher?.search.text === searchText) {
                 visibilities.launcher = false;
                 return;
             }
-            
+
             if (launcher?.search) {
                 launcher.search.text = searchText;
                 launcher.search.forceActiveFocus();
