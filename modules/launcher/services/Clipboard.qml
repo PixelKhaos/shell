@@ -154,8 +154,7 @@ Singleton {
         id: copyImageProcess
 
         stdout: StdioCollector {}
-
-        onExited: (exitCode, exitStatus) => {
+        onExited: (exitCode, exitStatus) => { // qmllint disable signal-handler-parameters
             if (exitCode === 0) {
                 Toaster.toast("Image copied", "Downloaded and copied image to clipboard", "image");
                 Qt.callLater(() => root.refresh());
@@ -169,6 +168,6 @@ Singleton {
         id: deleteProcess
 
         stdout: StdioCollector {}
-        onExited: root.refresh()
+        onExited: root.refresh() // qmllint disable signal-handler-parameters
     }
 }

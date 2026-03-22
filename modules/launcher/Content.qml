@@ -105,7 +105,7 @@ Item {
                     property Item activeTab: {
                         for (let i = 0; i < tabsRepeater.count; i++) {
                             const tab = tabsRepeater.itemAt(i);
-                            if (tab && tab.isActive) {
+                            if (tab && tab.isActive) { // qmllint disable missing-property
                                 return tab;
                             }
                         }

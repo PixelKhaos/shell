@@ -19,7 +19,7 @@ Item {
     property bool _showAnimRetarget: false
 
     readonly property var currentClipboardItem: {
-        const list = content.item?.list?.currentList;
+        const list = content.item?.list?.currentList; // qmllint disable missing-property
         if (!list)
             return null;
 
@@ -30,7 +30,7 @@ Item {
         return list.currentItem;
     }
 
-    readonly property bool showingClipboard: content.item?.list?.showClipboard ?? false
+    readonly property bool showingClipboard: content.item?.list?.showClipboard ?? false // qmllint disable missing-property
 
     readonly property real maxHeight: {
         let max = screen.height - Config.border.thickness * 2 - Appearance.spacing.large;

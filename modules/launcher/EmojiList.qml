@@ -56,7 +56,7 @@ Item {
     function updateGrid(): void {
         const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "emoji\\s*", "i");
         const query = root.search.text.replace(pattern, "").trim();
-        let emojis = Emojis.emojis;
+        let emojis = Emojis.emojis; // qmllint disable missing-property
         if (root.activeCategory !== "all") {
             emojis = emojis.filter(emoji => emoji.category === root.activeCategory);
         }
@@ -97,7 +97,7 @@ Item {
         spacing: Appearance.spacing.small
 
         Repeater {
-            model: Emojis.categories
+            model: Emojis.categories // qmllint disable missing-property
 
             IconButton {
                 required property var modelData
@@ -196,7 +196,7 @@ Item {
             root.updateGrid();
         }
 
-        target: Emojis
+        target: Emojis // qmllint disable incompatible-type
     }
 
     Connections {

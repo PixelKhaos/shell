@@ -120,9 +120,9 @@ Item {
         id: decodeProcess
 
         stdout: StdioCollector {}
-        onExited: {
+        onExited: { // qmllint disable signal-handler-parameters
             if (root.currentItem?.modelData?.isImage) {
-                const b64 = String(stdout.text).trim();
+                const b64 = String(stdout.text).trim(); // qmllint disable missing-property
                 if (b64)
                     root.imageDataUrl = "data:image/png;base64," + b64;
             }
@@ -134,10 +134,10 @@ Item {
         id: decodeHtmlProcess
 
         stdout: StdioCollector {}
-        onExited: {
+        onExited: { // qmllint disable signal-handler-parameters
             root.decodingHtml = false;
-            if (root.currentItem?.modelData?.needsDecodeForUrl) {
-                const srcMatch = String(stdout.text).match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
+            if (root.currentItem?.modelData?.needsDecodeForUrl) { 
+                const srcMatch = String(stdout.text).match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i); // qmllint disable missing-property
                 if (srcMatch?.[1])
                     root.extractedImageUrl = srcMatch[1];
             }
@@ -147,11 +147,10 @@ Item {
     Process {
         id: copyGrabbedImageProcess
 
-        stdout: StdioCollector {}
-        onExited: (exitCode, exitStatus) => {
+        onExited: (exitCode, exitStatus) => { // qmllint disable signal-handler-parameters
             if (exitCode === 0) {
                 Toaster.toast("Image copied", "Copied image to clipboard", "image");
-                Clipboard.refresh();
+                Clipboard.refresh(); // qmllint disable missing-property
             } else {
                 Toaster.toast("Copy failed", "Failed to copy image", "error");
             }

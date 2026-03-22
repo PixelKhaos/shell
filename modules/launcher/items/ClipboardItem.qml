@@ -18,7 +18,7 @@ Item {
 
     property bool isItemHovered: itemHoverHandler.hovered
     readonly property bool isHovered: root.isItemHovered
-    readonly property bool isCurrent: ListView.isCurrentItem && root.ListView.view?.lastInteraction === "keyboard"
+    readonly property bool isCurrent: ListView.isCurrentItem && root.ListView.view?.lastInteraction === "keyboard" // qmllint disable missing-property
 
     implicitHeight: Config.launcher.sizes.itemHeight
     anchors.left: parent?.left
@@ -53,7 +53,7 @@ Item {
             anchors.fill: parent
             onClicked: {
                 root.ListView.view.currentIndex = root.index;
-                Clipboard.copyToClipboard(root.modelData);
+                Clipboard.copyToClipboard(root.modelData); // qmllint disable missing-property
                 root.visibilities.launcher = false;
             }
         }
@@ -117,7 +117,7 @@ Item {
                     radius: Appearance.rounding.small
                     padding: Appearance.padding.small
                     onClicked: {
-                        Clipboard.togglePin(root.modelData);
+                        Clipboard.togglePin(root.modelData); // qmllint disable missing-property
                     }
                 }
 
@@ -130,7 +130,7 @@ Item {
                     padding: Appearance.padding.small
                     onClicked: {
                         root.ListView.view.deletedItemIndex = root.index;
-                        Clipboard.deleteItem(root.modelData);
+                        Clipboard.deleteItem(root.modelData); // qmllint disable missing-property
                     }
                 }
             }

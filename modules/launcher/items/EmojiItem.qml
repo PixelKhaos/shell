@@ -33,7 +33,7 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
-                Emojis.copyEmoji(root.modelData);
+                Emojis.copyEmoji(root.modelData); // qmllint disable missing-property
                 root.visibilities.launcher = false;
             }
         }

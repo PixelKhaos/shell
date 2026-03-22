@@ -30,7 +30,7 @@ StyledListView {
     function filterAndSortItems(): var {
         const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "clipboard\\s*", "i");
         const query = root.search.text.replace(pattern, "").trim();
-        let items = Clipboard.history;
+        let items = Clipboard.history; // qmllint disable missing-property
 
         if (root.activeCategory === "images") {
             items = items.filter(item => item.isImage);
@@ -88,7 +88,7 @@ StyledListView {
     }
 
     Component.onCompleted: {
-        Clipboard.refresh();
+        Clipboard.refresh(); // qmllint disable missing-property
         updateModel();
     }
 
@@ -149,7 +149,7 @@ StyledListView {
             root.updateModel();
         }
 
-        target: Clipboard
+        target: Clipboard // qmllint disable incompatible-type
     }
 
     Connections {
@@ -328,7 +328,7 @@ StyledListView {
                         type: TextButton.Filled
                         onClicked: {
                             root.showClearConfirmation = false;
-                            Clipboard.clearAll(root.activeCategory);
+                            Clipboard.clearAll(root.activeCategory); // qmllint disable missing-property
                         }
                     }
                 }
