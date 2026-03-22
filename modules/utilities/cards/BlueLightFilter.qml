@@ -29,7 +29,9 @@ StyledRect {
             spacing: Appearance.spacing.normal
 
             StyledRect {
-                implicitWidth: 40; implicitHeight: 40; radius: Appearance.rounding.full
+                implicitWidth: 40
+                implicitHeight: 40
+                radius: Appearance.rounding.full
                 color: Sunset.active ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
 
                 MaterialIcon {
@@ -42,14 +44,19 @@ StyledRect {
             ColumnLayout {
                 spacing: 0
 
-                StyledText { text: qsTr("Night Light") }
+                StyledText {
+                    text: qsTr("Night Light")
+                }
                 StyledText {
                     text: Sunset.active ? qsTr("%1K").arg(Sunset.temperature) : qsTr("Disabled")
-                    color: Colours.palette.m3onSurfaceVariant; font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                    font.pointSize: Appearance.font.size.small
                 }
             }
 
-            Item { Layout.fillWidth: true }
+            Item {
+                Layout.fillWidth: true
+            }
 
             StyledSwitch {
                 checked: Sunset.enabled
@@ -65,7 +72,11 @@ StyledRect {
             opacity: Sunset.active ? 1 : 0
             spacing: Appearance.spacing.small
 
-            Behavior on opacity { NumberAnimation { duration: 200 } }
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: 200
+                }
+            }
 
             RowLayout {
                 StyledText {
@@ -73,7 +84,9 @@ StyledRect {
                     font.pointSize: Appearance.font.size.smaller
                     color: Colours.palette.m3onSurfaceVariant
                 }
-                Item { Layout.fillWidth: true }
+                Item {
+                    Layout.fillWidth: true
+                }
                 StyledText {
                     text: "Cool"
                     font.pointSize: Appearance.font.size.smaller
@@ -84,7 +97,9 @@ StyledRect {
             StyledSlider {
                 Layout.fillWidth: true
                 implicitHeight: 26
-                from: 2000; to: 7500; stepSize: 100
+                from: 2000
+                to: 7500
+                stepSize: 100
                 value: Sunset.temperature
                 onMoved: Sunset.temperature = value
             }
