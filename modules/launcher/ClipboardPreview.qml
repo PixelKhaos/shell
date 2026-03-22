@@ -2,8 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Shapes
-import Quickshell
 import Quickshell.Io
 import Caelestia
 import "services"
@@ -161,7 +159,7 @@ Item {
     }
 
     Behavior on height {
-        enabled: targetHeight === 0 || height === 0 || Math.abs(targetHeight - height) > 5
+        enabled: root.targetHeight === 0 || root.height === 0 || Math.abs(root.targetHeight - root.height) > 5
 
         Anim {
             duration: Appearance.anim.durations.expressiveDefaultSpatial

@@ -162,7 +162,7 @@ StyledListView {
 
     Connections {
         function onActiveCategoryChanged(): void {
-            if (previousCategory !== root.activeCategory && root.search.text.startsWith(Config.launcher.actionPrefix + "clipboard")) {
+            if (root.previousCategory !== root.activeCategory && root.search.text.startsWith(Config.launcher.actionPrefix + "clipboard")) {
                 if (categoryChangeAnimation.running) {
                     categoryChangeAnimation.stop();
                     root.opacity = 1;
@@ -173,7 +173,7 @@ StyledListView {
                 root.isCategoryChange = true;
                 categoryChangeAnimation.start();
             }
-            previousCategory = root.activeCategory;
+            root.previousCategory = root.activeCategory;
         }
     }
 

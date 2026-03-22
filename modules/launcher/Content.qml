@@ -163,6 +163,8 @@ Item {
                         ]
 
                         delegate: Item {
+                            id: categoryTab
+
                             required property var modelData
                             required property int index
 
@@ -174,7 +176,7 @@ Item {
                             StateLayer {
                                 function onClicked(): void {
                                     if (list.currentList) {
-                                        list.currentList.activeCategory = modelData.id;
+                                        list.currentList.activeCategory = categoryTab.modelData.id;
                                     }
                                 }
 
@@ -190,16 +192,16 @@ Item {
 
                                 MaterialIcon {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: modelData.icon
+                                    text: categoryTab.modelData.icon
                                     font.pointSize: Appearance.font.size.small
-                                    color: isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                    color: categoryTab.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
                                 }
 
                                 StyledText {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    text: modelData.name
+                                    text: categoryTab.modelData.name
                                     font.pointSize: Appearance.font.size.small
-                                    color: isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                    color: categoryTab.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
                                 }
                             }
                         }

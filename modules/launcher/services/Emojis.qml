@@ -129,7 +129,7 @@ Singleton {
         onLoaded: {
             try {
                 root.emojis = JSON.parse(text());
-                loadFrequentEmojis();
+                root.loadFrequentEmojis();
                 root.emojisLoaded();
             } catch (e) {
                 console.error("Failed to parse emoji.json:", e);

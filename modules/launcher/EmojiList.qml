@@ -5,9 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import "items"
 import "services"
-import qs.components
 import qs.components.controls
-import qs.components.containers
 import qs.services
 import qs.config
 
@@ -109,7 +107,7 @@ Item {
                 type: root.activeCategory === modelData.id ? IconButton.Filled : IconButton.Tonal
                 onClicked: {
                     root.activeCategory = modelData.id;
-                    updateGrid();
+                    root.updateGrid();
                 }
             }
         }
@@ -150,7 +148,7 @@ Item {
 
         delegate: emojiItem
 
-        Keys.onLeftPressed: {
+        Keys.onLeftPressed: function (event) {
             if (currentIndex % root.columns === 0) {
                 event.accepted = false;
             } else {
@@ -158,7 +156,7 @@ Item {
             }
         }
 
-        Keys.onRightPressed: {
+        Keys.onRightPressed: function (event) {
             if (currentIndex % root.columns === root.columns - 1) {
                 event.accepted = false;
             } else {
@@ -166,7 +164,7 @@ Item {
             }
         }
 
-        Keys.onUpPressed: {
+        Keys.onUpPressed: function (event) {
             if (currentIndex < root.columns) {
                 event.accepted = false;
             } else {
@@ -174,7 +172,7 @@ Item {
             }
         }
 
-        Keys.onDownPressed: {
+        Keys.onDownPressed: function (event) {
             if (currentIndex >= count - root.columns) {
                 event.accepted = false;
             } else {
@@ -195,7 +193,7 @@ Item {
 
     Connections {
         function onEmojisLoaded(): void {
-            updateGrid();
+            root.updateGrid();
         }
 
         target: Emojis
@@ -203,7 +201,7 @@ Item {
 
     Connections {
         function onTextChanged(): void {
-            updateGrid();
+            root.updateGrid();
         }
 
         target: root.search
