@@ -1,9 +1,9 @@
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Layouts
 
 StyledRect {
     id: root
@@ -16,6 +16,7 @@ StyledRect {
 
     ColumnLayout {
         id: layout
+
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -30,6 +31,7 @@ StyledRect {
             StyledRect {
                 implicitWidth: 40; implicitHeight: 40; radius: Appearance.rounding.full
                 color: Sunset.active ? Colours.palette.m3primary : Colours.palette.m3secondaryContainer
+
                 MaterialIcon {
                     anchors.centerIn: parent
                     text: Sunset.active ? "moon_stars" : "partly_cloudy_night"
@@ -39,6 +41,7 @@ StyledRect {
 
             ColumnLayout {
                 spacing: 0
+
                 StyledText { text: qsTr("Night Light") }
                 StyledText {
                     text: Sunset.active ? qsTr("%1K").arg(Sunset.temperature) : qsTr("Disabled")
@@ -57,6 +60,7 @@ StyledRect {
         ColumnLayout {
             id: extraControls
             Layout.fillWidth: true
+
             visible: Sunset.active
             opacity: Sunset.active ? 1 : 0
             spacing: Appearance.spacing.small

@@ -1,32 +1,32 @@
 pragma Singleton
 
-import qs.config
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
+import qs.config
 
 Singleton {
     id: root
 
+    // 1. Property Declarations
     property bool enabled: Config.services.sunsetService?.manualEnabled ?? false
     property int temperature: Config.services.sunsetService?.temperature ?? 4500
+    property int backend: backendWlGammarelay
+    property bool backendDetected: false
+    property string watchedBackend: Config.services.sunsetService?.preferredBackend ?? "" 
 
     readonly property bool active: enabled
-
-    onEnabledChanged: {
-        if (Config.services.sunsetService) {
-            Config.services.sunsetService.manualEnabled = enabled;
-        }
-    }
-
     readonly property int backendWlGammarelay: 0
     readonly property int backendHyprsunset: 1
     readonly property int backendWlsunset: 2
     readonly property int backendGammastep: 3
 
-    property int backend: backendWlGammarelay
-    property bool backendDetected: false
-    property string watchedBackend: Config.services.sunsetService?.preferredBackend ?? ""
+    // 2. Signal Handlers & Bindings
+    onEnabledChanged: {
+        if (Config.services.sunsetService) {
+            Config.services.sunsetService.manualEnabled = enabled;
+        }
+    }
 
     onWatchedBackendChanged: {
         if (backendDetected) {
@@ -34,10 +34,62 @@ Singleton {
         }
     }
 
+    onActiveChanged: {
+        wlGammarelayProcess.running = false;
+        sunsetProcess.running = false;
+        wlsunsetProcess.running = false;
+        gammastepProcess.running = false;
+        killHyprsunset.running = true;
+        killWlsunset.running = true;
+        killGammastep.running = true;
+
+        if (active) {
+            switch (backend) {
+                case backendWlGammarelay:
+                    wlGammarelayProcess.running = true;
+                    wlGammarelayInitTimer.start();
+                    break;
+                case backendHyprsunset:
+                    updateTimer.restart();
+                    break;
+                case backendWlsunset:
+                    updateWlsunsetTimer.restart();
+                    break;
+                case backendGammastep:
+                    updateGammastepTimer.restart();
+                    break;
+            }
+        }
+    }
+
+    onTemperatureChanged: {
+        if (Config.services.sunsetService && temperature !== (Config.services.sunsetService.temperature ?? 4500)) {
+            Config.services.sunsetService.temperature = temperature;
+        }
+
+        if (active) {
+            switch (backend) {
+                case backendWlGammarelay:
+                    updateWlGammarelay();
+                    break;
+                case backendHyprsunset:
+                    updateTimer.restart();
+                    break;
+                case backendWlsunset:
+                    updateWlsunsetTimer.restart();
+                    break;
+                case backendGammastep:
+                    updateGammastepTimer.restart();
+                    break;
+            }
+        }
+    }
+
     Component.onCompleted: {
         Qt.callLater(detectBackend);
     }
 
+    // 3. Functions
     function verifyBackend(name, command, targetBackend) {
         checkPreferredBackend.command = ["sh", "-c", command];
         checkPreferredBackend.targetBackend = targetBackend;
@@ -53,62 +105,10 @@ Singleton {
                 "gammastep": [backendGammastep, "which gammastep >/dev/null 2>&1"],
                 "wl-gammarelay-rs": [backendWlGammarelay, "busctl --user status rs.wl-gammarelay >/dev/null 2>&1 || which wl-gammarelay-rs >/dev/null 2>&1"]
             };
-
-            const backend = backendMap[preferredBackend] || backendMap["wl-gammarelay-rs"];
-            verifyBackend(preferredBackend, backend[1], backend[0]);
+            const backendData = backendMap[preferredBackend] || backendMap["wl-gammarelay-rs"];
+            verifyBackend(preferredBackend, backendData[1], backendData[0]);
         } else {
             checkWlGammarelay.running = true;
-        }
-    }
-
-    onActiveChanged: {
-        wlGammarelayProcess.running = false;
-        sunsetProcess.running = false;
-        wlsunsetProcess.running = false;
-        gammastepProcess.running = false;
-        killHyprsunset.running = true;
-        killWlsunset.running = true;
-        killGammastep.running = true;
-
-        if (active) {
-            switch (backend) {
-            case backendWlGammarelay:
-                wlGammarelayProcess.running = true;
-                wlGammarelayInitTimer.start();
-                break;
-            case backendHyprsunset:
-                updateTimer.restart();
-                break;
-            case backendWlsunset:
-                updateWlsunsetTimer.restart();
-                break;
-            case backendGammastep:
-                updateGammastepTimer.restart();
-                break;
-            }
-        }
-    }
-
-    onTemperatureChanged: {
-        if (Config.services.sunsetService && temperature !== (Config.services.sunsetService.temperature ?? 4500)) {
-            Config.services.sunsetService.temperature = temperature;
-        }
-
-        if (active) {
-            switch (backend) {
-            case backendWlGammarelay:
-                updateWlGammarelay();
-                break;
-            case backendHyprsunset:
-                updateTimer.restart();
-                break;
-            case backendWlsunset:
-                updateWlsunsetTimer.restart();
-                break;
-            case backendGammastep:
-                updateGammastepTimer.restart();
-                break;
-            }
         }
     }
 
@@ -123,17 +123,15 @@ Singleton {
         process.running = true;
     }
 
+    // 4. Child Objects (Processes and Timers)
     Process {
         id: checkPreferredBackend
         property int targetBackend: backendWlGammarelay
-
         onExited: (exitCode, exitStatus) => {
             if (exitCode === 0) {
                 backend = targetBackend;
                 backendDetected = true;
-                if (active) {
-                    activeChanged();
-                }
+                if (active) activeChanged();
             } else {
                 console.warn("Preferred backend not found, falling back to auto-detection");
                 checkWlGammarelay.running = true;
@@ -148,9 +146,7 @@ Singleton {
             if (exitCode === 0) {
                 backend = backendWlGammarelay;
                 backendDetected = true;
-                if (active) {
-                    activeChanged();
-                }
+                if (active) activeChanged();
             } else {
                 checkGammastep.running = true;
             }
@@ -164,9 +160,7 @@ Singleton {
             if (exitCode === 0) {
                 backend = backendGammastep;
                 backendDetected = true;
-                if (active) {
-                    activeChanged();
-                }
+                if (active) activeChanged();
             } else {
                 checkWlsunset.running = true;
             }
@@ -180,9 +174,7 @@ Singleton {
             if (exitCode === 0) {
                 backend = backendWlsunset;
                 backendDetected = true;
-                if (active) {
-                    activeChanged();
-                }
+                if (active) activeChanged();
             } else {
                 checkHyprsunset.running = true;
             }
@@ -193,15 +185,9 @@ Singleton {
         id: checkHyprsunset
         command: ["sh", "-c", "which hyprsunset >/dev/null 2>&1"]
         onExited: (exitCode, exitStatus) => {
-            if (exitCode === 0) {
-                backend = backendHyprsunset;
-            } else {
-                backend = backendHyprsunset;
-            }
+            backend = backendHyprsunset;
             backendDetected = true;
-            if (active) {
-                activeChanged();
-            }
+            if (active) activeChanged();
         }
     }
 
