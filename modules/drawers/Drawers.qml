@@ -74,6 +74,21 @@ Variants {
             WlrLayershell.layer: WlrLayer.Overlay
             WlrLayershell.keyboardFocus: visibilities.launcher || visibilities.session || panels.dashboard.needsKeyboard ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
 
+            mask: Region {
+                x: bar.clampedWidth + win.dragMaskPadding
+                y: Config.border.clampedThickness + win.dragMaskPadding
+                width: win.width - bar.clampedWidth - Config.border.clampedThickness - win.dragMaskPadding * 2
+                height: win.height - Config.border.clampedThickness * 2 - win.dragMaskPadding * 2
+                intersection: Intersection.Xor
+
+                regions: regions.instances // qmllint disable stale-property-read
+            }
+
+            anchors.top: true
+            anchors.bottom: true
+            anchors.left: true
+            anchors.right: true
+
             Behavior on borderThickness {
                 Anim {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
@@ -97,21 +112,6 @@ Variants {
                     easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                 }
             }
-
-            mask: Region {
-                x: bar.clampedWidth + win.dragMaskPadding
-                y: Config.border.clampedThickness + win.dragMaskPadding
-                width: win.width - bar.clampedWidth - Config.border.clampedThickness - win.dragMaskPadding * 2
-                height: win.height - Config.border.clampedThickness * 2 - win.dragMaskPadding * 2
-                intersection: Intersection.Xor
-
-                regions: regions.instances // qmllint disable stale-property-read
-            }
-
-            anchors.top: true
-            anchors.bottom: true
-            anchors.left: true
-            anchors.right: true
 
             Variants {
                 id: regions
