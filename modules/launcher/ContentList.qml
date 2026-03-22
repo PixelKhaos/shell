@@ -1,18 +1,17 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import QtQuick
 
 Item {
     id: root
 
     required property var content
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     required property var panels
     required property real maxHeight
     required property StyledTextField search
@@ -22,7 +21,7 @@ Item {
     readonly property bool showWallpapers: search.text.startsWith(`${Config.launcher.actionPrefix}wallpaper `)
     readonly property bool showClipboard: search.text.startsWith(`${Config.launcher.actionPrefix}clipboard `)
     readonly property bool showEmoji: search.text.startsWith(`${Config.launcher.actionPrefix}emoji `)
-    readonly property Item currentList: {
+    readonly property var currentList: {
         if (showWallpapers)
             return wallpaperList.item;
         if (showClipboard)
