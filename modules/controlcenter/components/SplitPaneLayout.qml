@@ -1,27 +1,25 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell.Widgets
 import qs.components
 import qs.components.effects
 import qs.config
-import Quickshell.Widgets
-import QtQuick
-import QtQuick.Layouts
 
 RowLayout {
     id: root
 
-    spacing: 0
-
     property Component leftContent: null
     property Component rightContent: null
-
     property real leftWidthRatio: 0.4
     property int leftMinimumWidth: 420
     property var leftLoaderProperties: ({})
     property var rightLoaderProperties: ({})
-
     property alias leftLoader: leftLoader
     property alias rightLoader: rightLoader
+
+    spacing: 0
 
     Item {
         id: leftPane

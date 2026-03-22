@@ -1,17 +1,17 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Widgets
 import qs.components
 import qs.components.filedialog
 import qs.config
-import Quickshell
-import Quickshell.Widgets
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
 
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     readonly property bool needsKeyboard: {
         const count = repeater.count;
         for (let i = 0; i < count; i++) {
@@ -21,7 +21,7 @@ Item {
         }
         return false;
     }
-    required property PersistentProperties state
+    required property DashboardState state
     required property FileDialog facePicker
 
     readonly property var dashboardTabs: {
@@ -163,6 +163,7 @@ Item {
 
             Component {
                 id: dashComponent
+
                 Dash {
                     visibilities: root.visibilities
                     state: root.state
@@ -172,6 +173,7 @@ Item {
 
             Component {
                 id: mediaComponent
+
                 MediaWrapper {
                     visibilities: root.visibilities
                 }
@@ -179,12 +181,14 @@ Item {
 
             Component {
                 id: performanceComponent
+
                 Performance {}
             }
 
             Component {
                 id: weatherComponent
-                Weather {}
+
+                WeatherTab {}
             }
 
             Behavior on contentX {

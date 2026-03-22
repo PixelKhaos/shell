@@ -1,12 +1,11 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
+import QtQuick
+import Quickshell
+import Quickshell.Wayland
 import qs.components.containers
 import qs.services
 import qs.config
-import Quickshell
-import Quickshell.Wayland
-import QtQuick
 
 Loader {
     asynchronous: true
@@ -68,6 +67,7 @@ Loader {
                 states: [
                     State {
                         name: "top-left"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.top: parent.top
@@ -76,6 +76,7 @@ Loader {
                     },
                     State {
                         name: "top-center"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.top: parent.top
@@ -84,6 +85,7 @@ Loader {
                     },
                     State {
                         name: "top-right"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.top: parent.top
@@ -92,6 +94,7 @@ Loader {
                     },
                     State {
                         name: "middle-left"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.verticalCenter: parent.verticalCenter
@@ -100,6 +103,7 @@ Loader {
                     },
                     State {
                         name: "middle-center"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.verticalCenter: parent.verticalCenter
@@ -108,6 +112,7 @@ Loader {
                     },
                     State {
                         name: "middle-right"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.verticalCenter: parent.verticalCenter
@@ -116,6 +121,7 @@ Loader {
                     },
                     State {
                         name: "bottom-left"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.bottom: parent.bottom
@@ -124,6 +130,7 @@ Loader {
                     },
                     State {
                         name: "bottom-center"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.bottom: parent.bottom
@@ -132,6 +139,7 @@ Loader {
                     },
                     State {
                         name: "bottom-right"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.bottom: parent.bottom

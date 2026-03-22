@@ -1,8 +1,8 @@
-import "../services"
+import QtQuick
 import qs.components
 import qs.services
 import qs.config
-import QtQuick
+import qs.modules.launcher.services
 
 Item {
     id: root
@@ -16,11 +16,11 @@ Item {
     anchors.right: parent?.right
 
     StateLayer {
-        radius: Appearance.rounding.normal
-
         function onClicked(): void {
             root.modelData?.onClicked(root.list);
         }
+
+        radius: Appearance.rounding.normal
     }
 
     Item {
