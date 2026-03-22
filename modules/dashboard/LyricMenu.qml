@@ -164,29 +164,27 @@ StyledRect {
                 sourceComponent: ListView {
                     id: candidatesView
 
-                    visible: LyricsService.candidatesModel.count > 0
                     model: LyricsService.candidatesModel
                     clip: true
                     spacing: Appearance.spacing.small
-
+                    visible: LyricsService.candidatesModel.count > 0
                     opacity: visible ? 1 : 0
-                // Behavior on opacity {
-                //     NumberAnimation { duration: Appearance.anim.durations.normal }
-                // }
 
-                delegate: Item {
-                    id: delegateRoot
+                    delegate: Item {
+                        id: delegateRoot
 
-                    required property real id
-                    required property string title
-                    required property string artist
-                    property bool hovered: false
-                    property bool pressed: false
+                        required property real id
+                        required property string title
+                        required property string artist
 
-                    width: ListView.view.width * 0.98
-                    height: 70
-                    anchors.horizontalCenter: parent?.horizontalCenter
-                    scale: hovered ? 1.02 : 1.0
+                        property bool hovered: false
+                        property bool pressed: false
+
+                        width: ListView.view.width * 0.98
+                        height: 70
+
+                        anchors.horizontalCenter: parent?.horizontalCenter
+                        scale: hovered ? 1.02 : 1.0
 
                     Behavior on scale {
                         NumberAnimation {

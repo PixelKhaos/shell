@@ -20,28 +20,14 @@ Singleton {
     property string preferredBackend: Config.services.lyricsBackend
     property real currentSongId: 0
     property string loadedLocalFile: ""
-
     property real offset
-
-    onPreferredBackendChanged: {
-        if (Config.services.lyricsBackend !== preferredBackend) {
-            Config.services.lyricsBackend = preferredBackend;
-            Config.save();
-        }
-    }
+    property int currentRequestId: 0
+    property var lyricsMap: ({})
 
     readonly property string lyricsDir: Paths.absolutePath(Config.paths.lyricsDir)
     readonly property string lyricsMapFile: Paths.absolutePath(Config.paths.lyricsDir) + "/lyrics_map.json"
-
-    property int currentRequestId: 0
-
-    // The data source for the UI
     readonly property alias model: lyricsModel
     readonly property alias candidatesModel: fetchedCandidatesModel
-
-    property var lyricsMap: ({})
-
-    // shared headers for all NetEase requests
     readonly property var _netEaseHeaders: ({
             "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:120.0) Gecko/20100101 Firefox/120.0",
             "Referer": "https://music.163.com/"
@@ -117,7 +103,7 @@ Singleton {
             root.backend = "Local";
             let cleanDir = lyricsDir.replace(/\/$/, "");
             let flatPath = `${cleanDir}/${meta.artist} - ${meta.title}.lrc`;
-            
+
             // Search for files matching "Artist - Title.lrc" pattern
             const artistStr = Array.isArray(meta.artist) ? meta.artist.join(", ") : String(meta.artist || "");
             const titleStr = Array.isArray(meta.title) ? meta.title.join(", ") : String(meta.title || "");
@@ -126,7 +112,7 @@ Singleton {
             findLyricsInSubdirs.command = ["sh", "-c", `find "${cleanDir}" -type f -iname "*${escapedArtist}*${escapedTitle}*.lrc" | head -n 1`];
             findLyricsInSubdirs.requestId = requestId;
             findLyricsInSubdirs.running = true;
-            
+
             lrcFile.path = "";
             lrcFile.path = flatPath;
             return;
@@ -136,7 +122,7 @@ Singleton {
         root.backend = "Local";
         let cleanDir = lyricsDir.replace(/\/$/, "");
         let flatPath = `${cleanDir}/${meta.artist} - ${meta.title}.lrc`;
-        
+
         const artistStr = Array.isArray(meta.artist) ? meta.artist.join(", ") : String(meta.artist || "");
         const titleStr = Array.isArray(meta.title) ? meta.title.join(", ") : String(meta.title || "");
         const escapedTitle = titleStr.replace(/'/g, "'\\''");
@@ -144,7 +130,7 @@ Singleton {
         findLyricsInSubdirs.command = ["sh", "-c", `find "${cleanDir}" -type f -iname "*${escapedArtist}*${escapedTitle}*.lrc" | head -n 1`];
         findLyricsInSubdirs.requestId = requestId;
         findLyricsInSubdirs.running = true;
-        
+
         lrcFile.path = "";
         lrcFile.path = flatPath;
         fetchNetEaseCandidates(meta.title, meta.artist, requestId);
@@ -280,6 +266,13 @@ Singleton {
         }
 
         seekTimer.restart();
+    }
+
+    onPreferredBackendChanged: {
+        if (Config.services.lyricsBackend !== preferredBackend) {
+            Config.services.lyricsBackend = preferredBackend;
+            Config.save();
+        }
     }
 
     ListModel {
