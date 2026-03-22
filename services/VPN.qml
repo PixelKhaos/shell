@@ -338,7 +338,7 @@ Singleton {
     Process {
         id: statusProc
 
-        command: getStatusCommand()
+        command: root.getStatusCommand()
         // qmllint disable incompatible-type
         environment: ({
                 // qmllint enable incompatible-type
@@ -347,8 +347,8 @@ Singleton {
             })
         stdout: StdioCollector {
             onStreamFinished: {
-                const newStatus = parseStatusOutput(text);
-                updateStatus(newStatus);
+                const newStatus = root.parseStatusOutput(text);
+                root.updateStatus(newStatus);
             }
         }
         stderr: StdioCollector {
@@ -356,7 +356,7 @@ Singleton {
                 if (text.trim().length > 0) {
                     if (text.includes("doesn't appear to be running") || text.includes("failed to connect to local tailscaled") || text.includes("daemon is not running") || text.includes("not running") && (text.includes("netbird") || text.includes("warp"))) {
                         let cmd = "sudo systemctl start ";
-                        switch (providerName) {
+                        switch (root.providerName) {
                         case "tailscale":
                             cmd += "tailscaled";
                             break;
@@ -367,7 +367,7 @@ Singleton {
                             cmd += "warp-svc";
                             break;
                         default:
-                            cmd += providerName + "d";
+                            cmd += root.providerName + "d";
                             break;
                         }
                         const errorStatus = {
@@ -376,7 +376,7 @@ Singleton {
                             reason: `Service not running (run: ${cmd})`,
                             authUrl: ""
                         };
-                        updateStatus(errorStatus);
+                        root.updateStatus(errorStatus);
                     }
                 }
             }
@@ -386,26 +386,26 @@ Singleton {
     Process {
         id: connectProc
 
-        onExited: exitCode => {
+        onExited: exitCode => { // qmllint disable signal-handler-parameters
             if (exitCode !== 0) {
                 return;
             }
 
-            if (providerName === "tailscale") {
+            if (root.providerName === "tailscale") {
                 Qt.callLater(() => {
-                    if (status.state !== "needs-auth") {
+                    if (root.status.state !== "needs-auth") {
                         statusCheckTimer.start();
                     }
                 });
-            } else if (status.state !== "needs-auth") {
+            } else if (root.status.state !== "needs-auth") {
                 statusCheckTimer.start();
             }
         }
         stdout: SplitParser {
             onRead: data => {
-                const authUrl = extractAuthUrl(data);
+                const authUrl = root.extractAuthUrl(data);
                 if (authUrl) {
-                    updateStatus(createAuthStatus(authUrl));
+                    root.updateStatus(root.createAuthStatus(authUrl));
                 }
             }
         }
@@ -420,7 +420,7 @@ Singleton {
                         reason: "Permission denied. Run in terminal: sudo tailscale set --operator=$USER",
                         authUrl: ""
                     };
-                    updateStatus(errorStatus);
+                    root.updateStatus(errorStatus);
                     return;
                 }
 
@@ -431,14 +431,14 @@ Singleton {
                         reason: "WireGuard module not loaded. Run: sudo modprobe wireguard",
                         authUrl: ""
                     };
-                    updateStatus(errorStatus);
+                    root.updateStatus(errorStatus);
                     return;
                 }
 
-                const authUrl = extractAuthUrl(error);
+                const authUrl = root.extractAuthUrl(error);
 
                 if (authUrl) {
-                    updateStatus(createAuthStatus(authUrl));
+                    root.updateStatus(root.createAuthStatus(authUrl));
                 } else if (error.includes("already exists")) {
                     root.connected = true;
                 }
@@ -463,7 +463,7 @@ Singleton {
     Process {
         id: warpRegisterProc
 
-        onExited: exitCode => {
+        onExited: exitCode => { // qmllint disable signal-handler-parameters
             if (exitCode === 0) {
                 statusCheckTimer.start();
             }
