@@ -4,7 +4,6 @@ import QtQuick
 import QtQuick.Effects
 import qs.components
 import qs.services
-import qs.config
 
 Item {
     id: root

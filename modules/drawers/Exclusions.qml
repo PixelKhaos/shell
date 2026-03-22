@@ -3,7 +3,6 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import qs.components.containers
-import qs.config
 import qs.modules.bar as Bar
 
 Scope {
