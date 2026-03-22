@@ -87,7 +87,7 @@ Scope {
         // qmllint enable unresolved-type
         name: "clipboard"
         description: "Open clipboard manager"
-        onPressed: clipboardIpc.toggle()
+        onPressed: launcherHandler.action("clipboard")
     }
 
     // qmllint disable unresolved-type
@@ -95,7 +95,7 @@ Scope {
         // qmllint enable unresolved-type
         name: "emoji"
         description: "Open emoji picker"
-        onPressed: emojiIpc.toggle()
+        onPressed: launcherHandler.action("emoji")
     }
 
     // qmllint disable unresolved-type
@@ -145,21 +145,15 @@ Scope {
     }
 
     IpcHandler {
-        id: clipboardIpc
+        id: launcherHandler
 
-        function toggle(): void {
+        function open(searchText: string): void {
             if (root.hasFullscreen)
                 return;
 
             const visibilities = Visibilities.getForActive();
             const launcher = LauncherIpc.getForActive();
             const wrapper = LauncherWrappers.getForActive();
-            const searchText = Config.launcher.actionPrefix + "clipboard ";
-
-            if (visibilities.launcher && launcher?.search.text === searchText) {
-                visibilities.launcher = false;
-                return;
-            }
 
             if (launcher?.search) {
                 launcher.search.text = searchText;
@@ -170,36 +164,27 @@ Scope {
             visibilities.launcher = true;
         }
 
-        target: "clipboard"
-    }
-
-    IpcHandler {
-        id: emojiIpc
-
-        function toggle(): void {
+        function toggle(searchText: string): void {
             if (root.hasFullscreen)
                 return;
 
             const visibilities = Visibilities.getForActive();
             const launcher = LauncherIpc.getForActive();
-            const wrapper = LauncherWrappers.getForActive();
-            const searchText = Config.launcher.actionPrefix + "emoji ";
 
             if (visibilities.launcher && launcher?.search.text === searchText) {
                 visibilities.launcher = false;
                 return;
             }
 
-            if (launcher?.search) {
-                launcher.search.text = searchText;
-                launcher.search.forceActiveFocus();
-            } else if (wrapper) {
-                wrapper.pendingSearchText = searchText;
-            }
-            visibilities.launcher = true;
+            open(searchText);
         }
 
-        target: "emoji"
+        function action(actionName: string): void {
+            const searchText = Config.launcher.actionPrefix + actionName + " ";
+            toggle(searchText);
+        }
+
+        target: "launcher"
     }
 
     IpcHandler {
