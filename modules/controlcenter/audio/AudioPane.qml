@@ -2,13 +2,15 @@ pragma ComponentBehavior: Bound
 
 import ".."
 import "../components"
-import qs.components
-import qs.components.controls
-import qs.components.containers
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Widgets
+import qs.components
+import qs.components.containers
+import qs.components.controls
+import qs.components.effects
+import qs.services
+import qs.config
 
 Item {
     id: root
@@ -86,18 +88,17 @@ Item {
                                 model: Audio.sinks
 
                                 delegate: StyledRect {
-                                    id: outputDeviceDelegate
-
                                     required property var modelData
 
                                     Layout.fillWidth: true
 
-                                    color: Audio.sink?.id === outputDeviceDelegate.modelData.id ? Colours.layer(Colours.palette.m3surfaceContainer, 2) : "transparent"
+                                    color: Audio.sink?.id === modelData.id ? Colours.layer(Colours.palette.m3surfaceContainer, 2) : "transparent"
                                     radius: Appearance.rounding.normal
+                                    implicitHeight: outputRowLayout.implicitHeight + Appearance.padding.normal * 2
 
                                     StateLayer {
                                         function onClicked(): void {
-                                            Audio.setAudioSink(outputDeviceDelegate.modelData);
+                                            Audio.setAudioSink(modelData);
                                         }
                                     }
 
@@ -112,9 +113,9 @@ Item {
                                         spacing: Appearance.spacing.normal
 
                                         MaterialIcon {
-                                            text: Audio.sink?.id === outputDeviceDelegate.modelData.id ? "speaker" : "speaker_group"
+                                            text: Audio.sink?.id === modelData.id ? "speaker" : "speaker_group"
                                             font.pointSize: Appearance.font.size.large
-                                            fill: Audio.sink?.id === outputDeviceDelegate.modelData.id ? 1 : 0
+                                            fill: Audio.sink?.id === modelData.id ? 1 : 0
                                         }
 
                                         StyledText {
@@ -122,12 +123,10 @@ Item {
                                             elide: Text.ElideRight
                                             maximumLineCount: 1
 
-                                            text: outputDeviceDelegate.modelData.description || qsTr("Unknown")
-                                            font.weight: Audio.sink?.id === outputDeviceDelegate.modelData.id ? 500 : 400
+                                            text: modelData.description || qsTr("Unknown")
+                                            font.weight: Audio.sink?.id === modelData.id ? 500 : 400
                                         }
                                     }
-
-                                    implicitHeight: outputRowLayout.implicitHeight + Appearance.padding.normal * 2
                                 }
                             }
                         }
@@ -166,18 +165,17 @@ Item {
                                 model: Audio.sources
 
                                 delegate: StyledRect {
-                                    id: inputDeviceDelegate
-
                                     required property var modelData
 
                                     Layout.fillWidth: true
 
-                                    color: Audio.source?.id === inputDeviceDelegate.modelData.id ? Colours.layer(Colours.palette.m3surfaceContainer, 2) : "transparent"
+                                    color: Audio.source?.id === modelData.id ? Colours.layer(Colours.palette.m3surfaceContainer, 2) : "transparent"
                                     radius: Appearance.rounding.normal
+                                    implicitHeight: inputRowLayout.implicitHeight + Appearance.padding.normal * 2
 
                                     StateLayer {
                                         function onClicked(): void {
-                                            Audio.setAudioSource(inputDeviceDelegate.modelData);
+                                            Audio.setAudioSource(modelData);
                                         }
                                     }
 
@@ -194,7 +192,7 @@ Item {
                                         MaterialIcon {
                                             text: "mic"
                                             font.pointSize: Appearance.font.size.large
-                                            fill: Audio.source?.id === inputDeviceDelegate.modelData.id ? 1 : 0
+                                            fill: Audio.source?.id === modelData.id ? 1 : 0
                                         }
 
                                         StyledText {
@@ -202,12 +200,10 @@ Item {
                                             elide: Text.ElideRight
                                             maximumLineCount: 1
 
-                                            text: inputDeviceDelegate.modelData.description || qsTr("Unknown")
-                                            font.weight: Audio.source?.id === inputDeviceDelegate.modelData.id ? 500 : 400
+                                            text: modelData.description || qsTr("Unknown")
+                                            font.weight: Audio.source?.id === modelData.id ? 500 : 400
                                         }
                                     }
-
-                                    implicitHeight: inputRowLayout.implicitHeight + Appearance.padding.normal * 2
                                 }
                             }
                         }
@@ -280,16 +276,6 @@ Item {
                                         text = Math.round(Audio.volume * 100).toString();
                                     }
 
-                                    Connections {
-                                        function onVolumeChanged() {
-                                            if (!outputVolumeInput.hasFocus) {
-                                                outputVolumeInput.text = Math.round(Audio.volume * 100).toString();
-                                            }
-                                        }
-
-                                        target: Audio
-                                    }
-
                                     onTextEdited: text => {
                                         if (hasFocus) {
                                             const val = parseInt(text);
@@ -304,6 +290,16 @@ Item {
                                         if (isNaN(val) || val < 0 || val > 100) {
                                             text = Math.round(Audio.volume * 100).toString();
                                         }
+                                    }
+
+                                    Connections {
+                                        function onVolumeChanged() {
+                                            if (!outputVolumeInput.hasFocus) {
+                                                outputVolumeInput.text = Math.round(Audio.volume * 100).toString();
+                                            }
+                                        }
+
+                                        target: Audio
                                     }
                                 }
 
@@ -398,16 +394,6 @@ Item {
                                         text = Math.round(Audio.sourceVolume * 100).toString();
                                     }
 
-                                    Connections {
-                                        function onSourceVolumeChanged() {
-                                            if (!inputVolumeInput.hasFocus) {
-                                                inputVolumeInput.text = Math.round(Audio.sourceVolume * 100).toString();
-                                            }
-                                        }
-
-                                        target: Audio
-                                    }
-
                                     onTextEdited: text => {
                                         if (hasFocus) {
                                             const val = parseInt(text);
@@ -422,6 +408,16 @@ Item {
                                         if (isNaN(val) || val < 0 || val > 100) {
                                             text = Math.round(Audio.sourceVolume * 100).toString();
                                         }
+                                    }
+
+                                    Connections {
+                                        function onSourceVolumeChanged() {
+                                            if (!inputVolumeInput.hasFocus) {
+                                                inputVolumeInput.text = Math.round(Audio.sourceVolume * 100).toString();
+                                            }
+                                        }
+
+                                        target: Audio
                                     }
                                 }
 
@@ -493,8 +489,6 @@ Item {
                                 Layout.fillWidth: true
 
                                 delegate: ColumnLayout {
-                                    id: streamDelegate
-
                                     required property var modelData
                                     required property int index
 
@@ -515,7 +509,7 @@ Item {
                                             Layout.fillWidth: true
                                             elide: Text.ElideRight
                                             maximumLineCount: 1
-                                            text: Audio.getStreamName(streamDelegate.modelData)
+                                            text: Audio.getStreamName(modelData)
                                             font.pointSize: Appearance.font.size.normal
                                             font.weight: 500
                                         }
@@ -528,27 +522,17 @@ Item {
                                                 bottom: 0
                                                 top: 100
                                             }
-                                            enabled: !Audio.getStreamMuted(streamDelegate.modelData)
+                                            enabled: !Audio.getStreamMuted(modelData)
 
                                             Component.onCompleted: {
-                                                text = Math.round(Audio.getStreamVolume(streamDelegate.modelData) * 100).toString();
-                                            }
-
-                                            Connections {
-                                                function onAudioChanged() {
-                                                    if (!streamVolumeInput.hasFocus && streamDelegate.modelData?.audio) {
-                                                        streamVolumeInput.text = Math.round(streamDelegate.modelData.audio.volume * 100).toString();
-                                                    }
-                                                }
-
-                                                target: streamDelegate.modelData
+                                                text = Math.round(Audio.getStreamVolume(modelData) * 100).toString();
                                             }
 
                                             onTextEdited: text => {
                                                 if (hasFocus) {
                                                     const val = parseInt(text);
                                                     if (!isNaN(val) && val >= 0 && val <= 100) {
-                                                        Audio.setStreamVolume(streamDelegate.modelData, val / 100);
+                                                        Audio.setStreamVolume(modelData, val / 100);
                                                     }
                                                 }
                                             }
@@ -556,8 +540,18 @@ Item {
                                             onEditingFinished: {
                                                 const val = parseInt(text);
                                                 if (isNaN(val) || val < 0 || val > 100) {
-                                                    text = Math.round(Audio.getStreamVolume(streamDelegate.modelData) * 100).toString();
+                                                    text = Math.round(Audio.getStreamVolume(modelData) * 100).toString();
                                                 }
+                                            }
+
+                                            Connections {
+                                                function onAudioChanged() {
+                                                    if (!streamVolumeInput.hasFocus && modelData?.audio) {
+                                                        streamVolumeInput.text = Math.round(modelData.audio.volume * 100).toString();
+                                                    }
+                                                }
+
+                                                target: modelData
                                             }
                                         }
 
@@ -565,7 +559,7 @@ Item {
                                             text: "%"
                                             color: Colours.palette.m3outline
                                             font.pointSize: Appearance.font.size.normal
-                                            opacity: Audio.getStreamMuted(streamDelegate.modelData) ? 0.5 : 1
+                                            opacity: Audio.getStreamMuted(modelData) ? 0.5 : 1
                                         }
 
                                         StyledRect {
@@ -573,11 +567,11 @@ Item {
                                             implicitHeight: streamMuteIcon.implicitHeight + Appearance.padding.normal * 2
 
                                             radius: Appearance.rounding.normal
-                                            color: Audio.getStreamMuted(streamDelegate.modelData) ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
+                                            color: Audio.getStreamMuted(modelData) ? Colours.palette.m3secondary : Colours.palette.m3secondaryContainer
 
                                             StateLayer {
                                                 function onClicked(): void {
-                                                    Audio.setStreamMuted(streamDelegate.modelData, !Audio.getStreamMuted(streamDelegate.modelData));
+                                                    Audio.setStreamMuted(modelData, !Audio.getStreamMuted(modelData));
                                                 }
                                             }
 
@@ -585,23 +579,21 @@ Item {
                                                 id: streamMuteIcon
 
                                                 anchors.centerIn: parent
-                                                text: Audio.getStreamMuted(streamDelegate.modelData) ? "volume_off" : "volume_up"
-                                                color: Audio.getStreamMuted(streamDelegate.modelData) ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
+                                                text: Audio.getStreamMuted(modelData) ? "volume_off" : "volume_up"
+                                                color: Audio.getStreamMuted(modelData) ? Colours.palette.m3onSecondary : Colours.palette.m3onSecondaryContainer
                                             }
                                         }
                                     }
 
                                     StyledSlider {
-                                        id: streamSlider
-
                                         Layout.fillWidth: true
                                         implicitHeight: Appearance.padding.normal * 3
 
-                                        value: Audio.getStreamVolume(streamDelegate.modelData)
-                                        enabled: !Audio.getStreamMuted(streamDelegate.modelData)
+                                        value: Audio.getStreamVolume(modelData)
+                                        enabled: !Audio.getStreamMuted(modelData)
                                         opacity: enabled ? 1 : 0.5
                                         onMoved: {
-                                            Audio.setStreamVolume(streamDelegate.modelData, value);
+                                            Audio.setStreamVolume(modelData, value);
                                             if (!streamVolumeInput.hasFocus) {
                                                 streamVolumeInput.text = Math.round(value * 100).toString();
                                             }
@@ -609,12 +601,12 @@ Item {
 
                                         Connections {
                                             function onAudioChanged() {
-                                                if (streamDelegate.modelData?.audio) {
-                                                    streamSlider.value = streamDelegate.modelData.audio.volume;
+                                                if (modelData?.audio) {
+                                                    value = modelData.audio.volume;
                                                 }
                                             }
 
-                                            target: streamDelegate.modelData
+                                            target: modelData
                                         }
                                     }
                                 }

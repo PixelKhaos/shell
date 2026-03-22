@@ -1,9 +1,9 @@
 import ".."
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.services
 import qs.config
-import QtQuick
-import QtQuick.Layouts
 
 StyledRect {
     id: root
@@ -44,7 +44,7 @@ StyledRect {
             step: root.step
             value: root.value
             onValueModified: value => {
-                root.onValueModified(value);
+                root.onValueModified(value); // qmllint disable use-proper-function
             }
         }
     }

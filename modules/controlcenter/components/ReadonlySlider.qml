@@ -1,8 +1,11 @@
-import qs.components
-import qs.services
-import qs.config
+import ".."
+import "../components"
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.components.controls
+import qs.services
+import qs.config
 
 ColumnLayout {
     id: root

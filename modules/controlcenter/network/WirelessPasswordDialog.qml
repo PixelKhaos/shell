@@ -1,14 +1,17 @@
 pragma ComponentBehavior: Bound
 
 import ".."
+import "."
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
 import qs.components
+import qs.components.containers
 import qs.components.controls
+import qs.components.effects
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
@@ -71,7 +74,9 @@ Item {
     enabled: session.network.showPasswordDialog && !isClosing
     focus: enabled
 
-    Keys.onEscapePressed: closeDialog()
+    Keys.onEscapePressed: {
+        closeDialog();
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -84,7 +89,7 @@ Item {
 
         MouseArea {
             anchors.fill: parent
-            onClicked: root.closeDialog()
+            onClicked: closeDialog()
         }
     }
 
@@ -100,6 +105,7 @@ Item {
         color: Colours.tPalette.m3surface
         opacity: root.session.network.showPasswordDialog && !root.isClosing ? 1 : 0
         scale: root.session.network.showPasswordDialog && !root.isClosing ? 1 : 0.7
+        Keys.onEscapePressed: closeDialog()
 
         Behavior on opacity {
             Anim {}
@@ -129,8 +135,6 @@ Item {
                 to: 0.7
             }
         }
-
-        Keys.onEscapePressed: root.closeDialog()
 
         ColumnLayout {
             id: content
@@ -463,7 +467,7 @@ Item {
         triggeredOnStart: false
         onTriggered: {
             repeatCount++;
-            root.checkConnectionStatus();
+            checkConnectionStatus();
         }
 
         onRunningChanged: {
@@ -484,7 +488,7 @@ Item {
                     connectionMonitor.stop();
                     connectButton.connecting = false;
                     connectButton.text = qsTr("Connect");
-                    root.closeDialog();
+                    closeDialog();
                 }
             }
         }
@@ -493,7 +497,7 @@ Item {
     Connections {
         function onActiveChanged() {
             if (root.visible) {
-                root.checkConnectionStatus();
+                checkConnectionStatus();
             }
         }
         function onConnectionFailed(ssid: string) {

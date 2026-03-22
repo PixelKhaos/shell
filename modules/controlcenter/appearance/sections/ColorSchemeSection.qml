@@ -1,13 +1,15 @@
 pragma ComponentBehavior: Bound
 
+import ".."
 import "../../../launcher/services"
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
 import qs.components
+import qs.components.containers
 import qs.components.controls
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
 
 CollapsibleSection {
     title: qsTr("Color scheme")
@@ -22,8 +24,6 @@ CollapsibleSection {
             model: Schemes.list
 
             delegate: StyledRect {
-                id: schemeDelegate
-
                 required property var modelData
 
                 Layout.fillWidth: true
@@ -35,11 +35,12 @@ CollapsibleSection {
                 radius: Appearance.rounding.normal
                 border.width: isCurrent ? 1 : 0
                 border.color: Colours.palette.m3primary
+                implicitHeight: schemeRow.implicitHeight + Appearance.padding.normal * 2
 
                 StateLayer {
                     function onClicked(): void {
-                        const name = schemeDelegate.modelData.name;
-                        const flavour = schemeDelegate.modelData.flavour;
+                        const name = modelData.name;
+                        const flavour = modelData.flavour;
                         const schemeKey = `${name} ${flavour}`;
 
                         Schemes.currentScheme = schemeKey;
@@ -74,9 +75,9 @@ CollapsibleSection {
                         Layout.alignment: Qt.AlignVCenter
 
                         border.width: 1
-                        border.color: Qt.alpha(`#${schemeDelegate.modelData.colours?.outline}`, 0.5)
+                        border.color: Qt.alpha(`#${modelData.colours?.outline}`, 0.5)
 
-                        color: `#${schemeDelegate.modelData.colours?.surface}`
+                        color: `#${modelData.colours?.surface}`
                         radius: Appearance.rounding.full
                         implicitWidth: iconPlaceholder.implicitWidth
                         implicitHeight: iconPlaceholder.implicitWidth
@@ -103,7 +104,7 @@ CollapsibleSection {
                                 anchors.right: parent.right
 
                                 implicitWidth: preview.implicitWidth
-                                color: `#${schemeDelegate.modelData.colours?.primary}`
+                                color: `#${modelData.colours?.primary}`
                                 radius: Appearance.rounding.full
                             }
                         }
@@ -114,12 +115,12 @@ CollapsibleSection {
                         spacing: 0
 
                         StyledText {
-                            text: schemeDelegate.modelData.flavour ?? ""
+                            text: modelData.flavour ?? ""
                             font.pointSize: Appearance.font.size.normal
                         }
 
                         StyledText {
-                            text: schemeDelegate.modelData.name ?? ""
+                            text: modelData.name ?? ""
                             font.pointSize: Appearance.font.size.small
                             color: Colours.palette.m3outline
 
@@ -131,7 +132,7 @@ CollapsibleSection {
 
                     Loader {
                         asynchronous: true
-                        active: schemeDelegate.isCurrent
+                        active: isCurrent
 
                         sourceComponent: MaterialIcon {
                             text: "check"
@@ -140,8 +141,6 @@ CollapsibleSection {
                         }
                     }
                 }
-
-                implicitHeight: schemeRow.implicitHeight + Appearance.padding.normal * 2
             }
         }
     }

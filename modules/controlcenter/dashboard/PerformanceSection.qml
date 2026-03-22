@@ -1,10 +1,12 @@
+import ".."
 import "../components"
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Services.UPower
 import qs.components
-import qs.config
+import qs.components.controls
 import qs.services
+import qs.config
 
 SectionContainer {
     id: root

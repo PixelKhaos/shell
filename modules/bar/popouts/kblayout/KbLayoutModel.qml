@@ -1,24 +1,20 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-
 import Quickshell.Io
-
-import qs.config
 import Caelestia
+import qs.config
+
+// TODO: handle this better later
 
 Item {
     id: model
 
-    visible: false
-
-    ListModel {
-        id: _visibleModel
-    }
     property alias visibleModel: _visibleModel
-
     property string activeLabel: ""
     property int activeIndex: -1
+    property var _xkbMap: ({})
+    property bool _notifiedLimit: false
 
     function start() {
         _xkbXmlBase.running = true;
@@ -125,12 +121,15 @@ Item {
         return code.toUpperCase() + " - " + code;
     }
 
+    visible: false
+
+    ListModel {
+        id: _visibleModel
+    }
+
     ListModel {
         id: _layoutsModel
     }
-
-    property var _xkbMap: ({})
-    property bool _notifiedLimit: false
 
     Process {
         id: _xkbXmlBase
@@ -139,7 +138,7 @@ Item {
         stdout: StdioCollector {
             onStreamFinished: model._buildXmlMap(text)
         }
-        onRunningChanged: if (!running && (typeof _xkbXmlBase.exitCode !== "undefined") && _xkbXmlBase.exitCode !== 0)
+        onRunningChanged: if (!running && (typeof _xkbXmlBase.exitCode !== "undefined") && _xkbXmlBase.exitCode !== 0) // qmllint disable missing-property
             _xkbXmlEvdev.running = true
     }
 

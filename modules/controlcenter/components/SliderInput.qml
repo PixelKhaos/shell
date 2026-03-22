@@ -1,11 +1,12 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
-import qs.components.controls
-import qs.services
-import qs.config
 import QtQuick
 import QtQuick.Layouts
+import qs.components
+import qs.components.controls
+import qs.components.effects
+import qs.services
+import qs.config
 
 ColumnLayout {
     id: root
@@ -151,14 +152,6 @@ ColumnLayout {
         to: root.to
         stepSize: root.stepSize
 
-        // Use Binding to allow slider to move freely during dragging
-        Binding {
-            target: slider
-            property: "value"
-            value: root.value
-            when: !slider.pressed
-        }
-
         onValueChanged: {
             // Update input field text in real-time as slider moves during dragging
             // Always update when slider value changes (during dragging or external updates)
@@ -174,6 +167,14 @@ ColumnLayout {
             if (!inputField.hasFocus) {
                 inputField.text = root.formatValue(newValue);
             }
+        }
+
+        // Use Binding to allow slider to move freely during dragging
+        Binding {
+            target: slider
+            property: "value"
+            value: root.value
+            when: !slider.pressed
         }
     }
 }

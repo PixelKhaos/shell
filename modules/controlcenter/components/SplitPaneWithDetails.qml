@@ -1,6 +1,13 @@
 pragma ComponentBehavior: Bound
 
+import ".."
 import QtQuick
+import QtQuick.Layouts
+import Quickshell.Widgets
+import qs.components
+import qs.components.containers
+import qs.components.effects
+import qs.config
 
 Item {
     id: root
@@ -41,6 +48,11 @@ Item {
                     nextComponent = targetComponent;
                 }
 
+                onPaneChanged: {
+                    nextComponent = getComponentForPane();
+                    paneId = root.paneIdGenerator(pane);
+                }
+
                 Loader {
                     id: rightLoader
 
@@ -66,11 +78,6 @@ Item {
                             }
                         ]
                     }
-                }
-
-                onPaneChanged: {
-                    nextComponent = getComponentForPane();
-                    paneId = root.paneIdGenerator(pane);
                 }
             }
         }

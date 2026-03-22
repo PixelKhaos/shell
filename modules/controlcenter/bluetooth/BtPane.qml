@@ -3,9 +3,13 @@ pragma ComponentBehavior: Bound
 import ".."
 import "../components"
 import "."
-import qs.components.controls
-import qs.components.containers
 import QtQuick
+import Quickshell.Bluetooth
+import Quickshell.Widgets
+import qs.components
+import qs.components.containers
+import qs.components.controls
+import qs.config
 
 SplitPaneWithDetails {
     id: root

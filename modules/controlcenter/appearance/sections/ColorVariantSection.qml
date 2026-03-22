@@ -1,13 +1,15 @@
 pragma ComponentBehavior: Bound
 
+import ".."
 import "../../../launcher/services"
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
 import qs.components
+import qs.components.containers
 import qs.components.controls
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
 
 CollapsibleSection {
     title: qsTr("Color variant")
@@ -22,8 +24,6 @@ CollapsibleSection {
             model: M3Variants.list
 
             delegate: StyledRect {
-                id: variantDelegate
-
                 required property var modelData
 
                 Layout.fillWidth: true
@@ -32,10 +32,11 @@ CollapsibleSection {
                 radius: Appearance.rounding.normal
                 border.width: modelData.variant === Schemes.currentVariant ? 1 : 0
                 border.color: Colours.palette.m3primary
+                implicitHeight: variantRow.implicitHeight + Appearance.padding.normal * 2
 
                 StateLayer {
                     function onClicked(): void {
-                        const variant = variantDelegate.modelData.variant;
+                        const variant = modelData.variant;
 
                         Schemes.currentVariant = variant;
                         Quickshell.execDetached(["caelestia", "scheme", "set", "-v", variant]);
@@ -66,26 +67,24 @@ CollapsibleSection {
                     spacing: Appearance.spacing.normal
 
                     MaterialIcon {
-                        text: variantDelegate.modelData.icon
+                        text: modelData.icon
                         font.pointSize: Appearance.font.size.large
-                        fill: variantDelegate.modelData.variant === Schemes.currentVariant ? 1 : 0
+                        fill: modelData.variant === Schemes.currentVariant ? 1 : 0
                     }
 
                     StyledText {
                         Layout.fillWidth: true
-                        text: variantDelegate.modelData.name
-                        font.weight: variantDelegate.modelData.variant === Schemes.currentVariant ? 500 : 400
+                        text: modelData.name
+                        font.weight: modelData.variant === Schemes.currentVariant ? 500 : 400
                     }
 
                     MaterialIcon {
-                        visible: variantDelegate.modelData.variant === Schemes.currentVariant
+                        visible: modelData.variant === Schemes.currentVariant
                         text: "check"
                         color: Colours.palette.m3primary
                         font.pointSize: Appearance.font.size.large
                     }
                 }
-
-                implicitHeight: variantRow.implicitHeight + Appearance.padding.normal * 2
             }
         }
     }

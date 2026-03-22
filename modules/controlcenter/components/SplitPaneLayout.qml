@@ -1,10 +1,11 @@
 pragma ComponentBehavior: Bound
 
-import qs.components.effects
-import qs.config
-import Quickshell.Widgets
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Widgets
+import qs.components
+import qs.components.effects
+import qs.config
 
 RowLayout {
     id: root
