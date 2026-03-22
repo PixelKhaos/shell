@@ -44,6 +44,29 @@ Item {
         return "";
     }
 
+    readonly property real rounding: Config.border.rounding
+
+    property real lastValidHeight: 0
+
+    readonly property real targetHeight: {
+        if (!shouldShow || !hasImage) {
+            return 0;
+        }
+
+        if (previewImage.status === Image.Ready && previewImage.sourceSize.height > 0) {
+            const aspectRatio = previewImage.sourceSize.width / previewImage.sourceSize.height;
+            const maxHeight = 600;
+            const minHeight = 200;
+            const availableWidth = width - (Appearance.padding.normal * 2);
+            const calculatedHeight = (availableWidth / aspectRatio) + (Appearance.padding.normal * 2);
+            const newHeight = Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
+            lastValidHeight = newHeight;
+            return newHeight;
+        }
+
+        return lastValidHeight;
+    }
+
     function decodeImageToDataUrl(): void {
         if (!currentItem?.modelData?.isImage)
             return;
@@ -57,6 +80,16 @@ Item {
         decodeHtmlProcess.command = ["cliphist", "decode", currentItem.modelData.id];
         decodeHtmlProcess.running = true;
     }
+
+    width: 400
+
+    height: targetHeight
+
+    enabled: shouldShow && hasImage
+
+    visible: height > (rounding * 2)
+
+    clip: false
 
     onCurrentItemChanged: {
         const wasImage = imageDataUrl !== "" || extractedImageUrl !== "";
@@ -127,39 +160,6 @@ Item {
         }
     }
 
-    readonly property real rounding: Config.border.rounding
-
-    property real lastValidHeight: 0
-
-    readonly property real targetHeight: {
-        if (!shouldShow || !hasImage) {
-            return 0;
-        }
-
-        if (previewImage.status === Image.Ready && previewImage.sourceSize.height > 0) {
-            const aspectRatio = previewImage.sourceSize.width / previewImage.sourceSize.height;
-            const maxHeight = 600;
-            const minHeight = 200;
-            const availableWidth = width - (Appearance.padding.normal * 2);
-            const calculatedHeight = (availableWidth / aspectRatio) + (Appearance.padding.normal * 2);
-            const newHeight = Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
-            lastValidHeight = newHeight;
-            return newHeight;
-        }
-
-        return lastValidHeight;
-    }
-
-    width: 400
-
-    height: targetHeight
-
-    enabled: shouldShow && hasImage
-
-    visible: height > (rounding * 2)
-
-    clip: false
-
     Behavior on height {
         enabled: targetHeight === 0 || height === 0 || Math.abs(targetHeight - height) > 5
 
@@ -182,6 +182,11 @@ Item {
 
             property string pendingSource: ""
 
+            onPendingSourceChanged: {
+                if (pendingSource !== "")
+                    fadeOutIn.restart();
+            }
+
             Image {
                 id: previewImage
 
@@ -203,11 +208,6 @@ Item {
                         easing.type: Easing.InOutQuad
                     }
                 }
-            }
-
-            onPendingSourceChanged: {
-                if (pendingSource !== "")
-                    fadeOutIn.restart();
             }
 
             Connections {

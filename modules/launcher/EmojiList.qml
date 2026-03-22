@@ -25,16 +25,6 @@ Item {
     readonly property alias count: grid.count
     property int currentIndex: 0
 
-    implicitWidth: Config.launcher.sizes.itemWidth
-    implicitHeight: 100
-
-    Binding {
-        target: root
-        property: "implicitHeight"
-        value: categoryBar.height + grid.height + Appearance.padding.large
-        when: categoryBar.height > 0 && grid.height > 0
-    }
-
     function incrementCurrentIndex(): void {
         const newIndex = currentIndex + columns;
         if (newIndex < grid.count) {
@@ -65,10 +55,39 @@ Item {
         }
     }
 
+    function updateGrid(): void {
+        const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "emoji\\s*", "i");
+        const query = root.search.text.replace(pattern, "").trim();
+        let emojis = Emojis.emojis;
+        if (root.activeCategory !== "all") {
+            emojis = emojis.filter(emoji => emoji.category === root.activeCategory);
+        }
+        if (query) {
+            const lowerQuery = query.toLowerCase();
+            emojis = emojis.filter(emoji => emoji.name.toLowerCase().includes(lowerQuery) || emoji.keywords.some(kw => kw.toLowerCase().includes(lowerQuery)));
+        }
+        grid.model = emojis;
+        currentIndex = 0;
+    }
+
+    implicitWidth: Config.launcher.sizes.itemWidth
+    implicitHeight: 100
+
     onCurrentIndexChanged: {
         if (grid.currentIndex !== currentIndex) {
             grid.currentIndex = currentIndex;
         }
+    }
+
+    Component.onCompleted: {
+        updateGrid();
+    }
+
+    Binding {
+        target: root
+        property: "implicitHeight"
+        value: categoryBar.height + grid.height + Appearance.padding.large
+        when: categoryBar.height > 0 && grid.height > 0
     }
 
     RowLayout {
@@ -131,16 +150,6 @@ Item {
 
         delegate: emojiItem
 
-        Component {
-            id: emojiItem
-
-            EmojiItem {
-                width: grid.cellWidth - Appearance.spacing.small
-                height: grid.cellHeight - Appearance.spacing.small
-                visibilities: root.visibilities
-            }
-        }
-
         Keys.onLeftPressed: {
             if (currentIndex % root.columns === 0) {
                 event.accepted = false;
@@ -172,6 +181,16 @@ Item {
                 currentIndex += root.columns;
             }
         }
+
+        Component {
+            id: emojiItem
+
+            EmojiItem {
+                width: grid.cellWidth - Appearance.spacing.small
+                height: grid.cellHeight - Appearance.spacing.small
+                visibilities: root.visibilities
+            }
+        }
     }
 
     Connections {
@@ -188,26 +207,5 @@ Item {
         }
 
         target: root.search
-    }
-
-    function updateGrid(): void {
-        const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "emoji\\s*", "i");
-        const query = root.search.text.replace(pattern, "").trim();
-
-        let items;
-
-        if (query) {
-            // Search mode - ignore category
-            items = Emojis.search(query);
-        } else {
-            // Category mode
-            items = Emojis.filterByCategory(root.activeCategory);
-        }
-
-        model.values = items;
-    }
-
-    Component.onCompleted: {
-        updateGrid();
     }
 }

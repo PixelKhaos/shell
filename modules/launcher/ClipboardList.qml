@@ -24,28 +24,38 @@ StyledListView {
 
     property bool isCategoryChange: false
     property int deletedItemIndex: -1
+    property string previousCategory: "all"
+    property var pendingModelUpdate: null
 
-    HoverHandler {
-        id: listHoverHandler
+    function filterAndSortItems(): var {
+        const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "clipboard\\s*", "i");
+        const query = root.search.text.replace(pattern, "").trim();
+        let items = Clipboard.history;
 
-        onHoveredChanged: {
-            if (!hovered) {
-                root.hoveredItem = null;
-            }
+        if (root.activeCategory === "images") {
+            items = items.filter(item => item.isImage);
+        } else if (root.activeCategory === "misc") {
+            items = items.filter(item => !item.isImage);
         }
+
+        if (query) {
+            const lowerQuery = query.toLowerCase();
+            items = items.filter(item => item.content.toLowerCase().includes(lowerQuery));
+        }
+
+        items.sort((a, b) => {
+            if (a.isPinned && !b.isPinned)
+                return -1;
+            if (!a.isPinned && b.isPinned)
+                return 1;
+            return a.index - b.index;
+        });
+
+        return items;
     }
 
-    model: ScriptModel {
-        id: model
-
-        onValuesChanged: {
-            if (root.deletedItemIndex >= 0) {
-                if (root.deletedItemIndex <= root.currentIndex) {
-                    root.currentIndex = Math.max(0, root.currentIndex - 1);
-                }
-                root.deletedItemIndex = -1;
-            }
-        }
+    function updateModel(): void {
+        model.values = root.filterAndSortItems();
     }
 
     spacing: Appearance.spacing.small
@@ -60,6 +70,12 @@ StyledListView {
         return baseHeight + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
     }
 
+    preferredHighlightBegin: 0
+
+    preferredHighlightEnd: height
+
+    highlightRangeMode: ListView.ApplyRange
+
     onCurrentIndexChanged: {
         if (root.lastInteraction !== "hover") {
             root.lastInteraction = "keyboard";
@@ -71,13 +87,27 @@ StyledListView {
         root.hoveredItem = null;
     }
 
-    preferredHighlightBegin: 0
-
-    preferredHighlightEnd: height
-
-    highlightRangeMode: ListView.ApplyRange
+    Component.onCompleted: {
+        Clipboard.refresh();
+        updateModel();
+    }
 
     highlightFollowsCurrentItem: false
+
+    delegate: clipboardItem
+
+    model: ScriptModel {
+        id: model
+
+        onValuesChanged: {
+            if (root.deletedItemIndex >= 0) {
+                if (root.deletedItemIndex <= root.currentIndex) {
+                    root.currentIndex = Math.max(0, root.currentIndex - 1);
+                }
+                root.deletedItemIndex = -1;
+            }
+        }
+    }
 
     highlight: StyledRect {
         radius: Appearance.rounding.normal
@@ -96,7 +126,15 @@ StyledListView {
         }
     }
 
-    delegate: clipboardItem
+    HoverHandler {
+        id: listHoverHandler
+
+        onHoveredChanged: {
+            if (!hovered) {
+                root.hoveredItem = null;
+            }
+        }
+    }
 
     Component {
         id: clipboardItem
@@ -105,10 +143,6 @@ StyledListView {
             visibilities: root.visibilities
         }
     }
-
-    property string previousCategory: "all"
-
-    property var pendingModelUpdate: null
 
     Connections {
         function onHistoryChanged(): void {
@@ -195,42 +229,6 @@ StyledListView {
                 easing.bezierCurve: Appearance.anim.curves.emphasizedDecel
             }
         }
-    }
-
-    function filterAndSortItems(): var {
-        const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "clipboard\\s*", "i");
-        const query = root.search.text.replace(pattern, "").trim();
-        let items = Clipboard.history;
-
-        if (root.activeCategory === "images") {
-            items = items.filter(item => item.isImage);
-        } else if (root.activeCategory === "misc") {
-            items = items.filter(item => !item.isImage);
-        }
-
-        if (query) {
-            const lowerQuery = query.toLowerCase();
-            items = items.filter(item => item.content.toLowerCase().includes(lowerQuery));
-        }
-
-        items.sort((a, b) => {
-            if (a.isPinned && !b.isPinned)
-                return -1;
-            if (!a.isPinned && b.isPinned)
-                return 1;
-            return a.index - b.index;
-        });
-
-        return items;
-    }
-
-    function updateModel(): void {
-        model.values = root.filterAndSortItems();
-    }
-
-    Component.onCompleted: {
-        Clipboard.refresh();
-        updateModel();
     }
 
     // Confirmation dialog overlay

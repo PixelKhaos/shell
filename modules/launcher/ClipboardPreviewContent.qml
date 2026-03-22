@@ -44,6 +44,24 @@ Item {
         return "";
     }
 
+    readonly property real rounding: Config.border.rounding
+
+    readonly property real targetHeight: {
+        if (!shouldShow || !hasImage)
+            return 0;
+
+        if (previewImage.status === Image.Ready && previewImage.sourceSize.height > 0) {
+            const aspectRatio = previewImage.sourceSize.width / previewImage.sourceSize.height;
+            const maxHeight = 600;
+            const minHeight = 200;
+            const availableWidth = width - (Appearance.padding.normal * 2);
+            const calculatedHeight = (availableWidth / aspectRatio) + (Appearance.padding.normal * 2);
+            return Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
+        }
+
+        return 400;
+    }
+
     function decodeImageToDataUrl(): void {
         if (!currentItem?.modelData || currentItem.modelData.isImage !== true)
             return;
@@ -61,6 +79,16 @@ Item {
         decodeHtmlProcess.command = ["cliphist", "decode", data.id];
         decodeHtmlProcess.running = true;
     }
+
+    width: 400
+
+    height: targetHeight
+
+    enabled: shouldShow && hasImage
+
+    visible: height > 0
+
+    clip: false
 
     onCurrentItemChanged: {
         imageDataUrl = "";
@@ -129,34 +157,6 @@ Item {
             }
         }
     }
-
-    readonly property real rounding: Config.border.rounding
-
-    readonly property real targetHeight: {
-        if (!shouldShow || !hasImage)
-            return 0;
-
-        if (previewImage.status === Image.Ready && previewImage.sourceSize.height > 0) {
-            const aspectRatio = previewImage.sourceSize.width / previewImage.sourceSize.height;
-            const maxHeight = 600;
-            const minHeight = 200;
-            const availableWidth = width - (Appearance.padding.normal * 2);
-            const calculatedHeight = (availableWidth / aspectRatio) + (Appearance.padding.normal * 2);
-            return Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
-        }
-
-        return 400;
-    }
-
-    width: 400
-
-    height: targetHeight
-
-    enabled: shouldShow && hasImage
-
-    visible: height > 0
-
-    clip: false
 
     Behavior on height {
         SequentialAnimation {

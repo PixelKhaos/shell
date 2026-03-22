@@ -108,6 +108,32 @@ Singleton {
         Toaster.toast("Clipboard cleared", `${count} ${categoryName.toLowerCase()} item${count !== 1 ? 's' : ''} deleted (pinned items preserved)`, "delete_sweep");
     }
 
+    function parseClipboardItem(line, index): var {
+        const parts = line.split('\t');
+        const id = parts[0] || "";
+        const content = parts.slice(1).join('\t') || line;
+        const isImage = content.includes("[[ binary data");
+        const hasHtmlImage = !isImage && content.includes("<img");
+        const isDirectImageUrl = !isImage && !hasHtmlImage && content.match(/^https?:\/\/.*\.(png|jpg|jpeg|gif|webp|bmp)/i);
+
+        return {
+            id: id,
+            content: content,
+            preview: content.substring(0, 100),
+            isPinned: root.pinnedItems.includes(id),
+            isImage: isImage,
+            imageUrl: isDirectImageUrl ? content.trim() : "",
+            hasImageUrl: hasHtmlImage || isDirectImageUrl,
+            needsDecodeForUrl: hasHtmlImage,
+            index: index
+        };
+    }
+
+    Component.onCompleted: {
+        loadPinnedItems();
+        refresh();
+    }
+
     Process {
         id: cliphistProcess
 
@@ -144,31 +170,5 @@ Singleton {
 
         stdout: StdioCollector {}
         onExited: root.refresh()
-    }
-
-    function parseClipboardItem(line, index): var {
-        const parts = line.split('\t');
-        const id = parts[0] || "";
-        const content = parts.slice(1).join('\t') || line;
-        const isImage = content.includes("[[ binary data");
-        const hasHtmlImage = !isImage && content.includes("<img");
-        const isDirectImageUrl = !isImage && !hasHtmlImage && content.match(/^https?:\/\/.*\.(png|jpg|jpeg|gif|webp|bmp)/i);
-
-        return {
-            id: id,
-            content: content,
-            preview: content.substring(0, 100),
-            isPinned: root.pinnedItems.includes(id),
-            isImage: isImage,
-            imageUrl: isDirectImageUrl ? content.trim() : "",
-            hasImageUrl: hasHtmlImage || isDirectImageUrl,
-            needsDecodeForUrl: hasHtmlImage,
-            index: index
-        };
-    }
-
-    Component.onCompleted: {
-        loadPinnedItems();
-        refresh();
     }
 }

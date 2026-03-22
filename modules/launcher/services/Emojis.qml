@@ -76,22 +76,6 @@ Singleton {
         Config.save();
     }
 
-    FileView {
-        id: emojiFile
-
-        path: `${Quickshell.shellDir}/assets/emoji.json`
-
-        onLoaded: {
-            try {
-                root.emojis = JSON.parse(text());
-                loadFrequentEmojis();
-                root.emojisLoaded();
-            } catch (e) {
-                console.error("Failed to parse emoji.json:", e);
-            }
-        }
-    }
-
     function filterByCategory(category: string): var {
         if (category === "all") {
             return root.emojis;
@@ -135,5 +119,21 @@ Singleton {
         saveFrequentEmojis();
 
         Toaster.toast("Copied to clipboard", `${emoji.emoji} ${emoji.name}`, "sentiment_satisfied");
+    }
+
+    FileView {
+        id: emojiFile
+
+        path: `${Quickshell.shellDir}/assets/emoji.json`
+
+        onLoaded: {
+            try {
+                root.emojis = JSON.parse(text());
+                loadFrequentEmojis();
+                root.emojisLoaded();
+            } catch (e) {
+                console.error("Failed to parse emoji.json:", e);
+            }
+        }
     }
 }
