@@ -123,14 +123,14 @@ Singleton {
     Process {
         id: checkPreferredBackend
 
-        property int targetBackend: backendWlGammarelay
+        property int targetBackend: root.backendWlGammarelay
 
-        onExited: (exitCode, exitStatus) => {
+        onExited: (exitCode, exitStatus) => { // qmllint disable signal-handler-parameters
             if (exitCode === 0) {
-                backend = targetBackend;
-                backendDetected = true;
-                if (active)
-                    activeChanged();
+                root.backend = targetBackend;
+                root.backendDetected = true;
+                if (root.active)
+                    root.activeChanged();
             } else {
                 console.warn("Preferred backend not found, falling back to auto-detection");
                 checkWlGammarelay.running = true;
@@ -143,12 +143,12 @@ Singleton {
 
         command: ["sh", "-c", "busctl --user status rs.wl-gammarelay >/dev/null 2>&1 || which wl-gammarelay-rs >/dev/null 2>&1"]
 
-        onExited: (exitCode, exitStatus) => {
+        onExited: (exitCode, exitStatus) => { // qmllint disable signal-handler-parameters
             if (exitCode === 0) {
-                backend = backendWlGammarelay;
-                backendDetected = true;
-                if (active)
-                    activeChanged();
+                root.backend = root.backendWlGammarelay;
+                root.backendDetected = true;
+                if (root.active)
+                    root.activeChanged();
             } else {
                 checkGammastep.running = true;
             }
@@ -160,12 +160,12 @@ Singleton {
 
         command: ["sh", "-c", "which gammastep >/dev/null 2>&1"]
 
-        onExited: (exitCode, exitStatus) => {
+        onExited: (exitCode, exitStatus) => { // qmllint disable signal-handler-parameters
             if (exitCode === 0) {
-                backend = backendGammastep;
-                backendDetected = true;
-                if (active)
-                    activeChanged();
+                root.backend = root.backendGammastep;
+                root.backendDetected = true;
+                if (root.active)
+                    root.activeChanged();
             } else {
                 checkWlsunset.running = true;
             }
@@ -177,12 +177,12 @@ Singleton {
 
         command: ["sh", "-c", "which wlsunset >/dev/null 2>&1"]
 
-        onExited: (exitCode, exitStatus) => {
+        onExited: (exitCode, exitStatus) => { // qmllint disable signal-handler-parameters
             if (exitCode === 0) {
-                backend = backendWlsunset;
-                backendDetected = true;
-                if (active)
-                    activeChanged();
+                root.backend = root.backendWlsunset;
+                root.backendDetected = true;
+                if (root.active)
+                    root.activeChanged();
             } else {
                 checkHyprsunset.running = true;
             }
@@ -194,11 +194,11 @@ Singleton {
 
         command: ["sh", "-c", "which hyprsunset >/dev/null 2>&1"]
 
-        onExited: (exitCode, exitStatus) => {
-            backend = backendHyprsunset;
-            backendDetected = true;
-            if (active)
-                activeChanged();
+        onExited: (exitCode, exitStatus) => { // qmllint disable signal-handler-parameters
+            root.backend = root.backendHyprsunset;
+            root.backendDetected = true;
+            if (root.active)
+                root.activeChanged();
         }
     }
 
@@ -213,13 +213,13 @@ Singleton {
 
         interval: 300
 
-        onTriggered: updateWlGammarelay()
+        onTriggered: root.updateWlGammarelay()
     }
 
     Process {
         id: sunsetProcess
 
-        command: ["hyprsunset", "-t", temperature.toString()]
+        command: ["hyprsunset", "-t", root.temperature.toString()]
     }
 
     Process {
@@ -227,7 +227,7 @@ Singleton {
 
         command: ["pkill", "hyprsunset"]
 
-        onExited: running = false
+        onExited: running = false // qmllint disable signal-handler-parameters
     }
 
     Timer {
@@ -235,13 +235,13 @@ Singleton {
 
         interval: 300
 
-        onTriggered: restartProcess(sunsetProcess)
+        onTriggered: root.restartProcess(sunsetProcess)
     }
 
     Process {
         id: wlsunsetProcess
 
-        command: ["wlsunset", "-T", "6500", "-t", temperature.toString(), "-S", "23:59", "-s", "00:00"]
+        command: ["wlsunset", "-T", "6500", "-t", root.temperature.toString(), "-S", "23:59", "-s", "00:00"]
     }
 
     Process {
@@ -249,7 +249,7 @@ Singleton {
 
         command: ["pkill", "wlsunset"]
 
-        onExited: running = false
+        onExited: running = false // qmllint disable signal-handler-parameters
     }
 
     Timer {
@@ -257,13 +257,13 @@ Singleton {
 
         interval: 300
 
-        onTriggered: restartProcess(wlsunsetProcess)
+        onTriggered: root.restartProcess(wlsunsetProcess)
     }
 
     Process {
         id: gammastepProcess
 
-        command: ["gammastep", "-O", temperature.toString(), "-r"]
+        command: ["gammastep", "-O", root.temperature.toString(), "-r"]
     }
 
     Process {
@@ -271,7 +271,7 @@ Singleton {
 
         command: ["pkill", "gammastep"]
 
-        onExited: running = false
+        onExited: running = false // qmllint disable signal-handler-parameters
     }
 
     Timer {
@@ -279,6 +279,6 @@ Singleton {
 
         interval: 300
 
-        onTriggered: restartProcess(gammastepProcess)
+        onTriggered: root.restartProcess(gammastepProcess)
     }
 }
