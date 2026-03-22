@@ -75,9 +75,7 @@ StyledRect {
                     Layout.preferredWidth: 60
                     radius: Appearance.rounding.small
                     visible: LyricsService.preferredBackend === "Auto"
-                    color: LyricsService.backend === "Local" 
-                        ? Qt.rgba(Colours.palette.m3tertiary.r, Colours.palette.m3tertiary.g, Colours.palette.m3tertiary.b, 0.15)
-                        : Qt.rgba(Colours.palette.m3secondary.r, Colours.palette.m3secondary.g, Colours.palette.m3secondary.b, 0.15)
+                    color: LyricsService.backend === "Local" ? Qt.rgba(Colours.palette.m3tertiary.r, Colours.palette.m3tertiary.g, Colours.palette.m3tertiary.b, 0.15) : Qt.rgba(Colours.palette.m3secondary.r, Colours.palette.m3secondary.g, Colours.palette.m3secondary.b, 0.15)
 
                     StyledText {
                         anchors.centerIn: parent
@@ -158,9 +156,9 @@ StyledRect {
             Loader {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                
+
                 active: LyricsService.preferredBackend !== "Local"
-                
+
                 sourceComponent: ListView {
                     id: candidatesView
 
@@ -186,80 +184,60 @@ StyledRect {
                         anchors.horizontalCenter: parent?.horizontalCenter
                         scale: hovered ? 1.02 : 1.0
 
-                    Behavior on scale {
-                        NumberAnimation {
-                            duration: Appearance.anim.durations.small
-                            easing.type: Easing.OutCubic
-                        }
-                    }
-
-                    Rectangle {
-                        id: background
-
-                        anchors.fill: parent
-                        radius: Appearance.rounding.small
-
-                        color: delegateRoot.pressed ? Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.25) : delegateRoot.hovered ? Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.06) : Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.03)
-
-                        border.width: delegateRoot.hovered ? 1 : 0
-                        border.color: Colours.palette.m3primary
-
-                        Behavior on color {
-                            ColorAnimation {
-                                duration: Appearance.anim.durations.small
-                            }
-                        }
-                        Behavior on border.width {
+                        Behavior on scale {
                             NumberAnimation {
                                 duration: Appearance.anim.durations.small
+                                easing.type: Easing.OutCubic
                             }
                         }
-                    }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        cursorShape: Qt.PointingHandCursor
-
-                        onEntered: delegateRoot.hovered = true
-                        onExited: delegateRoot.hovered = false
-                        onPressed: delegateRoot.pressed = true
-                        onReleased: delegateRoot.pressed = false
-                        onClicked: LyricsService.selectCandidate(delegateRoot.id)
-                    }
-
-                    Row {
-                        anchors.fill: parent
-                        anchors.margins: Appearance.padding.normal
-                        spacing: Appearance.spacing.small
-
-                        // Active indicator bar
                         Rectangle {
-                            width: 4
-                            height: parent.height * 0.6
-                            radius: 2
-                            anchors.verticalCenter: parent.verticalCenter
-                            color: LyricsService.currentSongId === delegateRoot.id ? Colours.palette.m3primary : "transparent"
+                            id: background
+
+                            anchors.fill: parent
+                            radius: Appearance.rounding.small
+
+                            color: delegateRoot.pressed ? Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.25) : delegateRoot.hovered ? Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.06) : Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.03)
+
+                            border.width: delegateRoot.hovered ? 1 : 0
+                            border.color: Colours.palette.m3primary
 
                             Behavior on color {
                                 ColorAnimation {
                                     duration: Appearance.anim.durations.small
                                 }
                             }
+                            Behavior on border.width {
+                                NumberAnimation {
+                                    duration: Appearance.anim.durations.small
+                                }
+                            }
                         }
 
-                        Column {
-                            anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - 30
-                            spacing: 4
+                        MouseArea {
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
 
-                            Text {
-                                text: delegateRoot.title
-                                font.pointSize: Appearance.font.size.normal
-                                font.bold: true
-                                color: delegateRoot.hovered ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                                width: parent.width
-                                elide: Text.ElideRight
+                            onEntered: delegateRoot.hovered = true
+                            onExited: delegateRoot.hovered = false
+                            onPressed: delegateRoot.pressed = true
+                            onReleased: delegateRoot.pressed = false
+                            onClicked: LyricsService.selectCandidate(delegateRoot.id)
+                        }
+
+                        Row {
+                            anchors.fill: parent
+                            anchors.margins: Appearance.padding.normal
+                            spacing: Appearance.spacing.small
+
+                            // Active indicator bar
+                            Rectangle {
+                                width: 4
+                                height: parent.height * 0.6
+                                radius: 2
+                                anchors.verticalCenter: parent.verticalCenter
+                                color: LyricsService.currentSongId === delegateRoot.id ? Colours.palette.m3primary : "transparent"
 
                                 Behavior on color {
                                     ColorAnimation {
@@ -268,15 +246,35 @@ StyledRect {
                                 }
                             }
 
-                            Text {
-                                text: delegateRoot.artist
-                                font.pointSize: Appearance.font.size.small
-                                color: Colours.palette.m3onSurfaceVariant
-                                elide: Text.ElideRight
+                            Column {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width - 30
+                                spacing: 4
+
+                                Text {
+                                    text: delegateRoot.title
+                                    font.pointSize: Appearance.font.size.normal
+                                    font.bold: true
+                                    color: delegateRoot.hovered ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                                    width: parent.width
+                                    elide: Text.ElideRight
+
+                                    Behavior on color {
+                                        ColorAnimation {
+                                            duration: Appearance.anim.durations.small
+                                        }
+                                    }
+                                }
+
+                                Text {
+                                    text: delegateRoot.artist
+                                    font.pointSize: Appearance.font.size.small
+                                    color: Colours.palette.m3onSurfaceVariant
+                                    elide: Text.ElideRight
+                                }
                             }
                         }
                     }
-                }
                 }
             }
 
