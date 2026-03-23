@@ -1,14 +1,14 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell.Io
+import Caelestia
 import "services"
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
-import Quickshell.Io
-import Caelestia
-import QtQuick
-import QtQuick.Layouts
 
 Item {
     id: root
@@ -29,6 +29,8 @@ Item {
     property bool loadingImage: false
     property bool decodingHtml: false
 
+    property string extractedImageUrl: ""
+
     readonly property string imageSource: {
         if (!currentItem?.modelData)
             return "";
@@ -42,28 +44,22 @@ Item {
         return "";
     }
 
-    property string extractedImageUrl: ""
+    readonly property real rounding: Config.border.rounding
 
-    onCurrentItemChanged: {
-        imageDataUrl = "";
-        loadingImage = false;
-        extractedImageUrl = "";
-        imageLoadError = false;
-        decodingHtml = false;
+    readonly property real targetHeight: {
+        if (!shouldShow || !hasImage)
+            return 0;
 
-        if (currentItem && currentItem.modelData) {
-            const data = currentItem.modelData;
-            if (data.isImage === true) {
-                loadingImage = true;
-                decodeImageToDataUrl();
-            } else if (data.needsDecodeForUrl === true) {
-                // Need to decode full HTML to extract image URL
-                decodingHtml = true;
-                decodeHtmlForImageUrl();
-            } else if (data.imageUrl) {
-                extractedImageUrl = data.imageUrl;
-            }
+        if (previewImage.status === Image.Ready && previewImage.sourceSize.height > 0) {
+            const aspectRatio = previewImage.sourceSize.width / previewImage.sourceSize.height;
+            const maxHeight = 600;
+            const minHeight = 200;
+            const availableWidth = width - (Appearance.padding.normal * 2);
+            const calculatedHeight = (availableWidth / aspectRatio) + (Appearance.padding.normal * 2);
+            return Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
         }
+
+        return 400;
     }
 
     function decodeImageToDataUrl(): void {
@@ -84,13 +80,44 @@ Item {
         decodeHtmlProcess.running = true;
     }
 
+    width: 400
+
+    height: targetHeight
+
+    enabled: shouldShow && hasImage
+
+    visible: height > 0
+
+    clip: false
+
+    onCurrentItemChanged: {
+        imageDataUrl = "";
+        loadingImage = false;
+        extractedImageUrl = "";
+        imageLoadError = false;
+        decodingHtml = false;
+
+        if (currentItem && currentItem.modelData) {
+            const data = currentItem.modelData;
+            if (data.isImage === true) {
+                loadingImage = true;
+                decodeImageToDataUrl();
+            } else if (data.needsDecodeForUrl === true) {
+                decodingHtml = true;
+                decodeHtmlForImageUrl();
+            } else if (data.imageUrl) {
+                extractedImageUrl = data.imageUrl;
+            }
+        }
+    }
+
     Process {
         id: decodeProcess
-        stdout: StdioCollector {}
 
-        onExited: {
+        stdout: StdioCollector {}
+        onExited: { // qmllint disable signal-handler-parameters
             if (root.currentItem?.modelData?.isImage === true) {
-                const b64 = String(stdout.text).trim();
+                const b64 = String(stdout.text).trim(); // qmllint disable missing-property
                 if (b64)
                     root.imageDataUrl = "data:image/png;base64," + b64;
                 root.loadingImage = false;
@@ -100,13 +127,13 @@ Item {
 
     Process {
         id: copyGrabbedImageProcess
-        stdout: StdioCollector {}
 
-        onExited: (exitCode, exitStatus) => {
+        stdout: StdioCollector {}
+        onExited: (exitCode, exitStatus) => { // qmllint disable signal-handler-parameters
             if (exitCode === 0) {
                 Toaster.toast("Image copied", "Copied image to clipboard", "image");
                 // Refresh clipboard list
-                Clipboard.refresh();
+                Clipboard.refresh(); // qmllint disable missing-property
             } else {
                 Toaster.toast("Copy failed", "Failed to copy image", "error");
             }
@@ -115,41 +142,18 @@ Item {
 
     Process {
         id: decodeHtmlProcess
-        stdout: StdioCollector {}
 
-        onExited: {
+        stdout: StdioCollector {}
+        onExited: { // qmllint disable signal-handler-parameters
             root.decodingHtml = false;
             if (root.currentItem?.modelData?.needsDecodeForUrl === true) {
-                const fullHtml = String(stdout.text);
+                const fullHtml = String(stdout.text); // qmllint disable missing-property
                 const srcMatch = fullHtml.match(/<img[^>]+src\s*=\s*["']([^"']+)["']/i);
                 if (srcMatch?.[1])
                     root.extractedImageUrl = srcMatch[1];
             }
         }
     }
-
-    readonly property real rounding: Config.border.rounding
-    readonly property real targetHeight: {
-        if (!shouldShow || !hasImage)
-            return 0;
-
-        if (previewImage.status === Image.Ready && previewImage.sourceSize.height > 0) {
-            const aspectRatio = previewImage.sourceSize.width / previewImage.sourceSize.height;
-            const maxHeight = 600;
-            const minHeight = 200;
-            const availableWidth = width - (Appearance.padding.normal * 2);
-            const calculatedHeight = (availableWidth / aspectRatio) + (Appearance.padding.normal * 2);
-            return Math.max(minHeight, Math.min(maxHeight, calculatedHeight));
-        }
-
-        return 400;
-    }
-
-    width: 400
-    height: targetHeight
-    enabled: shouldShow && hasImage
-    visible: height > 0
-    clip: false
 
     Behavior on height {
         SequentialAnimation {
@@ -176,6 +180,7 @@ Item {
 
             Image {
                 id: previewImage
+
                 anchors.fill: parent
                 source: root.imageSource
                 fillMode: Image.PreserveAspectFit

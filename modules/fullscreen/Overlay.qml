@@ -67,9 +67,14 @@ Variants {
             anchors.margins: Config.border.thickness
             anchors.leftMargin: (Visibilities.bars.get(win.monitor)?.implicitWidth ?? Config.border.thickness)
 
+            Item {
+                id: sidebarPanelProxy
+                implicitWidth: (win.panels ?? win.fallbackPanels).sidebar?.width ?? 0
+            }
+
             Notifications.Wrapper {
-                visibilities: win.visibilities ?? win.fallbackVisibilities
-                panels: win.panels ?? win.fallbackPanels
+                visibilities: (win.visibilities ?? win.fallbackVisibilities) as DrawerVisibilities
+                sidebarPanel: sidebarPanelProxy
                 fullscreenOnly: true
                 hasFullscreen: win.hasFullscreen
 

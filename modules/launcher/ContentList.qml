@@ -1,18 +1,17 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
 import qs.utils
-import Quickshell
-import QtQuick
 
 Item {
     id: root
 
     required property var content
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     required property var panels
     required property real maxHeight
     required property StyledTextField search
@@ -23,10 +22,13 @@ Item {
     readonly property bool showWallpapers: search.text.startsWith(`${Config.launcher.actionPrefix}wallpaper `)
     readonly property bool showClipboard: search.text.startsWith(`${Config.launcher.actionPrefix}clipboard `)
     readonly property bool showEmoji: search.text.startsWith(`${Config.launcher.actionPrefix}emoji `)
-    readonly property Item currentList: {
-        if (showWallpapers) return wallpaperList.item;
-        if (showClipboard) return clipboardList.item;
-        if (showEmoji) return emojiList.item;
+    readonly property var currentList: {
+        if (showWallpapers)
+            return wallpaperList.item;
+        if (showClipboard)
+            return clipboardList.item;
+        if (showEmoji)
+            return emojiList.item;
         return appList.item;
     }
 
@@ -36,9 +38,12 @@ Item {
 
     clip: true
     state: {
-        if (showWallpapers) return "wallpapers";
-        if (showClipboard) return "clipboard";
-        if (showEmoji) return "emoji";
+        if (showWallpapers)
+            return "wallpapers";
+        if (showClipboard)
+            return "clipboard";
+        if (showEmoji)
+            return "emoji";
         return "apps";
     }
 
@@ -84,7 +89,7 @@ Item {
             name: "emoji"
 
             PropertyChanges {
-                root.implicitWidth: Math.max(Config.launcher.sizes.itemWidth * 1.2, emojiList.implicitWidth)
+                root.implicitWidth: Config.launcher.sizes.itemWidth
                 root.implicitHeight: Math.min(root.maxHeight, emojiList.implicitHeight > 0 ? emojiList.implicitHeight : empty.implicitHeight)
                 emojiList.active: true
             }
@@ -97,6 +102,8 @@ Item {
     ]
 
     Behavior on state {
+        enabled: !root.content.loadedWithInitialText
+
         SequentialAnimation {
             Anim {
                 target: root
@@ -138,6 +145,7 @@ Item {
     Loader {
         id: wallpaperList
 
+        asynchronous: true
         active: false
 
         anchors.top: parent.top
@@ -193,9 +201,12 @@ Item {
 
         MaterialIcon {
             text: {
-                if (root.state === "wallpapers") return "wallpaper_slideshow";
-                if (root.state === "clipboard") return "content_paste";
-                if (root.state === "emoji") return "sentiment_satisfied";
+                if (root.state === "wallpapers")
+                    return "wallpaper_slideshow";
+                if (root.state === "clipboard")
+                    return "content_paste";
+                if (root.state === "emoji")
+                    return "sentiment_satisfied";
                 return "manage_search";
             }
             color: Colours.palette.m3onSurfaceVariant
@@ -209,9 +220,12 @@ Item {
 
             StyledText {
                 text: {
-                    if (root.state === "wallpapers") return qsTr("No wallpapers found");
-                    if (root.state === "clipboard") return qsTr("No clipboard history");
-                    if (root.state === "emoji") return qsTr("No emojis found");
+                    if (root.state === "wallpapers")
+                        return qsTr("No wallpapers found");
+                    if (root.state === "clipboard")
+                        return qsTr("No clipboard history");
+                    if (root.state === "emoji")
+                        return qsTr("No emojis found");
                     return qsTr("No results");
                 }
                 color: Colours.palette.m3onSurfaceVariant
@@ -253,7 +267,7 @@ Item {
     }
 
     Behavior on implicitHeight {
-        enabled: root.visibilities.launcher
+        enabled: root.visibilities.launcher && !root.content.loadedWithInitialText
 
         Anim {
             duration: Appearance.anim.durations.large

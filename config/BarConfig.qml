@@ -91,7 +91,7 @@ JsonObject {
     component ActiveWindow: JsonObject {
         property bool compact: false
         property bool inverted: false
-        property string popoutMode: "hover"
+        property bool showOnHover: true
     }
 
     component Tray: JsonObject {
@@ -115,6 +115,8 @@ JsonObject {
     }
 
     component Clock: JsonObject {
+        property bool background: false
+        property bool showDate: false
         property bool showIcon: true
     }
 

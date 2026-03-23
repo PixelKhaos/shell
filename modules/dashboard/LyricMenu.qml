@@ -1,30 +1,29 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
 import qs.components
 import qs.components.controls
 import qs.services
 import qs.config
-import Quickshell
-import Quickshell.Services.Mpris
-import QtQuick
-import QtQuick.Layouts
 
 StyledRect {
     id: root
 
     required property real contentHeight
 
-    implicitHeight: contentHeight
-
-    radius: Appearance.rounding.large
-    color: Colours.tPalette.m3surfaceContainer
-
     function searchCandidates(title, artist) {
         LyricsService.currentRequestId++;
         LyricsService.fetchNetEaseCandidates(title, artist, LyricsService.currentRequestId);
     }
 
+    implicitHeight: contentHeight
+
+    radius: Appearance.rounding.large
+    color: Colours.tPalette.m3surfaceContainer
+
     Loader {
+        asynchronous: true
         anchors.fill: parent
         active: root.height > 0
 
@@ -61,7 +60,7 @@ StyledRect {
 
                 StyledSwitch {
                     checked: LyricsService.lyricsVisible
-                    onToggled: LyricsService.lyricsVisible = !LyricsService.lyricsVisible
+                    onToggled: LyricsService.toggleVisibility()
                 }
             }
 
@@ -92,18 +91,18 @@ StyledRect {
 
                 delegate: Item {
                     id: delegateRoot
-                    width: ListView.view.width * 0.98
-                    height: 70
-                    anchors.horizontalCenter: parent?.horizontalCenter
 
                     required property real id
                     required property string title
                     required property string artist
-
                     property bool hovered: false
                     property bool pressed: false
 
+                    width: ListView.view.width * 0.98
+                    height: 70
+                    anchors.horizontalCenter: parent?.horizontalCenter
                     scale: hovered ? 1.02 : 1.0
+
                     Behavior on scale {
                         NumberAnimation {
                             duration: Appearance.anim.durations.small
@@ -113,26 +112,25 @@ StyledRect {
 
                     Rectangle {
                         id: background
+
                         anchors.fill: parent
                         radius: Appearance.rounding.small
 
-                        color: pressed
-                        ? Qt.rgba(Colours.palette.m3primary.r,
-                                  Colours.palette.m3primary.g,
-                                  Colours.palette.m3primary.b, 0.25)
-                        : hovered
-                        ? Qt.rgba(Colours.palette.m3primary.r,
-                                  Colours.palette.m3primary.g,
-                                  Colours.palette.m3primary.b, 0.06)
-                        : Qt.rgba(Colours.palette.m3primary.r,
-                                  Colours.palette.m3primary.g,
-                                  Colours.palette.m3primary.b, 0.03)
+                        color: delegateRoot.pressed ? Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.25) : delegateRoot.hovered ? Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.06) : Qt.rgba(Colours.palette.m3primary.r, Colours.palette.m3primary.g, Colours.palette.m3primary.b, 0.03)
 
-                        border.width: hovered ? 1 : 0
+                        border.width: delegateRoot.hovered ? 1 : 0
                         border.color: Colours.palette.m3primary
 
-                        Behavior on color { ColorAnimation { duration: Appearance.anim.durations.small } }
-                        Behavior on border.width { NumberAnimation { duration: Appearance.anim.durations.small } }
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Appearance.anim.durations.small
+                            }
+                        }
+                        Behavior on border.width {
+                            NumberAnimation {
+                                duration: Appearance.anim.durations.small
+                            }
+                        }
                     }
 
                     MouseArea {
@@ -144,7 +142,7 @@ StyledRect {
                         onExited: delegateRoot.hovered = false
                         onPressed: delegateRoot.pressed = true
                         onReleased: delegateRoot.pressed = false
-                        onClicked: LyricsService.selectCandidate(id)
+                        onClicked: LyricsService.selectCandidate(delegateRoot.id)
                     }
 
                     Row {
@@ -158,10 +156,13 @@ StyledRect {
                             height: parent.height * 0.6
                             radius: 2
                             anchors.verticalCenter: parent.verticalCenter
-                            color: LyricsService.currentSongId === id
-                            ? Colours.palette.m3primary
-                            : "transparent"
-                            Behavior on color { ColorAnimation { duration: Appearance.anim.durations.small } }
+                            color: LyricsService.currentSongId === delegateRoot.id ? Colours.palette.m3primary : "transparent"
+
+                            Behavior on color {
+                                ColorAnimation {
+                                    duration: Appearance.anim.durations.small
+                                }
+                            }
                         }
 
                         Column {
@@ -170,19 +171,22 @@ StyledRect {
                             spacing: 4
 
                             Text {
-                                text: title
+                                text: delegateRoot.title
                                 font.pointSize: Appearance.font.size.normal
                                 font.bold: true
-                                color: delegateRoot.hovered
-                                ? Colours.palette.m3primary
-                                : Colours.palette.m3onSurface
+                                color: delegateRoot.hovered ? Colours.palette.m3primary : Colours.palette.m3onSurface
                                 width: parent.width
                                 elide: Text.ElideRight
-                                Behavior on color { ColorAnimation { duration: Appearance.anim.durations.small } }
+
+                                Behavior on color {
+                                    ColorAnimation {
+                                        duration: Appearance.anim.durations.small
+                                    }
+                                }
                             }
 
                             Text {
-                                text: artist
+                                text: delegateRoot.artist
                                 font.pointSize: Appearance.font.size.small
                                 color: Colours.palette.m3onSurfaceVariant
                                 elide: Text.ElideRight
@@ -240,7 +244,7 @@ StyledRect {
 
                     IconButton {
                         icon: "search"
-                        onClicked: searchCandidates(searchTitle.text, searchArtist.text)
+                        onClicked: root.searchCandidates(searchTitle.text, searchArtist.text)
                     }
                 }
             }
@@ -262,7 +266,9 @@ StyledRect {
                     font.pointSize: Appearance.font.size.normal
                 }
 
-                Item { Layout.fillWidth: true }
+                Item {
+                    Layout.fillWidth: true
+                }
 
                 IconButton {
                     icon: "remove"
@@ -280,21 +286,6 @@ StyledRect {
                     font.pointSize: Appearance.font.size.normal
                     selectByMouse: true
                     text: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
-
-                    Binding {
-                        target: offsetInput
-                        property: "text"
-                        value: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
-                        when: !offsetInput.activeFocus
-                    }
-
-                    Connections {
-                        target: LyricsService
-                        function onCurrentRequestIdChanged() {
-                            offsetInput.focus = false;
-                        }
-                    }
-
                     onEditingFinished: {
                         let cleaned = offsetInput.text.replace(/[+s]/g, "").trim();
                         let val = parseFloat(cleaned);
@@ -304,6 +295,21 @@ StyledRect {
                         } else {
                             offsetInput.text = (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s";
                         }
+                    }
+
+                    Binding {
+                        target: offsetInput
+                        property: "text"
+                        value: (LyricsService.offset >= 0 ? "+" : "") + LyricsService.offset.toFixed(1) + "s"
+                        when: !offsetInput.activeFocus
+                    }
+
+                    Connections {
+                        function onCurrentRequestIdChanged() {
+                            offsetInput.focus = false;
+                        }
+
+                        target: LyricsService
                     }
                 }
 

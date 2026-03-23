@@ -1,10 +1,10 @@
 pragma Singleton
 
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
-import qs.config
 import Caelestia
+import qs.config
 
 Singleton {
     id: root
@@ -277,8 +277,10 @@ Singleton {
     Process {
         id: statusProc
 
-        command: getStatusCommand()
+        command: ["ip", "link", "show"]
+        // qmllint disable incompatible-type
         environment: ({
+                // qmllint enable incompatible-type
                 LANG: "C.UTF-8",
                 LC_ALL: "C.UTF-8"
             })
@@ -293,19 +295,7 @@ Singleton {
     Process {
         id: connectProc
 
-        onExited: (exitCode) => {
-            if (status.state !== "needs-auth") {
-                statusCheckTimer.start();
-            }
-        }
-        stdout: SplitParser {
-            onRead: (data) => {
-                const authUrl = extractAuthUrl(data);
-                if (authUrl) {
-                    updateStatus(createAuthStatus(authUrl));
-                }
-            }
-        }
+        onExited: statusCheckTimer.start() // qmllint disable signal-handler-parameters
         stderr: StdioCollector {
             onStreamFinished: {
                 const error = text.trim();
@@ -323,15 +313,13 @@ Singleton {
     Process {
         id: disconnectProc
 
-        onExited: statusCheckTimer.start()
-    }
-
-    Process {
-        id: warpRegisterProc
-
-        onExited: (exitCode) => {
-            if (exitCode === 0) {
-                statusCheckTimer.start();
+        onExited: statusCheckTimer.start() // qmllint disable signal-handler-parameters
+        stderr: StdioCollector {
+            onStreamFinished: {
+                const error = text.trim();
+                if (error && !error.includes("[#]")) {
+                    console.warn("VPN disconnection error:", error);
+                }
             }
         }
     }

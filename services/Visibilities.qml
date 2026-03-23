@@ -1,13 +1,15 @@
 pragma Singleton
 
 import Quickshell
+import qs.components
+import qs.services
 
 Singleton {
     property var screens: new Map()
     property var bars: new Map()
     property var panels: new Map()
 
-    function load(screen: ShellScreen, visibilities: var): void {
+    function load(screen: ShellScreen, visibilities: DrawerVisibilities): void {
         screens.set(Hypr.monitorFor(screen), visibilities);
     }
 

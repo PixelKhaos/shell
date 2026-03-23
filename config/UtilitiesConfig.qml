@@ -10,34 +10,6 @@ JsonObject {
     property Vpn vpn: Vpn {}
     property NightLight nightLight: NightLight {}
 
-    component Sizes: JsonObject {
-        property int width: 430
-        property int toastWidth: 430
-    }
-
-    component Toasts: JsonObject {
-        property bool configLoaded: true
-        property string fullscreen: "off"
-        property bool chargingChanged: true
-        property bool gameModeChanged: true
-        property bool dndChanged: true
-        property bool audioOutputChanged: true
-        property bool audioInputChanged: true
-        property bool capsLockChanged: true
-        property bool numLockChanged: true
-        property bool kbLayoutChanged: true
-        property bool kbLimit: true
-        property bool vpnChanged: true
-        property bool nowPlaying: false
-        property bool nightLight: true
-        property bool lowPowerModeChanged: true
-    }
-
-    component Vpn: JsonObject {
-        property bool enabled: false
-        property list<var> provider: ["netbird"]
-    }
-
     property list<var> quickToggles: [
         {
             id: "wifi",
@@ -68,6 +40,34 @@ JsonObject {
             enabled: false
         }
     ]
+
+    component Sizes: JsonObject {
+        property int width: 430
+        property int toastWidth: 430
+    }
+
+    component Toasts: JsonObject {
+        property bool configLoaded: true
+        property string fullscreen: "off"
+        property bool chargingChanged: true
+        property bool gameModeChanged: true
+        property bool dndChanged: true
+        property bool audioOutputChanged: true
+        property bool audioInputChanged: true
+        property bool capsLockChanged: true
+        property bool numLockChanged: true
+        property bool kbLayoutChanged: true
+        property bool kbLimit: true
+        property bool vpnChanged: true
+        property bool nowPlaying: false
+        property bool nightLight: true
+        property bool lowPowerModeChanged: true
+    }
+
+    component Vpn: JsonObject {
+        property bool enabled: false
+        property list<var> provider: ["netbird"]
+    }
 
     component NightLight: JsonObject {
         property bool enabled: true

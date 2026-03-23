@@ -1,9 +1,8 @@
-import qs.config
-import qs.services
-import Caelestia
+import QtQuick
 import Quickshell
 import Quickshell.Services.UPower
-import QtQuick
+import Caelestia
+import qs.config
 
 Scope {
     id: root
@@ -36,8 +35,6 @@ Scope {
     }
     
     Connections {
-        target: UPower
-
         function onOnBatteryChanged(): void {
             if (UPower.onBattery) {
                 if (Config.utilities.toasts.chargingChanged && root.initialized)
@@ -58,6 +55,8 @@ Scope {
                 }
             }
         }
+
+        target: UPower
     }
 
     Connections {
@@ -364,6 +363,8 @@ Scope {
                 Hypr.extras.message(`keyword monitor ${data.name},${data.width}x${data.height}@${originalRate},${data.x}x${data.y},${data.scale}`);
             }
         }
+
+        target: UPower.displayDevice
     }
 
     Timer {

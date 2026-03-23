@@ -1,19 +1,20 @@
 pragma ComponentBehavior: Bound
 
-import qs.services
-import qs.config
 import "popouts" as BarPopouts
 import "components"
 import "components/workspaces"
-import Quickshell
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import qs.components
+import qs.services
+import qs.config
 
 ColumnLayout {
     id: root
 
     required property ShellScreen screen
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     required property BarPopouts.Wrapper popouts
     readonly property int vPadding: Appearance.padding.large
 
@@ -22,9 +23,9 @@ ColumnLayout {
             return;
 
         for (let i = 0; i < repeater.count; i++) {
-            const item = repeater.itemAt(i);
-            if (item?.enabled && item.id === "tray") {
-                item.item.expanded = false;
+            const loader = repeater.itemAt(i) as WrappedLoader;
+            if (loader?.enabled && loader.id === "tray") {
+                (loader.item as Tray).expanded = false;
             }
         }
     }
@@ -53,7 +54,7 @@ ColumnLayout {
             popouts.currentCenter = item.mapToItem(root, 0, item.height / 2).y;
             popouts.hasCurrent = true;
         } else if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
-            const items = item.items;
+            const items = (item as StatusIcons).items;
             const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
             if (icon) {
                 popouts.currentName = icon.name;
@@ -61,18 +62,19 @@ ColumnLayout {
                 popouts.hasCurrent = true;
             }
         } else if (id === "tray" && Config.bar.popouts.tray) {
-            if (item.justExpanded) {
+            const tray = item as Tray;
+            if (tray.justExpanded) {
                 popouts.hasCurrent = false;
             } else {
-                const relativeY = y - top - item.padding;
+                const relativeY = y - top - tray.padding;
                 let foundIndex = -1;
                 let currentY = 0;
                 
-                for (let i = 0; i < item.items.count; i++) {
-                    const trayItem = item.items.itemAt(i);
+                for (let i = 0; i < tray.items.count; i++) {
+                    const trayItem = tray.items.itemAt(i);
                     if (!trayItem) continue;
                     
-                    const shouldShow = item.expanded || !Config.bar.tray.compact || trayItem.isPinned;
+                    const shouldShow = tray.expanded || !Config.bar.tray.compact || trayItem.isPinned;
                     if (!shouldShow) continue;
                     
                     const itemHeight = trayItem.implicitHeight;
@@ -81,18 +83,22 @@ ColumnLayout {
                         break;
                     }
                     
-                    currentY += itemHeight + item.spacing;
+                    currentY += itemHeight + tray.spacing;
                 }
                 
                 if (foundIndex >= 0) {
-                    const trayItem = item.items.itemAt(foundIndex);
+                    const trayItem = tray.items.itemAt(foundIndex);
                     popouts.currentName = `traymenu${foundIndex}`;
                     popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
                     popouts.hasCurrent = true;
-                } else if (!item.expanded) {
+                } else if (!tray.expanded) {
                     popouts.hasCurrent = false;
                 }
             }
+        } else if (id === "activeWindow" && Config.bar.popouts.activeWindow && Config.bar.activeWindow.showOnHover) {
+            popouts.currentName = id.toLowerCase();
+            popouts.currentCenter = (item as Item).mapToItem(root, 0, (item as Item).implicitHeight / 2).y ?? 0;
+            popouts.hasCurrent = true;
         }
     }
 
@@ -155,6 +161,7 @@ ColumnLayout {
             DelegateChoice {
                 roleValue: "activeWindow"
                 delegate: WrappedLoader {
+                    Layout.fillWidth: true
                     sourceComponent: ActiveWindow {
                         bar: root
                         monitor: Brightness.getMonitorForScreen(root.screen)
@@ -212,6 +219,7 @@ ColumnLayout {
             return null;
         }
 
+        asynchronous: true
         Layout.alignment: Qt.AlignHCenter
         Layout.topMargin: findFirstEnabled() === this ? root.vPadding : 0
         Layout.bottomMargin: findLastEnabled() === this ? root.vPadding : 0

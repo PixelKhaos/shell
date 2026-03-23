@@ -1,13 +1,12 @@
 pragma ComponentBehavior: Bound
 
-import "../services"
-import qs.components
-import qs.components.controls
-import qs.services
-import qs.config
-import Quickshell
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import "../services"
+import qs.components
+import qs.services
+import qs.config
 
 Item {
     id: root
@@ -15,51 +14,54 @@ Item {
     required property var modelData
     required property PersistentProperties visibilities
 
-    implicitWidth: 80
-    implicitHeight: 80
-
     StyledRect {
         id: rect
 
         anchors.fill: parent
         radius: Appearance.rounding.normal
         color: {
-            if (GridView.isCurrentItem) return Colours.layer(Colours.palette.m3surfaceContainer, 3);
-            if (mouse.containsMouse) return Colours.layer(Colours.palette.m3surfaceContainer, 2);
+            if (mouse.containsMouse)
+                return Qt.alpha(Colours.palette.m3onSurface, 0.08);
+            if (GridView.isCurrentItem)
+                return Qt.alpha(Colours.palette.m3onSurface, 0.08);
             return "transparent";
         }
 
-        Behavior on color { CAnim {} }
-
         MouseArea {
             id: mouse
+
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
-                Emojis.copyEmoji(root.modelData);
+                Emojis.copyEmoji(root.modelData); // qmllint disable missing-property
                 root.visibilities.launcher = false;
             }
         }
 
-    ColumnLayout {
-        anchors.centerIn: parent
-        spacing: Appearance.spacing.smaller
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.smaller / 2
+            spacing: Appearance.spacing.smaller
 
-        StyledText {
-            Layout.alignment: Qt.AlignHCenter
-            text: root.modelData.emoji
-            font.pointSize: Appearance.font.size.extraLarge * 1.5
-        }
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.fillWidth: true
+                text: root.modelData.emoji
+                font.pointSize: Appearance.font.size.extraLarge * 1.2
+                horizontalAlignment: Text.AlignHCenter
+            }
 
-        StyledText {
-            Layout.alignment: Qt.AlignHCenter
-            Layout.maximumWidth: root.width - Appearance.padding.small * 2
-            text: root.modelData.name
-            color: Colours.palette.m3onSurfaceVariant
-            font.pointSize: Appearance.font.size.smaller
-            elide: Text.ElideRight
-            horizontalAlignment: Text.AlignHCenter
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.fillWidth: true
+                Layout.maximumWidth: rect.width - Appearance.padding.small * 2
+                text: root.modelData.name
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.small
+                elide: Text.ElideRight
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.NoWrap
+            }
         }
-    }
     }
 }

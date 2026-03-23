@@ -1,16 +1,14 @@
 pragma ComponentBehavior: Bound
 
-import qs.components
+import QtQuick
+import Quickshell
+import Quickshell.Wayland
 import qs.components.containers
 import qs.services
 import qs.config
-import Quickshell
-import Quickshell.Wayland
-import QtQuick
 
 Loader {
-    id: backgroundLoader
-
+    asynchronous: true
     active: Config.background.enabled
 
     property var lock
@@ -43,12 +41,14 @@ Loader {
                 Loader {
                     id: wallpaper
 
+                    asynchronous: true
+
                     anchors.fill: parent
                     active: Config.background.wallpaperEnabled
 
                     sourceComponent: Wallpaper {
                         screen: win.modelData
-                        sessionLock: backgroundLoader.lock ? backgroundLoader.lock.lock : null
+                        sessionLock: lock ? lock.lock : null
                     }
                 }
 
@@ -61,6 +61,8 @@ Loader {
 
             Loader {
                 id: clockLoader
+
+                asynchronous: true
                 active: Config.background.desktopClock.enabled
 
                 anchors.margins: Appearance.padding.large * 2
@@ -70,6 +72,7 @@ Loader {
                 states: [
                     State {
                         name: "top-left"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.top: parent.top
@@ -78,6 +81,7 @@ Loader {
                     },
                     State {
                         name: "top-center"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.top: parent.top
@@ -86,6 +90,7 @@ Loader {
                     },
                     State {
                         name: "top-right"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.top: parent.top
@@ -94,6 +99,7 @@ Loader {
                     },
                     State {
                         name: "middle-left"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.verticalCenter: parent.verticalCenter
@@ -102,6 +108,7 @@ Loader {
                     },
                     State {
                         name: "middle-center"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.verticalCenter: parent.verticalCenter
@@ -110,6 +117,7 @@ Loader {
                     },
                     State {
                         name: "middle-right"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.verticalCenter: parent.verticalCenter
@@ -118,6 +126,7 @@ Loader {
                     },
                     State {
                         name: "bottom-left"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.bottom: parent.bottom
@@ -126,6 +135,7 @@ Loader {
                     },
                     State {
                         name: "bottom-center"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.bottom: parent.bottom
@@ -134,6 +144,7 @@ Loader {
                     },
                     State {
                         name: "bottom-right"
+
                         AnchorChanges {
                             target: clockLoader
                             anchors.bottom: parent.bottom

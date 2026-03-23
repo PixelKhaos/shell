@@ -1,24 +1,25 @@
+import QtQuick
+import Quickshell
+import qs.components
 import qs.config
-import qs.services
-import qs.modules.osd as Osd
-import qs.modules.notifications as Notifications
-import qs.modules.session as Session
+import qs.modules.bar as Bar
+import qs.modules.dashboard as Dashboard
 import qs.modules.launcher as Launcher
 import qs.modules.launcher.items.contextmenu as LauncherItems
-import qs.modules.dashboard as Dashboard
-import qs.modules.bar.popouts as BarPopouts
-import qs.modules.utilities as Utilities
-import qs.modules.utilities.toasts as Toasts
+import qs.modules.notifications as Notifications
+import qs.modules.osd as Osd
+import qs.modules.session as Session
 import qs.modules.sidebar as Sidebar
-import Quickshell
-import QtQuick
+import qs.modules.utilities as Utilities
+import qs.modules.bar.popouts as BarPopouts
+import qs.modules.utilities.toasts as Toasts
 
 Item {
     id: root
 
     required property ShellScreen screen
-    required property PersistentProperties visibilities
-    required property Item bar
+    required property DrawerVisibilities visibilities
+    required property Bar.BarWrapper bar
     required property var windowRef
 
     readonly property alias osd: osd
@@ -30,6 +31,7 @@ Item {
     readonly property alias utilities: utilities
     readonly property alias toasts: toasts
     readonly property alias sidebar: sidebar
+    readonly property alias clipboardPreview: clipboardPreview
 
     readonly property bool contextMenuOpen: launcherContextMenu.visible
     readonly property real contextMenuX: launcherContextMenu.visible ? launcherContextMenu.mapToItem(root, launcherContextMenu.gooBounds.x, launcherContextMenu.gooBounds.y).x : 0
@@ -57,7 +59,9 @@ Item {
         id: notifications
 
         visibilities: root.visibilities
-        panels: root
+        sidebarPanel: sidebar
+        osdPanel: osd
+        sessionPanel: session
 
         anchors.top: parent.top
         anchors.right: parent.right
@@ -148,7 +152,7 @@ Item {
         id: clipboardPreview
 
         currentItem: launcher.currentClipboardItem
-        shouldShow: root.visibilities.launcher && launcher.showingClipboard && !root.visibilities.utilities && !root.visibilities.sidebar
+        shouldShow: root.visibilities.launcher && launcher.showingClipboard && !root.visibilities.utilities && !root.visibilities.sidebar && clipboardPreview.hasImage
 
         anchors.left: launcher.right
         anchors.leftMargin: Appearance.spacing.large + 4

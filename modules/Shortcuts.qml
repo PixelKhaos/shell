@@ -1,9 +1,10 @@
-import qs.components.misc
-import qs.modules.controlcenter
-import qs.services
-import Caelestia
 import Quickshell
 import Quickshell.Io
+import Caelestia
+import qs.components.misc
+import qs.services
+import qs.config
+import qs.modules.controlcenter
 
 Scope {
     id: root
@@ -11,13 +12,17 @@ Scope {
     property bool launcherInterrupted
     readonly property bool hasFullscreen: Hypr.focusedWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "controlCenter"
         description: "Open control center"
         onPressed: WindowFactory.create()
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "showall"
         description: "Toggle launcher, dashboard and osd"
         onPressed: {
@@ -28,7 +33,9 @@ Scope {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "dashboard"
         description: "Toggle dashboard"
         onPressed: {
@@ -39,7 +46,9 @@ Scope {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "session"
         description: "Toggle session menu"
         onPressed: {
@@ -50,7 +59,9 @@ Scope {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "launcher"
         description: "Toggle launcher"
         onPressed: root.launcherInterrupted = false
@@ -63,14 +74,33 @@ Scope {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "launcherInterrupt"
         description: "Interrupt launcher keybind"
         onPressed: root.launcherInterrupted = true
     }
 
-
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "clipboard"
+        description: "Open clipboard manager"
+        onPressed: launcherHandler.action("clipboard")
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
+        name: "emoji"
+        description: "Open emoji picker"
+        onPressed: launcherHandler.action("emoji")
+    }
+
+    // qmllint disable unresolved-type
+    CustomShortcut {
+        // qmllint enable unresolved-type
         name: "sidebar"
         description: "Toggle sidebar"
         onPressed: {
@@ -81,7 +111,9 @@ Scope {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "utilities"
         description: "Toggle utilities"
         onPressed: {
@@ -93,8 +125,6 @@ Scope {
     }
 
     IpcHandler {
-        target: "drawers"
-
         function toggle(drawer: string): void {
             if (list().split("\n").includes(drawer)) {
                 if (root.hasFullscreen && ["launcher", "session", "dashboard"].includes(drawer))
@@ -110,53 +140,62 @@ Scope {
             const visibilities = Visibilities.getForActive();
             return Object.keys(visibilities).filter(k => typeof visibilities[k] === "boolean").join("\n");
         }
+
+        target: "drawers"
     }
 
     IpcHandler {
-        target: "clipboard"
+        id: launcherHandler
 
-        function toggle(): void {
+        function open(searchText: string): void {
             if (root.hasFullscreen)
                 return;
+
             const visibilities = Visibilities.getForActive();
-            visibilities.launcher = true;
-            // Set the launcher text to trigger clipboard view
             const launcher = LauncherIpc.getForActive();
-            if (launcher) {
-                launcher.search.text = ">clipboard ";
+            const wrapper = LauncherWrappers.getForActive();
+
+            if (launcher?.search) {
+                launcher.search.text = searchText;
                 launcher.search.forceActiveFocus();
+            } else if (wrapper) {
+                wrapper.pendingSearchText = searchText;
             }
+            visibilities.launcher = true;
         }
-    }
 
-    IpcHandler {
-        target: "emoji"
-
-        function toggle(): void {
+        function toggle(searchText: string): void {
             if (root.hasFullscreen)
                 return;
+
             const visibilities = Visibilities.getForActive();
-            visibilities.launcher = true;
-            // Set the launcher text to trigger emoji view
             const launcher = LauncherIpc.getForActive();
-            if (launcher) {
-                launcher.search.text = ">emoji ";
-                launcher.search.forceActiveFocus();
+
+            if (visibilities.launcher && launcher?.search.text === searchText) {
+                visibilities.launcher = false;
+                return;
             }
+
+            open(searchText);
         }
+
+        function action(actionName: string): void {
+            const searchText = Config.launcher.actionPrefix + actionName + " ";
+            toggle(searchText);
+        }
+
+        target: "launcher"
     }
 
     IpcHandler {
-        target: "controlCenter"
-
         function open(): void {
             WindowFactory.create();
         }
+
+        target: "controlCenter"
     }
 
     IpcHandler {
-        target: "toaster"
-
         function info(title: string, message: string, icon: string): void {
             Toaster.toast(title, message, icon, Toast.Info);
         }
@@ -172,5 +211,7 @@ Scope {
         function error(title: string, message: string, icon: string): void {
             Toaster.toast(title, message, icon, Toast.Error);
         }
+
+        target: "toaster"
     }
 }

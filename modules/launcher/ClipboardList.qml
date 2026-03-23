@@ -1,5 +1,8 @@
 pragma ComponentBehavior: Bound
 
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
 import "items"
 import "services"
 import qs.components
@@ -7,9 +10,6 @@ import qs.components.controls
 import qs.components.containers
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
-import QtQuick.Layouts
 
 StyledListView {
     id: root
@@ -20,18 +20,87 @@ StyledListView {
     property string activeCategory: "all"
     property bool showClearConfirmation: false
     property var hoveredItem: null
-    property string lastInteraction: "keyboard" // "hover" or "keyboard"
+    property string lastInteraction: "keyboard"
 
     property bool isCategoryChange: false
     property int deletedItemIndex: -1
+    property string previousCategory: "all"
+    property var pendingModelUpdate: null
+
+    function filterAndSortItems(): var {
+        const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "clipboard\\s*", "i");
+        const query = root.search.text.replace(pattern, "").trim();
+        let items = Clipboard.history; // qmllint disable missing-property
+
+        if (root.activeCategory === "images") {
+            items = items.filter(item => item.isImage);
+        } else if (root.activeCategory === "misc") {
+            items = items.filter(item => !item.isImage);
+        }
+
+        if (query) {
+            const lowerQuery = query.toLowerCase();
+            items = items.filter(item => item.content.toLowerCase().includes(lowerQuery));
+        }
+
+        items.sort((a, b) => {
+            if (a.isPinned && !b.isPinned)
+                return -1;
+            if (!a.isPinned && b.isPinned)
+                return 1;
+            return a.index - b.index;
+        });
+
+        return items;
+    }
+
+    function updateModel(): void {
+        model.values = root.filterAndSortItems();
+    }
+
+    spacing: Appearance.spacing.small
+
+    orientation: Qt.Vertical
+
+    implicitHeight: {
+        if (count === 0)
+            return 0;
+        const itemsToShow = Math.min(Config.launcher.maxShown, count);
+        const baseHeight = (Config.launcher.sizes.itemHeight + spacing) * itemsToShow;
+        return baseHeight + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
+    }
+
+    preferredHighlightBegin: 0
+
+    preferredHighlightEnd: height
+
+    highlightRangeMode: ListView.ApplyRange
+
+    onCurrentIndexChanged: {
+        if (root.lastInteraction !== "hover") {
+            root.lastInteraction = "keyboard";
+        }
+    }
+
+    onContentYChanged: {
+        // Clear hover when list scrolls to prevent accidental hover changes
+        root.hoveredItem = null;
+    }
+
+    Component.onCompleted: {
+        Clipboard.refresh(); // qmllint disable missing-property
+        updateModel();
+    }
+
+    highlightFollowsCurrentItem: false
+
+    delegate: clipboardItem
 
     model: ScriptModel {
         id: model
 
         onValuesChanged: {
-            // After deletion, adjust currentIndex if needed
             if (root.deletedItemIndex >= 0) {
-                // If we deleted an item before or at current position, move back
                 if (root.deletedItemIndex <= root.currentIndex) {
                     root.currentIndex = Math.max(0, root.currentIndex - 1);
                 }
@@ -40,31 +109,6 @@ StyledListView {
         }
     }
 
-    spacing: Appearance.spacing.small
-    orientation: Qt.Vertical
-    implicitHeight: {
-        if (count === 0)
-            return 0;
-        const itemsToShow = Math.min(Config.launcher.maxShown, count);
-        const calculatedHeight = (Config.launcher.sizes.itemHeight + spacing) * itemsToShow - spacing + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
-        const minHeight = 200;
-        return Math.max(minHeight, calculatedHeight);
-    }
-
-    onCurrentIndexChanged: {
-        root.lastInteraction = "keyboard";
-    }
-
-    onContentYChanged: {
-        // Clear hover when list scrolls to prevent accidental hover changes
-        root.hoveredItem = null;
-    }
-
-    preferredHighlightBegin: 0
-    preferredHighlightEnd: height
-    highlightRangeMode: ListView.ApplyRange
-
-    highlightFollowsCurrentItem: false
     highlight: StyledRect {
         radius: Appearance.rounding.normal
         color: Colours.palette.m3onSurface
@@ -82,7 +126,15 @@ StyledListView {
         }
     }
 
-    delegate: clipboardItem
+    HoverHandler {
+        id: listHoverHandler
+
+        onHoveredChanged: {
+            if (!hovered) {
+                root.hoveredItem = null;
+            }
+        }
+    }
 
     Component {
         id: clipboardItem
@@ -93,28 +145,24 @@ StyledListView {
     }
 
     Connections {
-        target: Clipboard
         function onHistoryChanged(): void {
             root.updateModel();
         }
+
+        target: Clipboard // qmllint disable incompatible-type
     }
 
     Connections {
-        target: root.search
-
         function onTextChanged(): void {
             root.updateModel();
         }
+
+        target: root.search
     }
 
-    property string previousCategory: "all"
-    property var pendingModelUpdate: null
-
     Connections {
-        target: root
-
         function onActiveCategoryChanged(): void {
-            if (previousCategory !== root.activeCategory && root.search.text.startsWith(">clipboard")) {
+            if (root.previousCategory !== root.activeCategory && root.search.text.startsWith(Config.launcher.actionPrefix + "clipboard")) {
                 if (categoryChangeAnimation.running) {
                     categoryChangeAnimation.stop();
                     root.opacity = 1;
@@ -125,7 +173,7 @@ StyledListView {
                 root.isCategoryChange = true;
                 categoryChangeAnimation.start();
             }
-            previousCategory = root.activeCategory;
+            root.previousCategory = root.activeCategory;
         }
     }
 
@@ -183,54 +231,11 @@ StyledListView {
         }
     }
 
-    function filterAndSortItems(): var {
-        const query = root.search.text.replace(/^>clipboard\s*/i, "").trim();
-        let items = Clipboard.history;
-
-        // Filter by category using consistent isImage property
-        if (root.activeCategory === "images") {
-            items = items.filter(item => item.isImage);
-        } else if (root.activeCategory === "misc") {
-            items = items.filter(item => !item.isImage);
-        }
-
-        // Filter by search query
-        if (query) {
-            const lowerQuery = query.toLowerCase();
-            items = items.filter(item => item.content.toLowerCase().includes(lowerQuery));
-        }
-
-        // Sort: pinned items first, preserve original order otherwise
-        items.sort((a, b) => {
-            if (a.isPinned && !b.isPinned)
-                return -1;
-            if (!a.isPinned && b.isPinned)
-                return 1;
-            return a.index - b.index;
-        });
-
-        return items;
-    }
-
-    function updateModel(): void {
-        model.values = root.filterAndSortItems();
-    }
-
-    Component.onCompleted: {
-        Clipboard.refresh();
-        updateModel();
-    }
-
-    Behavior on scale {
-        Anim {}
-    }
-
     // Confirmation dialog overlay
     Rectangle {
         anchors.fill: parent
         color: Qt.alpha(Colours.palette.m3scrim, 0.5)
-        visible: opacity > 0
-        opacity: root.showClearConfirmation ? 1 : 0
+        visible: root.showClearConfirmation
         z: 1000
 
         Behavior on opacity {
@@ -271,6 +276,7 @@ StyledListView {
 
             ColumnLayout {
                 id: confirmContent
+
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
@@ -322,7 +328,7 @@ StyledListView {
                         type: TextButton.Filled
                         onClicked: {
                             root.showClearConfirmation = false;
-                            Clipboard.clearAll(root.activeCategory);
+                            Clipboard.clearAll(root.activeCategory); // qmllint disable missing-property
                         }
                     }
                 }

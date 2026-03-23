@@ -1,12 +1,12 @@
 pragma Singleton
 
-import qs.components.misc
-import qs.config
+import QtQml
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
-import QtQml
 import Caelestia
+import qs.components.misc
+import qs.config
 
 Singleton {
     id: root
@@ -25,8 +25,6 @@ Singleton {
     }
 
     Connections {
-        target: root.active
-
         function onPostTrackChanged() {
             if (!Config.utilities.toasts.nowPlaying)
                 return;
@@ -52,22 +50,12 @@ Singleton {
                     Toaster.toast(qsTr("Now Playing"), trackInfo, "music_note");
                 }
             }
-        }
-    }
-
-    Timer {
-        id: nowPlayingTimer
-
-        property string pendingTrack: ""
-
-        interval: 1500
-        repeat: false
-
-        onTriggered: {
-            if (root.active?.playbackState === MprisPlayer.Playing && root.shouldShowToast()) {
-                Toaster.toast(qsTr("Now Playing"), pendingTrack, "music_note");
+            if (root.active.trackArtist != "" && root.active.trackTitle != "") {
+                Toaster.toast(qsTr("Now Playing"), qsTr("%1 - %2").arg(root.active.trackArtist).arg(root.active.trackTitle), "music_note");
             }
         }
+
+        target: root.active
     }
 
     PersistentProperties {
@@ -78,7 +66,9 @@ Singleton {
         reloadableId: "players"
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "mediaToggle"
         description: "Toggle media playback"
         onPressed: {
@@ -88,7 +78,9 @@ Singleton {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "mediaPrev"
         description: "Previous track"
         onPressed: {
@@ -98,7 +90,9 @@ Singleton {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "mediaNext"
         description: "Next track"
         onPressed: {
@@ -108,15 +102,15 @@ Singleton {
         }
     }
 
+    // qmllint disable unresolved-type
     CustomShortcut {
+        // qmllint enable unresolved-type
         name: "mediaStop"
         description: "Stop media playback"
         onPressed: root.active?.stop()
     }
 
     IpcHandler {
-        target: "mpris"
-
         function getActive(prop: string): string {
             const active = root.active;
             return active ? active[prop] ?? "Invalid property" : "No active player";
@@ -159,5 +153,7 @@ Singleton {
         function stop(): void {
             root.active?.stop();
         }
+
+        target: "mpris"
     }
 }

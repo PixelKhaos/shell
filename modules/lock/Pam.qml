@@ -1,9 +1,9 @@
-import qs.config
+import QtQuick
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Pam
-import QtQuick
+import qs.config
 
 Scope {
     id: root
@@ -186,7 +186,7 @@ Scope {
         id: availProc
 
         command: ["sh", "-c", "fprintd-list $USER"]
-        onExited: code => {
+        onExited: code => { // qmllint disable signal-handler-parameters
             fprint.available = code === 0;
             fprint.checkAvail();
         }
@@ -258,7 +258,6 @@ Scope {
     }
 
     Connections {
-        target: root.lock
         function onSecureChanged(): void {
             if (root.lock.secure) {
                 availProc.running = true;
@@ -280,32 +279,15 @@ Scope {
             if (howdy.active)
                 howdy.abort();
         }
+
+        target: root.lock
     }
 
     Connections {
-        target: Config.lock
-
         function onEnableFprintChanged(): void {
             fprint.checkAvail();
         }
-        function onEnableHowdyChanged(): void {
-            howdy.checkAvail();
-        }
-    }
 
-    Connections {
-        target: root
-
-        function onScreenIsIdleChanged() {
-            if (root.screenIsIdle) {
-                if (howdy.available && howdy.active) {
-                    howdy.abort();
-                }
-            } else {
-                if (howdy.available && root.lock.secure && !howdy.active) {
-                    howdy.checkAvail();
-                }
-            }
-        }
+        target: Config.lock
     }
 }

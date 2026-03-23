@@ -1,22 +1,19 @@
+import QtQuick
 import qs.components
 import qs.config
-import QtQuick
 
 Item {
     id: root
 
-    property bool fullscreenOnly
-    property bool hasFullscreen
-    required property var visibilities
-    required property var panels
-    readonly property QtObject fallbackVisibilities: QtObject {
-        property bool sidebar: false
-        property bool osd: false
-        property bool session: false
-    }
+    required property DrawerVisibilities visibilities
+    required property Item sidebarPanel
+    property alias osdPanel: content.osdPanel
+    property alias sessionPanel: content.sessionPanel
+    property bool fullscreenOnly: false
+    property bool hasFullscreen: false
 
     visible: height > 0
-    implicitWidth: Math.max(panels?.sidebar?.width ?? 0, content.implicitWidth)
+    implicitWidth: Math.max(sidebarPanel?.width ?? 0, content.implicitWidth)
     implicitHeight: content.implicitHeight
 
     states: State {
@@ -40,8 +37,8 @@ Item {
     Content {
         id: content
 
-        visible: !!root.visibilities
-        visibilities: root.visibilities ?? root.fallbackVisibilities
-        panels: root.panels
+        visibilities: root.visibilities
+        osdPanel: root.sidebarPanel
+        sessionPanel: root.sidebarPanel
     }
 }

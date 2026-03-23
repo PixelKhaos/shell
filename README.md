@@ -346,9 +346,12 @@ default, you must create it manually.
     "bar": {
         "activeWindow": {
             "compact": false,
-            "inverted": false
+            "inverted": false,
+            "showOnHover": true
         },
         "clock": {
+            "background": false,
+            "showDate": false,
             "showIcon": true
         },
         "dragThreshold": 20,
@@ -681,6 +684,7 @@ default, you must create it manually.
             {"separator": {"parent": "custom-submenu"}},
             {"copy-exec": {"parent": "custom-submenu"}}
         ]
+        "frequentEmojis": []
     },
     "lock": {
         "recolourLogo": false,

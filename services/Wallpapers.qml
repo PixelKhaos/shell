@@ -1,11 +1,12 @@
 pragma Singleton
 
-import qs.config
-import qs.utils
-import Caelestia.Models
+import QtQuick
 import Quickshell
 import Quickshell.Io
-import QtQuick
+import Caelestia.Models
+import qs.services
+import qs.config
+import qs.utils
 
 Searcher {
     id: root
@@ -59,8 +60,6 @@ Searcher {
         })
 
     IpcHandler {
-        target: "wallpaper"
-
         function get(): string {
             return root.actualCurrent;
         }
@@ -72,6 +71,8 @@ Searcher {
         function list(): string {
             return root.list.map(w => w.path).join("\n");
         }
+
+        target: "wallpaper"
     }
 
     FileView {

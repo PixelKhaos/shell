@@ -1,20 +1,20 @@
 pragma ComponentBehavior: Bound
 
-import "items"
-import "services"
+import QtQuick
+import Quickshell
 import qs.components
-import qs.components.controls
 import qs.components.containers
+import qs.components.controls
 import qs.services
 import qs.config
-import Quickshell
-import QtQuick
+import qs.modules.launcher.items
+import qs.modules.launcher.services
 
 StyledListView {
     id: root
 
     required property StyledTextField search
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     required property string activeCategory
 
     model: ScriptModel {
@@ -138,9 +138,10 @@ StyledListView {
     spacing: Appearance.spacing.small
     orientation: Qt.Vertical
     implicitHeight: {
-        if (count === 0) return 0;
+        if (count === 0)
+            return 0;
         const itemsToShow = Math.min(Config.launcher.maxShown, count);
-        return (Config.launcher.sizes.itemHeight + spacing) * itemsToShow - spacing + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
+        return (Config.launcher.sizes.itemHeight + spacing) * itemsToShow + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
     }
 
     preferredHighlightBegin: 0

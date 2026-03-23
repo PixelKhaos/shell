@@ -1,6 +1,8 @@
 #include "requests.hpp"
 
+#include <qjsvalueiterator.h>
 #include <qnetworkaccessmanager.h>
+#include <qnetworkcookiejar.h>
 #include <qnetworkreply.h>
 #include <qnetworkrequest.h>
 #include <qjsvalueiterator.h>

@@ -15,7 +15,7 @@ Item {
     id: root
 
     required property ShellScreen screen
-    required property PersistentProperties visibilities
+    required property DrawerVisibilities visibilities
     required property var panels
     required property real maxHeight
 
@@ -64,7 +64,7 @@ Item {
     }
 
     implicitWidth: list.width + padding * 2
-    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + categoryNavbar.height + clipboardNav.height + (showCategoryNav ? padding : 0) + (showClipboardNav ? padding : 0) + padding * 2 + Appearance.spacing.normal
+    implicitHeight: searchWrapper.implicitHeight + list.implicitHeight + (showCategoryNav ? categoryNavbar.height : 0) + (showClipboardNav ? clipboardNav.height : 0) + (showCategoryNav || showClipboardNav ? padding : 0) + padding * 2 + Appearance.spacing.normal
 
     Component.onCompleted: {
         LauncherIpc.register(root.screen, root);
