@@ -457,7 +457,8 @@ Singleton {
                 temperature: services.sunsetService.temperature,
                 preferredBackend: services.sunsetService.preferredBackend
             },
-            showLyrics: services.showLyrics
+            showLyrics: services.showLyrics,
+            lyricsBackend: services.lyricsBackend
         };
     }
 
