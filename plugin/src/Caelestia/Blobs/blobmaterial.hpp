@@ -13,6 +13,11 @@ struct BlobRectData {
     float invDeform[4] = { 1, 0, 0, 1 };
     // Screen-space AABB half-extents of the deformed rect
     float screenHalfX = 0, screenHalfY = 0;
+    // Edge alignment mask (bit-packed: top=1, bottom=2, left=4, right=8)
+    // Aligned edges use hard union instead of smin to prevent bumps
+    float edgeMask = 0;
+    // Visibility flag: 1.0 = visible (blend with smin), 0.0 = hidden (use min)
+    float isVisible = 1.0;
     // Pre-computed corner fill factors (tr, br, bl, tl)
     float cornerFill[4] = { 1, 1, 1, 1 };
 };

@@ -75,11 +75,15 @@ void main() {
     int owner = -2;
     float minDist = 1e10;
 
+    // Two-pass approach: first blend visible rects, then add invisible ones
+    // Pass 1: Visible rects only (blend with smin)
     for (int i = 0; i < rectCount; i++) {
+        vec4 sh_check = rectData[i * 5 + 3];
+        if (sh_check.w < 0.5) continue;  // Skip invisible rects in pass 1
         vec4 rect = rectData[i * 5];         // cx, cy, hw, hh
         vec4 props = rectData[i * 5 + 1];    // radius, offsetX, offsetY, minEig
         vec4 invDm = rectData[i * 5 + 2];    // inverse deform matrix
-        vec4 sh = rectData[i * 5 + 3];       // screenHalfX, screenHalfY, 0, 0
+        vec4 sh = rectData[i * 5 + 3];       // screenHalfX, screenHalfY, edgeMask, isVisible
         vec4 fills = rectData[i * 5 + 4];    // f_tr, f_br, f_bl, f_tl
 
         // Offset center for asymmetric deformation
@@ -159,8 +163,13 @@ void main() {
 
                 vec4 jR = rectData[j * 5];
                 vec4 jP = rectData[j * 5 + 1];
-                vec2 jSh = rectData[j * 5 + 3].xy;
+                vec4 jShData = rectData[j * 5 + 3];
+                vec2 jSh = jShData.xy;
+                float jVisible = jShData.w;
                 vec2 jC = jR.xy + jP.yz;
+                
+                // Skip invisible rects for sink calculation
+                if (jVisible < 0.5) continue;
 
                 // Skip non-adjacent rects
                 float sinkRange = smoothFactor * 1.5;
@@ -199,11 +208,75 @@ void main() {
                 );
                 rectSinkVal = max(rectSinkVal, s);
             }
-            d += rectSinkVal * smoothFactor * 0.25;
+            d += rectSinkVal * smoothFactor * 0.02;
         }
 
-        mergedSdf = sminNoBulge(mergedSdf, d, smoothFactor);
+        // Check if pixel is near a masked (aligned) edge of this rect
+        float eMask = sh.z;
+        float alignSuppress = 0.0;
+        if (eMask > 0.5) {
+            float edgeZone = smoothFactor * 0.5;
+            // Distance from pixel to each edge of the rect
+            float dTop = pixel.y - (center.y - rect.w);
+            float dBot = (center.y + rect.w) - pixel.y;
+            float dLeft = pixel.x - (center.x - rect.z);
+            float dRight = (center.x + rect.z) - pixel.x;
+            // Decode masked edges and compute suppression
+            bool maskTop = mod(eMask, 2.0) > 0.5;
+            bool maskBot = mod(floor(eMask / 2.0), 2.0) > 0.5;
+            bool maskLeft = mod(floor(eMask / 4.0), 2.0) > 0.5;
+            bool maskRight = mod(floor(eMask / 8.0), 2.0) > 0.5;
+            if (maskTop) alignSuppress = max(alignSuppress, 1.0 - smoothstep(0.0, edgeZone, dTop));
+            if (maskBot) alignSuppress = max(alignSuppress, 1.0 - smoothstep(0.0, edgeZone, dBot));
+            if (maskLeft) alignSuppress = max(alignSuppress, 1.0 - smoothstep(0.0, edgeZone, dLeft));
+            if (maskRight) alignSuppress = max(alignSuppress, 1.0 - smoothstep(0.0, edgeZone, dRight));
+        }
+        // Visibility-based suppression: invisible rects (sh.w < 0.5) use hard
+        // union (min) instead of smin. They still contribute to border sink
+        // for elastic indent, but don't create bumps with visible rects.
+        float visibilitySuppress = 1.0 - sh.w;  // sh.w = isVisible (1.0 or 0.0)
+
+        // DEBUG: Force all rects to use min to test mechanism
+        // float totalSuppress = 1.0;
+        
+        // Combine: suppress smin at aligned edges (visibility already filtered by pass)
+        float totalSuppress = alignSuppress;
+        float sminResult = sminNoBulge(mergedSdf, d, smoothFactor);
+        float minResult = min(mergedSdf, d);
+        mergedSdf = mix(sminResult, minResult, totalSuppress);
         if (d < smoothFactor && d < minDist) {
+            minDist = d;
+            owner = i;
+        }
+    }
+
+    // Pass 2: Invisible rects (use hard union only)
+    for (int i = 0; i < rectCount; i++) {
+        vec4 sh_check = rectData[i * 5 + 3];
+        if (sh_check.w >= 0.5) continue;  // Skip visible rects in pass 2
+        
+        vec4 rect = rectData[i * 5];
+        vec4 props = rectData[i * 5 + 1];
+        vec4 invDm = rectData[i * 5 + 2];
+        vec4 sh = sh_check;
+        vec4 fills = rectData[i * 5 + 4];
+
+        vec2 center = rect.xy + props.yz;
+        vec2 extent = sh.xy + vec2(smoothFactor * 1.5);
+        if (abs(pixel.x - center.x) > extent.x || abs(pixel.y - center.y) > extent.y)
+            continue;
+
+        mat2 invDeform = mat2(invDm.xy, invDm.zw);
+        vec2 transformedPixel = center + invDeform * (pixel - center);
+        float br = props.x;
+        float minR = 2.0;
+        vec4 radii = max(br * fills, vec4(minR));
+        float d = sdRoundedBox4(transformedPixel, center, rect.zw, radii);
+        d *= max(props.w, 0.01);
+
+        // Invisible rects: always use hard union (min)
+        mergedSdf = min(mergedSdf, d);
+        if (d < minDist) {
             minDist = d;
             owner = i;
         }

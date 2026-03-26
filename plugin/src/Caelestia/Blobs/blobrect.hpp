@@ -14,6 +14,7 @@ class BlobRect : public BlobShape {
         qreal damping READ damping WRITE setDamping NOTIFY dampingChanged)
     Q_PROPERTY(qreal deformScale READ deformScale WRITE setDeformScale NOTIFY
             deformScaleChanged)
+    Q_PROPERTY(bool shouldBlend READ shouldBlend WRITE setShouldBlend NOTIFY shouldBlendChanged)
 
 public:
     explicit BlobRect(QQuickItem* parent = nullptr);
@@ -46,10 +47,21 @@ public:
         }
     }
 
+    bool shouldBlend() const { return m_shouldBlend; }
+
+    void setShouldBlend(bool v) {
+        if (m_shouldBlend != v) {
+            m_shouldBlend = v;
+            emit shouldBlendChanged();
+            polish();
+        }
+    }
+
 signals:
     void stiffnessChanged();
     void dampingChanged();
     void deformScaleChanged();
+    void shouldBlendChanged();
 
 protected:
     void updatePolish() override;
@@ -78,4 +90,5 @@ private:
     qreal m_stiffness = 200.0;
     qreal m_damping = 16.0;
     qreal m_deformScale = 0.0005;
+    bool m_shouldBlend = true;
 };

@@ -1,6 +1,7 @@
 #include "blobshape.hpp"
 #include "blobgroup.hpp"
 #include "blobinvertedrect.hpp"
+#include "blobrect.hpp"
 
 #include <qsggeometry.h>
 #include <qsgnode.h>
@@ -202,12 +203,74 @@ void BlobShape::updatePolish() {
             r.screenHalfX = std::abs(a) * r.hw + std::abs(c) * r.hh;
             r.screenHalfY = std::abs(b) * r.hw + std::abs(d) * r.hh;
 
+            // Set visibility flag (BlobRect only, inverted rects always visible)
+            auto* blobRect = qobject_cast<BlobRect*>(other);
+            r.isVisible = blobRect ? (blobRect->shouldBlend() ? 1.0f : 0.0f) : 1.0f;
+
             m_cachedRects.append(r);
         }
     }
 
     if (isInvertedRect())
         m_cachedMyIndex = -1;
+
+    // Detect aligned stacked rects and set edge masks
+    // Aligned edges use hard union (min) instead of smin in the shader
+    {
+        const auto rc = m_cachedRects.size();
+        const float alignThresh = 2.0f;  // position/size tolerance
+        const float gapThresh = pad * 0.5f;  // max gap to consider adjacent
+        for (qsizetype i = 0; i < rc; ++i) {
+            auto& ri = m_cachedRects[i];
+            for (qsizetype j = i + 1; j < rc; ++j) {
+                auto& rj = m_cachedRects[j];
+
+                // Vertically stacked: same x-center and width
+                if (std::abs(ri.cx - rj.cx) < alignThresh &&
+                    std::abs(ri.hw - rj.hw) < alignThresh) {
+                    const float iBot = ri.cy + ri.hh;
+                    const float jTop = rj.cy - rj.hh;
+                    const float iTop = ri.cy - ri.hh;
+                    const float jBot = rj.cy + rj.hh;
+                    if (ri.cy < rj.cy && std::abs(iBot - jTop) < gapThresh) {
+                        // i above j: mask i's bottom, j's top
+                        ri.edgeMask = static_cast<float>(
+                            static_cast<int>(ri.edgeMask) | 2);
+                        rj.edgeMask = static_cast<float>(
+                            static_cast<int>(rj.edgeMask) | 1);
+                    } else if (rj.cy < ri.cy && std::abs(jBot - iTop) < gapThresh) {
+                        // j above i: mask j's bottom, i's top
+                        rj.edgeMask = static_cast<float>(
+                            static_cast<int>(rj.edgeMask) | 2);
+                        ri.edgeMask = static_cast<float>(
+                            static_cast<int>(ri.edgeMask) | 1);
+                    }
+                }
+
+                // Horizontally stacked: same y-center and height
+                if (std::abs(ri.cy - rj.cy) < alignThresh &&
+                    std::abs(ri.hh - rj.hh) < alignThresh) {
+                    const float iRight = ri.cx + ri.hw;
+                    const float jLeft = rj.cx - rj.hw;
+                    const float iLeft = ri.cx - ri.hw;
+                    const float jRight = rj.cx + rj.hw;
+                    if (ri.cx < rj.cx && std::abs(iRight - jLeft) < gapThresh) {
+                        // i left of j: mask i's right, j's left
+                        ri.edgeMask = static_cast<float>(
+                            static_cast<int>(ri.edgeMask) | 8);
+                        rj.edgeMask = static_cast<float>(
+                            static_cast<int>(rj.edgeMask) | 4);
+                    } else if (rj.cx < ri.cx && std::abs(jRight - iLeft) < gapThresh) {
+                        // j left of i: mask j's right, i's left
+                        rj.edgeMask = static_cast<float>(
+                            static_cast<int>(rj.edgeMask) | 8);
+                        ri.edgeMask = static_cast<float>(
+                            static_cast<int>(ri.edgeMask) | 4);
+                    }
+                }
+            }
+        }
+    }
 
     // Cache inverted rect data
     m_cachedHasInverted = false;
@@ -309,6 +372,13 @@ void BlobShape::updatePolish() {
             fTl = std::min(fTl, cpuSmoothstep(0.0f, smoothFactor,
                 -cpuSdBox(cTlX, cTlY, icx, icy, ihw, ihh)));
         }
+
+        // Zero corners at aligned edges to create straight junctions
+        const int mask = static_cast<int>(ri.edgeMask);
+        if (mask & 1) { fTr = 0.0f; fTl = 0.0f; }  // top aligned
+        if (mask & 2) { fBr = 0.0f; fBl = 0.0f; }  // bottom aligned
+        if (mask & 4) { fTl = 0.0f; fBl = 0.0f; }  // left aligned
+        if (mask & 8) { fTr = 0.0f; fBr = 0.0f; }  // right aligned
 
         ri.cornerFill[0] = fTr;
         ri.cornerFill[1] = fBr;

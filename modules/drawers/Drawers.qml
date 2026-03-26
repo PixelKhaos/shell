@@ -157,6 +157,7 @@ Variants {
                     panel: panels.dashboard
                     bar: bar
                     deformAmount: 0.1
+                    isOpen: panels.dashboard.visible
                 }
 
                 PanelBg {
@@ -166,6 +167,7 @@ Variants {
                     panel: panels.launcher
                     bar: bar
                     deformAmount: 0.1
+                    isOpen: panels.launcher.visible
                 }
 
                 PanelBg {
@@ -175,6 +177,7 @@ Variants {
                     panel: panels.session
                     bar: bar
                     deformAmount: 0.25
+                    isOpen: panels.session.visible
                 }
 
                 PanelBg {
@@ -184,6 +187,7 @@ Variants {
                     panel: panels.sidebar
                     bar: bar
                     deformAmount: 0
+                    isOpen: panels.sidebar.visible
                 }
 
                 PanelBg {
@@ -193,6 +197,7 @@ Variants {
                     panel: panels.osd
                     bar: bar
                     deformAmount: 0.3
+                    isOpen: panels.osd.visible
                 }
 
                 PanelBg {
@@ -201,6 +206,7 @@ Variants {
                     blobGroup: blobGroup
                     panel: panels.notifications
                     bar: bar
+                    isOpen: true  // Notifications always blend when visible
                 }
 
                 PanelBg {
@@ -209,6 +215,7 @@ Variants {
                     blobGroup: blobGroup
                     panel: panels.utilities
                     bar: bar
+                    isOpen: panels.utilities.visible
                 }
 
                 PanelBg {
@@ -217,6 +224,7 @@ Variants {
                     blobGroup: blobGroup
                     panel: panels.popouts
                     bar: bar
+                    isOpen: panels.popouts.hasCurrent  // Blend when popout is active
 
                     x: bar.implicitWidth - (panels.popouts.isDetached ? -(win.width - panels.popouts.shownWidth) / 2 : panels.popouts.hasCurrent ? 0 : panels.popouts.shownWidth + 5)
                     implicitWidth: panels.popouts.shownWidth
@@ -306,8 +314,10 @@ Variants {
         required property Item panel
         required property Item bar
         property real deformAmount: 0.15
+        property bool isOpen: false  // Override per-instance based on visibility state
 
         group: panel.width > 0 && panel.height > 0 ? blobGroup : null
+        shouldBlend: isOpen
         x: panel.x + bar.implicitWidth
         y: panel.y + Config.border.thickness
         implicitWidth: panel.width

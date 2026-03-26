@@ -86,7 +86,7 @@ bool BlobMaterialShader::updateUniformData(
         const int base = 160 + i * 80;
         const float d0[4] = { r.cx, r.cy, r.hw, r.hh };
         const float d1[4] = { r.radius, r.offsetX, r.offsetY, r.minEig };
-        const float d3[4] = { r.screenHalfX, r.screenHalfY, 0.0f, 0.0f };
+        const float d3[4] = { r.screenHalfX, r.screenHalfY, r.edgeMask, r.isVisible };
         memcpy(buf->data() + base, d0, 16);
         memcpy(buf->data() + base + 16, d1, 16);
         memcpy(buf->data() + base + 32, r.invDeform, 16);
