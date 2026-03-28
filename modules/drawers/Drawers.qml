@@ -39,9 +39,9 @@ Variants {
                     if (!specialName)
                         return false;
                     const specialWs = Hypr.workspaces.values.find(ws => ws.name === specialName);
-                    return specialWs?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false;
+                    return specialWs?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false;
                 }
-                return monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen === 2) ?? false;
+                return monitor?.activeWorkspace?.toplevels.values.some(t => t.lastIpcObject.fullscreen > 1) ?? false;
             }
             property real borderThickness: hasFullscreen ? 0 : Config.border.thickness
             readonly property real borderLayoutThickness: hasFullscreen ? 0 : Config.border.thickness
