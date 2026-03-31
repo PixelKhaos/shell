@@ -11,7 +11,7 @@ import qs.components.containers
 import qs.services
 import qs.config
 
-StyledListView {
+Item {
     id: root
 
     required property StyledTextField search
@@ -19,13 +19,25 @@ StyledListView {
 
     property string activeCategory: "all"
     property bool showClearConfirmation: false
-    property var hoveredItem: null
-    property string lastInteraction: "keyboard"
+    property alias hoveredItem: listView.hoveredItem
+    property alias lastInteraction: listView.lastInteraction
+
+    readonly property alias currentItem: listView.currentItem
+    readonly property alias currentIndex: listView.currentIndex
+    readonly property alias count: listView.count
 
     property bool isCategoryChange: false
-    property int deletedItemIndex: -1
+    property alias deletedItemIndex: listView.deletedItemIndex
     property string previousCategory: "all"
     property var pendingModelUpdate: null
+
+    function incrementCurrentIndex(): void {
+        listView.incrementCurrentIndex();
+    }
+
+    function decrementCurrentIndex(): void {
+        listView.decrementCurrentIndex();
+    }
 
     function filterAndSortItems(): var {
         const pattern = new RegExp("^" + Config.launcher.actionPrefix.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "clipboard\\s*", "i");
@@ -58,89 +70,317 @@ StyledListView {
         model.values = root.filterAndSortItems();
     }
 
-    spacing: Appearance.spacing.small
-
-    orientation: Qt.Vertical
-
-    implicitHeight: {
-        if (count === 0)
-            return 0;
-        const itemsToShow = Math.min(Config.launcher.maxShown, count);
-        const baseHeight = (Config.launcher.sizes.itemHeight + spacing) * itemsToShow;
-        return baseHeight + (itemsToShow > 0 ? Appearance.spacing.smaller : 0);
-    }
-
-    preferredHighlightBegin: 0
-
-    preferredHighlightEnd: height
-
-    highlightRangeMode: ListView.ApplyRange
-
-    onCurrentIndexChanged: {
-        if (root.lastInteraction !== "hover") {
-            root.lastInteraction = "keyboard";
-        }
-    }
-
-    onContentYChanged: {
-        // Clear hover when list scrolls to prevent accidental hover changes
-        root.hoveredItem = null;
-    }
+    implicitWidth: Config.launcher.sizes.itemWidth
+    implicitHeight: toolbarBg.height + listView.implicitHeight + Appearance.spacing.small
 
     Component.onCompleted: {
         Clipboard.refresh(); // qmllint disable missing-property
         updateModel();
     }
 
-    highlightFollowsCurrentItem: false
+    StyledRect {
+        id: toolbarBg
 
-    delegate: clipboardItem
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
 
-    model: ScriptModel {
-        id: model
-
-        onValuesChanged: {
-            if (root.deletedItemIndex >= 0) {
-                if (root.deletedItemIndex <= root.currentIndex) {
-                    root.currentIndex = Math.max(0, root.currentIndex - 1);
-                }
-                root.deletedItemIndex = -1;
-            }
-        }
-    }
-
-    highlight: StyledRect {
+        color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
         radius: Appearance.rounding.normal
-        color: Colours.palette.m3onSurface
-        opacity: 0.08
+        implicitHeight: toolbar.implicitHeight + Appearance.padding.small * 2
 
-        y: root.currentItem?.y ?? 0
-        implicitWidth: root.width
-        implicitHeight: root.currentItem?.implicitHeight ?? 0
+        RowLayout {
+            id: toolbar
 
-        Behavior on y {
-            Anim {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.leftMargin: Appearance.padding.normal
+            anchors.rightMargin: Appearance.padding.normal
+            spacing: Appearance.spacing.small
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: tabsRow.height
+
+                StyledRect {
+                    id: activeIndicator
+
+                    property Item activeTab: {
+                        for (let i = 0; i < tabsRepeater.count; i++) {
+                            const tab = tabsRepeater.itemAt(i);
+                            if (tab && tab.isActive) { // qmllint disable missing-property
+                                return tab;
+                            }
+                        }
+                        return null;
+                    }
+
+                    visible: activeTab !== null
+                    color: Colours.palette.m3primary
+                    radius: 10
+
+                    x: activeTab ? activeTab.x : 0
+                    y: activeTab ? activeTab.y : 0
+                    width: activeTab ? activeTab.width : 0
+                    height: activeTab ? activeTab.height : 0
+
+                    Behavior on x {
+                        Anim {
+                            duration: Appearance.anim.durations.normal
+                            easing.bezierCurve: Appearance.anim.curves.emphasized
+                        }
+                    }
+
+                    Behavior on width {
+                        Anim {
+                            duration: Appearance.anim.durations.normal
+                            easing.bezierCurve: Appearance.anim.curves.emphasized
+                        }
+                    }
+                }
+
+                Row {
+                    id: tabsRow
+
+                    spacing: Appearance.spacing.small
+
+                    Repeater {
+                        id: tabsRepeater
+
+                        model: [
+                            {
+                                id: "all",
+                                name: qsTr("All"),
+                                icon: "apps"
+                            },
+                            {
+                                id: "images",
+                                name: qsTr("Images"),
+                                icon: "image"
+                            },
+                            {
+                                id: "misc",
+                                name: qsTr("Misc"),
+                                icon: "description"
+                            }
+                        ]
+
+                        delegate: Item {
+                            id: categoryTab
+
+                            required property var modelData
+                            required property int index
+
+                            property bool isActive: root.activeCategory === modelData.id
+
+                            implicitWidth: tabContent.width + Appearance.padding.normal * 2
+                            implicitHeight: tabContent.height + Appearance.padding.smaller * 2
+
+                            StateLayer {
+                                function onClicked(): void {
+                                    root.activeCategory = categoryTab.modelData.id;
+                                }
+
+                                anchors.fill: parent
+                                radius: 6
+                            }
+
+                            Row {
+                                id: tabContent
+
+                                anchors.centerIn: parent
+                                spacing: Appearance.spacing.smaller
+
+                                MaterialIcon {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: categoryTab.modelData.icon
+                                    font.pointSize: Appearance.font.size.small
+                                    color: categoryTab.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                }
+
+                                StyledText {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: categoryTab.modelData.name
+                                    font.pointSize: Appearance.font.size.small
+                                    color: categoryTab.isActive ? Colours.palette.m3surface : Colours.palette.m3onSurfaceVariant
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Item {
+                Layout.preferredWidth: countText.implicitWidth
+                Layout.preferredHeight: countText.implicitHeight
+
+                StyledText {
+                    id: countText
+
+                    anchors.centerIn: parent
+                    text: qsTr("%n item(s)", "", listView.count)
+                    font.pointSize: Appearance.font.size.small
+                    color: Colours.palette.m3onSurfaceVariant
+                    opacity: listView.count > 0 ? 1 : 0
+
+                    Behavior on opacity {
+                        Anim {
+                            duration: Appearance.anim.durations.small
+                            easing.bezierCurve: Appearance.anim.curves.standard
+                        }
+                    }
+                }
+            }
+
+            IconButton {
+                icon: "delete_sweep"
+                type: IconButton.Text
+                radius: Appearance.rounding.small
+                padding: Appearance.padding.small
+                disabled: listView.count === 0
+                onClicked: {
+                    if (listView.count > 0) {
+                        root.showClearConfirmation = true;
+                    }
+                }
             }
         }
     }
 
-    HoverHandler {
-        id: listHoverHandler
+    Row {
+        id: emptyState
 
-        onHoveredChanged: {
-            if (!hovered) {
-                root.hoveredItem = null;
+        opacity: listView.count === 0 ? 1 : 0
+        scale: listView.count === 0 ? 1 : 0.5
+        visible: opacity > 0
+
+        spacing: Appearance.spacing.normal
+        padding: Appearance.padding.large
+
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: toolbarBg.bottom
+        anchors.topMargin: (listView.implicitHeight - implicitHeight) / 2 + Appearance.spacing.small
+
+        MaterialIcon {
+            text: "content_paste"
+            color: Colours.palette.m3onSurfaceVariant
+            font.pointSize: Appearance.font.size.extraLarge
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        Column {
+            anchors.verticalCenter: parent.verticalCenter
+
+            StyledText {
+                text: qsTr("No clipboard history")
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.larger
+                font.weight: 500
             }
+
+            StyledText {
+                text: qsTr("Copy something to populate clipboard history")
+                color: Colours.palette.m3onSurfaceVariant
+                font.pointSize: Appearance.font.size.normal
+            }
+        }
+
+        Behavior on opacity {
+            Anim {}
+        }
+
+        Behavior on scale {
+            Anim {}
         }
     }
 
-    Component {
-        id: clipboardItem
+    StyledListView {
+        id: listView
 
-        ClipboardItem {
-            visibilities: root.visibilities
+        property var hoveredItem: null
+        property string lastInteraction: "keyboard"
+        property int deletedItemIndex: -1
+
+        anchors.top: toolbarBg.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.topMargin: Appearance.spacing.small
+
+        spacing: Appearance.spacing.small
+        orientation: Qt.Vertical
+
+        implicitHeight: {
+            if (count === 0)
+                return (Config.launcher.sizes.itemHeight + spacing) * 1.2 - spacing;
+            const itemsToShow = Math.min(Config.launcher.maxShown, count);
+            return (Config.launcher.sizes.itemHeight + spacing) * itemsToShow - spacing;
+        }
+
+        preferredHighlightBegin: 0
+        preferredHighlightEnd: height
+        highlightRangeMode: ListView.ApplyRange
+
+        onCurrentIndexChanged: {
+            if (lastInteraction !== "hover") {
+                lastInteraction = "keyboard";
+            }
+        }
+
+        onContentYChanged: {
+            hoveredItem = null;
+        }
+
+        highlightFollowsCurrentItem: false
+
+        delegate: clipboardItem
+
+        model: ScriptModel {
+            id: model
+
+            onValuesChanged: {
+                if (listView.deletedItemIndex >= 0) {
+                    if (listView.deletedItemIndex <= listView.currentIndex) {
+                        listView.currentIndex = Math.max(0, listView.currentIndex - 1);
+                    }
+                    listView.deletedItemIndex = -1;
+                }
+            }
+        }
+
+        highlight: StyledRect {
+            radius: Appearance.rounding.normal
+            color: Colours.palette.m3onSurface
+            opacity: 0.08
+
+            y: listView.currentItem?.y ?? 0
+            implicitWidth: listView.width
+            implicitHeight: listView.currentItem?.implicitHeight ?? 0
+
+            Behavior on y {
+                Anim {
+                    duration: Appearance.anim.durations.expressiveDefaultSpatial
+                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                }
+            }
+        }
+
+        HoverHandler {
+            id: listHoverHandler
+
+            onHoveredChanged: {
+                if (!hovered) {
+                    listView.hoveredItem = null;
+                }
+            }
+        }
+
+        Component {
+            id: clipboardItem
+
+            ClipboardItem {
+                visibilities: root.visibilities
+            }
         }
     }
 
@@ -165,8 +405,8 @@ StyledListView {
             if (root.previousCategory !== root.activeCategory && root.search.text.startsWith(Config.launcher.actionPrefix + "clipboard")) {
                 if (categoryChangeAnimation.running) {
                     categoryChangeAnimation.stop();
-                    root.opacity = 1;
-                    root.scale = 1;
+                    listView.opacity = 1;
+                    listView.scale = 1;
                 }
 
                 root.pendingModelUpdate = root.filterAndSortItems();
@@ -182,14 +422,14 @@ StyledListView {
 
         ParallelAnimation {
             Anim {
-                target: root
+                target: listView
                 property: "opacity"
                 to: 0
                 duration: Appearance.anim.durations.small
                 easing.bezierCurve: Appearance.anim.curves.standardAccel
             }
             Anim {
-                target: root
+                target: listView
                 property: "scale"
                 to: 0.95
                 duration: Appearance.anim.durations.small
@@ -199,14 +439,12 @@ StyledListView {
 
         ScriptAction {
             script: {
-                // Update model while invisible
                 if (root.pendingModelUpdate !== null) {
                     model.values = root.pendingModelUpdate;
                     root.pendingModelUpdate = null;
-                    // Only reset to top when switching categories
                     if (root.isCategoryChange) {
-                        root.currentIndex = 0;
-                        root.positionViewAtBeginning();
+                        listView.currentIndex = 0;
+                        listView.positionViewAtBeginning();
                         root.isCategoryChange = false;
                     }
                 }
@@ -215,14 +453,14 @@ StyledListView {
 
         ParallelAnimation {
             Anim {
-                target: root
+                target: listView
                 property: "opacity"
                 to: 1
                 duration: Appearance.anim.durations.small
                 easing.bezierCurve: Appearance.anim.curves.standardDecel
             }
             Anim {
-                target: root
+                target: listView
                 property: "scale"
                 to: 1
                 duration: Appearance.anim.durations.small
@@ -231,7 +469,6 @@ StyledListView {
         }
     }
 
-    // Confirmation dialog overlay
     Rectangle {
         anchors.fill: parent
         color: Qt.alpha(Colours.palette.m3scrim, 0.5)

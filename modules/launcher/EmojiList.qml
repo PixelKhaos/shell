@@ -69,7 +69,7 @@ Item {
     }
 
     implicitWidth: Config.launcher.sizes.itemWidth
-    implicitHeight: 100
+    implicitHeight: categoryBar.height + grid.height + Appearance.padding.large
 
     onCurrentIndexChanged: {
         if (grid.currentIndex !== currentIndex) {
@@ -79,13 +79,6 @@ Item {
 
     Component.onCompleted: {
         updateGrid();
-    }
-
-    Binding {
-        target: root
-        property: "implicitHeight"
-        value: categoryBar.height + grid.height + Appearance.padding.large
-        when: categoryBar.height > 0 && grid.height > 0
     }
 
     RowLayout {
