@@ -17,9 +17,7 @@ ColumnLayout {
     spacing: Appearance.spacing.small
     width: Config.bar.sizes.kbLayoutWidth
 
-    Component.onCompleted: kb.start()
-
-    KbLayoutModel {
+    KbLayoutModelAuto {
         id: kb
     }
 

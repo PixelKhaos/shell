@@ -5,6 +5,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Bluetooth
 import Quickshell.Services.UPower
+import Caelestia
 import qs.components
 import qs.services
 import qs.config
@@ -134,7 +135,7 @@ StyledRect {
 
             sourceComponent: StyledText {
                 animate: true
-                text: Hypr.kbLayout
+                text: Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE") ? Hypr.kbLayout : Drift.kbLayout
                 color: root.colour
                 font.family: Appearance.font.family.mono
             }
@@ -267,5 +268,16 @@ StyledRect {
         asynchronous: true
         Layout.alignment: Qt.AlignHCenter
         visible: active
+    }
+    
+    Connections {
+        target: Drift
+        enabled: !Quickshell.env("HYPRLAND_INSTANCE_SIGNATURE")
+        
+        function onKbLayoutFullChanged() {
+            if (Drift._hadLayout && Config.utilities.toasts.kbLayoutChanged) {
+                Toaster.toast(qsTr("Keyboard layout changed"), qsTr("Layout changed to: %1").arg(Drift.kbLayoutFull), "keyboard");
+            }
+        }
     }
 }
