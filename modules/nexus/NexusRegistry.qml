@@ -76,7 +76,7 @@ QtObject {
                     },
                     {
                         id: "session",
-                        label: "Session Menus",
+                        label: "Session",
                         icon: "account_circle",
                         tabs: [],
                         title: "Session Menus",
@@ -84,10 +84,10 @@ QtObject {
                     },
                     {
                         id: "lockscreen",
-                        label: "Lock Screen",
+                        label: "Lockscreen",
                         icon: "lock",
                         tabs: [],
-                        title: "Lock Screen",
+                        title: "Lockscreen",
                         description: "Lock screen appearance and security"
                     }
                 ]

@@ -17,7 +17,7 @@ Item {
     readonly property bool collapsed: session.sidebarCollapsed
 
     width: parent ? parent.width : 0
-    height: collapsed ? 64 : 40
+    height: collapsed ? 68 : 40
 
     Behavior on height {
         NumberAnimation {
@@ -30,7 +30,6 @@ Item {
     StyledRect {
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.normal
-        anchors.rightMargin: Appearance.padding.normal
 
         radius: root.collapsed ? Appearance.rounding.normal : Appearance.rounding.full
         color: root.isActive ? Qt.alpha(Colours.palette.m3secondaryContainer, 1) : "transparent"
@@ -57,11 +56,11 @@ Item {
             id: btmIcon
 
             x: root.collapsed ? (parent.width - width) / 2 : Appearance.padding.large
-            y: root.collapsed ? (parent.height - height) / 2 - 8 : (parent.height - height) / 2
+            y: root.collapsed ? (parent.height - height) / 2 - 10 : (parent.height - height) / 2
 
             text: root.modelData.icon
             color: root.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-            font.pointSize: root.collapsed ? Appearance.font.size.large : Appearance.font.size.larger
+            font.pointSize: root.collapsed ? Appearance.font.size.large + 2 : Appearance.font.size.larger
             fill: root.isActive ? 1 : 0
 
             Behavior on x {

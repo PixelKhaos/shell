@@ -61,13 +61,16 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Appearance.padding.large
+        anchors.rightMargin: Appearance.padding.large * 2
+        anchors.leftMargin: Appearance.padding.large * 2
+        anchors.topMargin: Appearance.padding.large
+        anchors.bottomMargin: Appearance.padding.large
         spacing: Appearance.spacing.normal
 
         // Header: title + description
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.topMargin: Appearance.padding.larger
+            Layout.topMargin: Appearance.padding.smaller
 
             spacing: Appearance.spacing.small / 2
 
@@ -90,15 +93,16 @@ Item {
             id: tabBar
 
             Layout.fillWidth: true
-            Layout.topMargin: Appearance.spacing.large
+            Layout.topMargin: Appearance.spacing.smaller
             Layout.preferredHeight: 48
             visible: root.tabs.length > 0
 
-            // Track line (full width, behind tabs)
+            // Track line
             Rectangle {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
+                anchors.bottomMargin: -8
                 height: 1
                 color: Qt.alpha(Colours.palette.m3onSurface, 0.1)
             }
@@ -129,7 +133,7 @@ Item {
                             anchors.centerIn: parent
                             text: tabItem.modelData
                             font.pointSize: Appearance.font.size.normal
-                            font.weight: root.activeTabIndex === tabItem.index ? Font.DemiBold : Font.Medium
+                            font.weight: Font.Medium
                             color: root.activeTabIndex === tabItem.index ? Colours.palette.m3primary : Colours.palette.m3onSurface
 
                             Behavior on color {
@@ -148,11 +152,11 @@ Item {
                 }
             }
 
-            // Sliding active indicator
             Rectangle {
                 id: tabIndicator
 
                 anchors.bottom: parent.bottom
+                anchors.bottomMargin: -8
                 height: 3
                 radius: 1.5
                 color: Colours.palette.m3primary
