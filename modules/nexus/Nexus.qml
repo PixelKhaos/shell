@@ -7,6 +7,7 @@ import qs.components
 import qs.config
 import qs.services
 import qs.modules.nexus
+import "./components"
 
 Item {
     id: root
@@ -56,6 +57,8 @@ Item {
             Sidebar {
                 id: sidebar
                 anchors.fill: parent
+                anchors.leftMargin: 5
+                anchors.rightMargin: 5
                 session: root.session
             }
         }
@@ -143,6 +146,49 @@ Item {
         onHoverExited: sidebar.scheduleFlyoutClose()
         onChildClicked: function (id) {
             session.setCategory(id);
+        }
+    }
+
+    // Search popout
+    SidebarPopout {
+        x: sidebarContainer.width
+        y: 0
+        visible: session.sidebarCollapsed
+        touchingTop: true
+
+        open: session.searchPopoutOpen
+        popoutWidth: 280
+
+        SearchEngine {
+            session: root.session
+        }
+    }
+
+    // Config popout
+    SidebarPopout {
+        x: sidebarContainer.width
+        y: 50
+        visible: session.sidebarCollapsed
+
+        open: session.configPopoutOpen
+        popoutWidth: 275
+
+        ConfigSwitcher {
+            session: root.session
+        }
+    }
+
+    MouseArea {
+        x: sidebarContainer.width
+        y: 0
+        width: parent.width - sidebarContainer.width
+        height: parent.height
+        z: -1
+        visible: session.sidebarCollapsed && (session.searchPopoutOpen || session.configPopoutOpen)
+
+        onClicked: {
+            session.searchPopoutOpen = false;
+            session.configPopoutOpen = false;
         }
     }
 }

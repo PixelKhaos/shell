@@ -36,8 +36,6 @@ Item {
         }
     }
 
-    // Fillets will be added via SDF shader module
-
     Rectangle {
         id: drawer
 
@@ -45,11 +43,11 @@ Item {
         height: targetHeight
         clip: true
 
-        property real targetWidth: 110
+        property real targetWidth: 100
         property real targetHeight: {
             if (!root.currentCat || !root.currentCat.children)
                 return 80;
-            return root.currentCat.children.length * 68 + 36;
+            return root.currentCat.children.length * 68 + 46;
         }
 
         color: Colours.tPalette.m3surfaceContainer
@@ -135,7 +133,7 @@ Item {
                 anchors.topMargin: 6
                 anchors.left: parent.left
                 anchors.right: parent.right
-                spacing: 4
+                spacing: 6
 
                 Repeater {
                     model: root.currentCat && root.currentCat.children ? root.currentCat.children : []
@@ -153,7 +151,7 @@ Item {
                         Rectangle {
                             anchors.fill: parent
                             radius: Appearance.rounding.normal
-                            color: flyoutChild.isActive ? Qt.alpha(Colours.palette.m3secondaryContainer, 0.16) : "transparent"
+                            color: flyoutChild.isActive ? Qt.alpha(Colours.palette.m3primary, 0.16) : "transparent"
 
                             Behavior on color {
                                 CAnim {}
@@ -164,7 +162,7 @@ Item {
                                     root.childClicked(flyoutChild.modelData.id);
                                 }
                                 radius: Appearance.rounding.normal
-                                color: flyoutChild.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                                color: flyoutChild.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                             }
 
                             Column {
@@ -189,7 +187,7 @@ Item {
                                     color: flyoutChild.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                                     font.pointSize: Appearance.font.size.small - 1
                                     font.capitalization: Font.Capitalize
-                                    font.weight: flyoutChild.isActive ? Font.DemiBold : Font.Medium
+                                    font.weight: Font.Medium
                                 }
                             }
                         }
