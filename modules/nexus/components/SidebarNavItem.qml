@@ -24,7 +24,7 @@ Item {
     signal flyoutCloseRequested
 
     width: parent ? parent.width : 0
-    height: collapsed ? 64 : 40
+    height: collapsed ? 68 : 40
 
     Behavior on height {
         NumberAnimation {
@@ -39,12 +39,11 @@ Item {
 
         anchors.fill: parent
         anchors.leftMargin: Appearance.padding.normal
-        anchors.rightMargin: Appearance.padding.normal
 
         radius: root.collapsed ? Appearance.rounding.normal : Appearance.rounding.full
         color: {
             if (root.isActive || root.isChildActive)
-                return Qt.alpha(Colours.palette.m3secondaryContainer, 1);
+                return Qt.alpha(Colours.palette.m3primary, 0.16);
             return "transparent";
         }
 
@@ -71,18 +70,18 @@ Item {
                     root.session.expandedCategory = root.session.expandedCategory === root.catId ? "" : root.catId;
                 }
             }
-            color: root.isActive || root.isChildActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+            color: root.isActive || root.isChildActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
         }
 
         MaterialIcon {
             id: navIcon
 
             x: root.collapsed ? (parent.width - width) / 2 : Appearance.padding.large
-            y: root.collapsed ? (parent.height - height) / 2 - 8 : (parent.height - height) / 2
+            y: root.collapsed ? (parent.height - height) / 2 - 10 : (parent.height - height) / 2
 
             text: root.modelData.icon
-            color: root.isActive || root.isChildActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-            font.pointSize: root.collapsed ? Appearance.font.size.large : Appearance.font.size.larger
+            color: root.isActive || root.isChildActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
+            font.pointSize: root.collapsed ? Appearance.font.size.large + 2 : Appearance.font.size.larger
             fill: root.isActive || root.isChildActive ? 1 : 0
 
             Behavior on x {
@@ -111,9 +110,10 @@ Item {
             y: root.collapsed ? parent.height - height - 6 : (parent.height - height) / 2
 
             text: root.collapsed ? (root.modelData.label.length > 8 ? root.modelData.label.substring(0, 7) + "…" : root.modelData.label) : root.modelData.label
-            color: root.isActive || root.isChildActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+            color: root.isActive || root.isChildActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
             font.pointSize: root.collapsed ? Appearance.font.size.small - 1 : Appearance.font.size.normal
             font.capitalization: Font.Capitalize
+            font.weight: Font.Medium
 
             opacity: root.collapsed ? 0.8 : 1
 

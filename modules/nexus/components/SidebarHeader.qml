@@ -57,8 +57,10 @@ ColumnLayout {
 
             StateLayer {
                 function onClicked() {
-                    root.session.searchPopoutOpen = !root.session.searchPopoutOpen;
-                    root.session.configPopoutOpen = false;
+                    if (root.collapsed) {
+                        root.session.searchPopoutOpen = !root.session.searchPopoutOpen;
+                        root.session.configPopoutOpen = false;
+                    }
                 }
                 radius: parent.radius
                 color: Colours.palette.m3onSurface
@@ -175,8 +177,10 @@ ColumnLayout {
 
             StateLayer {
                 function onClicked() {
-                    root.session.configPopoutOpen = !root.session.configPopoutOpen;
-                    root.session.searchPopoutOpen = false;
+                    if (root.collapsed) {
+                        root.session.configPopoutOpen = !root.session.configPopoutOpen;
+                        root.session.searchPopoutOpen = false;
+                    }
                 }
                 radius: parent.radius
                 color: Colours.palette.m3onSurface

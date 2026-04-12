@@ -14,7 +14,7 @@ Item {
     required property var childItems
     required property bool open
 
-    width: parent ? parent.width : 0
+    width: parent ? parent.width + 2: 0
     height: open ? col.implicitHeight : 0
     clip: true
 
@@ -26,10 +26,28 @@ Item {
         }
     }
 
+    // Vertical line indicator
+    Rectangle {
+        x: Appearance.padding.large + 16
+        y: 0
+        width: 1
+        height: root.open ? col.height : 0
+        color: Qt.alpha(Colours.palette.m3onSurface, 0.12)
+
+        Behavior on height {
+            NumberAnimation {
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            }
+        }
+    }
+
     Column {
         id: col
-        width: parent.width
+        width: parent.width - (Appearance.padding.large / 2)
         topPadding: Appearance.spacing.small
+        leftPadding: Appearance.padding.large
         spacing: Appearance.spacing.small
 
         Repeater {
@@ -50,7 +68,7 @@ Item {
                     anchors.rightMargin: Appearance.padding.normal
 
                     radius: Appearance.rounding.full
-                    color: childDelegate.isActive ? Qt.alpha(Colours.palette.m3secondaryContainer, 1) : "transparent"
+                    color: childDelegate.isActive ? Qt.alpha(Colours.palette.m3primary, 0.16) : "transparent"
 
                     Behavior on color {
                         CAnim {}
@@ -60,7 +78,7 @@ Item {
                         function onClicked() {
                             root.session.setCategory(childDelegate.modelData.id);
                         }
-                        color: childDelegate.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                        color: childDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                     }
 
                     Row {
@@ -72,7 +90,7 @@ Item {
                         MaterialIcon {
                             anchors.verticalCenter: parent.verticalCenter
                             text: childDelegate.modelData.icon
-                            color: childDelegate.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                            color: childDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                             font.pointSize: Appearance.font.size.normal
                             fill: childDelegate.isActive ? 1 : 0
                         }
@@ -80,7 +98,7 @@ Item {
                         StyledText {
                             anchors.verticalCenter: parent.verticalCenter
                             text: childDelegate.modelData.label
-                            color: childDelegate.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                            color: childDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                             font.pointSize: Appearance.font.size.smaller
                             font.capitalization: Font.Capitalize
                         }

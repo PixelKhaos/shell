@@ -9,7 +9,7 @@ QtObject {
     required property var nexusRoot
 
     property string activeCategory: "appearance"
-    property bool sidebarCollapsed: false
+    property bool sidebarCollapsed: true
     property string expandedCategory: ""
     property string flyoutCategory: ""
     property string searchQuery: ""

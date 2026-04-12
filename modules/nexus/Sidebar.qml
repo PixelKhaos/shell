@@ -54,7 +54,6 @@ Item {
         SidebarHeader {
             Layout.fillWidth: true
             Layout.leftMargin: Appearance.padding.normal
-            Layout.rightMargin: Appearance.padding.normal
             session: root.session
         }
 
@@ -132,19 +131,20 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
+            Layout.bottomMargin: Appearance.spacing.normal
+            Layout.topMargin: Appearance.spacing.normal
             Layout.leftMargin: Appearance.padding.large
-            Layout.rightMargin: Appearance.padding.large
             color: Qt.alpha(Colours.palette.m3onSurface, 0.08)
         }
 
         // Collapse toggle
         Item {
             Layout.fillWidth: true
+            Layout.leftMargin: Appearance.padding.large / 1.5
             Layout.preferredHeight: 48
 
             StyledRect {
-                anchors.centerIn: parent
-                width: root.session.sidebarCollapsed ? 48 : parent.width - Appearance.padding.normal * 2
+                width: parent.width
                 height: 40
                 radius: Appearance.rounding.full
                 color: "transparent"
