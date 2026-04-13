@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Hyprland
 import qs.components
 import qs.config
 import qs.services
@@ -50,7 +51,7 @@ Item {
                 NumberAnimation {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
                 }
             }
 
@@ -101,25 +102,52 @@ Item {
                 height: 40
                 color: Colours.tPalette.m3surfaceContainer
 
-                topRightRadius: root.rounding
-                bottomLeftRadius: Appearance.rounding.small
-
-                StateLayer {
-                    function onClicked() {
-                        root.close();
-                    }
-                    radius: closeBtn.bottomLeftRadius
-                    color: Colours.palette.m3onSurface
-                }
+                property bool hovered: closeMA.containsMouse
 
                 MaterialIcon {
                     anchors.centerIn: parent
                     text: "close"
-                    font.pointSize: Appearance.font.size.normal
-                    color: Colours.palette.m3onSurface
+                    font.pointSize: Appearance.font.size.larger
+                    color: closeBtn.hovered ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
                 }
 
-                // Fillets will be added via SDF shader module
+                MouseArea {
+                    id: closeMA
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: root.close()
+                }
+            }
+
+            Rectangle {
+                id: maximizeBtn
+
+                anchors.top: parent.top
+                anchors.right: closeBtn.left
+                width: 44
+                height: 40
+                color: Colours.tPalette.m3surfaceContainer
+
+                bottomLeftRadius: Appearance.rounding.small
+
+                property bool hovered: maxMA.containsMouse
+
+                MaterialIcon {
+                    anchors.centerIn: parent
+                    text: root.floating ? "fullscreen" : "fullscreen_exit"
+                    font.pointSize: Appearance.font.size.normal
+                    color: maximizeBtn.hovered ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+                }
+
+                MouseArea {
+                    id: maxMA
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        Hyprland.dispatch("togglefloating");
+                        root.floating = !root.floating;
+                    }
+                }
             }
         }
     }

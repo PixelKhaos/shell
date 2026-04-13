@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import qs.components
 import qs.services
 import qs.modules.nexus
@@ -36,10 +37,8 @@ Singleton {
             implicitWidth: nexus.implicitWidth
             implicitHeight: nexus.implicitHeight
 
-            minimumSize.width: implicitWidth
-            minimumSize.height: implicitHeight
-            maximumSize.width: implicitWidth
-            maximumSize.height: implicitHeight
+            minimumSize.width: 640
+            minimumSize.height: 400
 
             title: qsTr("Nexus - %1").arg(nexus.active.slice(0, 1).toUpperCase() + nexus.active.slice(1))
 
@@ -49,7 +48,17 @@ Singleton {
                 anchors.fill: parent
                 screen: win.screen
                 onClose: win.destroy()
-                floating: true
+                floating: !Hyprland.focusedToplevel?.lastIpcObject?.floating ?? true
+
+                Connections {
+                    target: Hyprland
+                    function onToplevelsChanged() {
+                        const our = Hyprland.toplevels.values.find(t => t.title === win.title);
+                        if (our) {
+                            nexus.floating = our.lastIpcObject?.floating ?? true;
+                        }
+                    }
+                }
             }
 
             Behavior on color {

@@ -14,7 +14,6 @@ ColumnLayout {
 
     spacing: Appearance.spacing.small
 
-    // Build model: Global + monitors
     readonly property var configModel: {
         const items = [{ id: "global", label: "Global", icon: "language", desc: "Settings apply everywhere" }];
         for (const screen of Screens.screens) {
