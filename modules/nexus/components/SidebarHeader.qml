@@ -416,7 +416,7 @@ Item {
             spacing: 2
 
             Repeater {
-                model: root.session.searchQuery.length > 0 ? getSearchResults(root.session.searchQuery) : []
+                model: root.session.searchQuery.length > 0 ? NexusRegistry.searchSettings(root.session.searchQuery) : []
 
                 delegate: Item {
                     id: searchResultDelegate
@@ -431,25 +431,33 @@ Item {
                         anchors.rightMargin: Appearance.spacing.normal
                         spacing: Appearance.spacing.normal
 
-                        MaterialIcon {
+                        Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: searchResultDelegate.modelData.icon || "settings"
-                            font.pointSize: Appearance.font.size.normal
-                            color: Colours.palette.m3primary
+                            width: 18
+                            height: 18
+                            radius: 5
+                            color: Qt.alpha(Colours.palette.m3primary, 0.1)
+
+                            MaterialIcon {
+                                anchors.centerIn: parent
+                                text: "arrow_forward"
+                                font.pointSize: Appearance.font.size.small - 1
+                                color: Colours.palette.m3primary
+                            }
                         }
 
                         Column {
                             anchors.verticalCenter: parent.verticalCenter
-                            width: parent.width - parent.spacing - 24
+                            width: parent.width - parent.spacing - 32
 
                             StyledText {
-                                text: searchResultDelegate.modelData.title
+                                text: searchResultDelegate.modelData.label
                                 font.pointSize: Appearance.font.size.normal
                                 font.weight: Font.Medium
                                 color: Colours.palette.m3onSurface
                             }
                             StyledText {
-                                text: searchResultDelegate.modelData.category + (searchResultDelegate.modelData.tab ? " · " + searchResultDelegate.modelData.tab : "")
+                                text: searchResultDelegate.modelData.categoryLabel + (searchResultDelegate.modelData.tab ? " › " + searchResultDelegate.modelData.tab : "")
                                 font.pointSize: Appearance.font.size.small - 1
                                 color: Qt.alpha(Colours.palette.m3onSurface, 0.4)
                             }
@@ -550,36 +558,4 @@ Item {
         }
     }
 
-    function getSearchResults(query) {
-        const results = [];
-        const categories = NexusRegistry.getCategories();
-
-        for (const cat of categories) {
-            if (cat.label.toLowerCase().includes(query.toLowerCase())) {
-                results.push({
-                    categoryId: cat.id,
-                    title: cat.label,
-                    category: cat.label,
-                    icon: cat.icon,
-                    tab: ""
-                });
-            }
-
-            if (cat.children) {
-                for (const child of cat.children) {
-                    if (child.label.toLowerCase().includes(query.toLowerCase())) {
-                        results.push({
-                            categoryId: child.id,
-                            title: child.label,
-                            category: cat.label,
-                            icon: child.icon,
-                            tab: ""
-                        });
-                    }
-                }
-            }
-        }
-
-        return results.slice(0, 8);
-    }
 }
