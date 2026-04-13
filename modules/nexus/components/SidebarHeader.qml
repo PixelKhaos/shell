@@ -2,19 +2,42 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls
 import qs.components
 import qs.config
 import qs.services
 import ".."
 
-ColumnLayout {
+Item {
     id: root
 
     required property NexusSession session
 
     readonly property bool collapsed: session.sidebarCollapsed
 
-    spacing: 0
+    property bool searchDropdownOpen: false
+    property bool configDropdownOpen: false
+
+    // Build config model: Global + monitors
+    readonly property var configModel: {
+        const items = [{ id: "global", label: "Global", icon: "language", desc: "Settings apply everywhere" }];
+        for (const screen of Screens.screens) {
+            items.push({
+                id: screen.name,
+                label: screen.name,
+                icon: "monitor",
+                desc: "Monitor-specific overrides"
+            });
+        }
+        return items;
+    }
+
+    implicitHeight: headerLayout.implicitHeight
+
+    ColumnLayout {
+        id: headerLayout
+        anchors.fill: parent
+        spacing: 0
 
     // Search bar
     Item {
@@ -55,12 +78,12 @@ ColumnLayout {
                 CAnim {}
             }
 
+            // Collapsed mode: click to open popout
             StateLayer {
+                visible: root.collapsed
                 function onClicked() {
-                    if (root.collapsed) {
-                        root.session.searchPopoutOpen = !root.session.searchPopoutOpen;
-                        root.session.configPopoutOpen = false;
-                    }
+                    root.session.searchPopoutOpen = !root.session.searchPopoutOpen;
+                    root.session.configPopoutOpen = false;
                 }
                 radius: parent.radius
                 color: Colours.palette.m3onSurface
@@ -99,18 +122,18 @@ ColumnLayout {
                 }
             }
 
+            // Collapsed label
             StyledText {
-                id: searchLabel
+                visible: root.collapsed
+                x: (parent.width - width) / 2
+                y: parent.height - height - 6
 
-                x: root.collapsed ? (parent.width - width) / 2 : searchIcon.x + searchIcon.width + Appearance.spacing.normal
-                y: root.collapsed ? parent.height - height - 6 : (parent.height - height) / 2
-
-                text: root.collapsed ? "Search" : "Search settings..."
-                font.pointSize: root.collapsed ? Appearance.font.size.small - 1 : Appearance.font.size.normal
+                text: "Search"
+                font.pointSize: Appearance.font.size.small - 1
                 color: {
                     if (root.session.searchPopoutOpen && root.collapsed)
                         return Colours.palette.m3primary;
-                    return Qt.alpha(Colours.palette.m3onSurface, root.collapsed ? 0.7 : 0.3);
+                    return Qt.alpha(Colours.palette.m3onSurface, 0.7);
                 }
 
                 opacity: root.collapsed ? 0.8 : 1
@@ -122,15 +145,69 @@ ColumnLayout {
                         easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                     }
                 }
-                Behavior on font.pointSize {
-                    NumberAnimation {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                    }
-                }
                 Behavior on color {
                     CAnim {}
+                }
+            }
+
+            // Expanded mode: text input
+            TextField {
+                id: searchField
+                visible: !root.collapsed
+                anchors.left: searchIcon.right
+                anchors.leftMargin: Appearance.spacing.normal
+                anchors.right: parent.right
+                anchors.rightMargin: searchClear.visible ? searchClear.width + Appearance.spacing.normal : Appearance.padding.large
+                anchors.verticalCenter: parent.verticalCenter
+
+                placeholderText: "Search settings..."
+                font.pointSize: Appearance.font.size.normal
+                color: Colours.palette.m3onSurface
+                placeholderTextColor: Qt.alpha(Colours.palette.m3onSurface, 0.3)
+                background: Item {}
+
+                onTextChanged: {
+                    root.session.searchQuery = text;
+                    root.searchDropdownOpen = text.length > 0;
+                }
+                onActiveFocusChanged: {
+                    if (activeFocus && text.length > 0)
+                        root.searchDropdownOpen = true;
+                    else if (!activeFocus)
+                        root.searchDropdownOpen = false;
+                }
+
+                Connections {
+                    target: root.session
+                    function onSidebarCollapsedChanged() {
+                        if (root.session.sidebarCollapsed) {
+                            searchField.focus = false;
+                            root.searchDropdownOpen = false;
+                        }
+                    }
+                }
+            }
+
+            // Clear button (expanded)
+            MaterialIcon {
+                id: searchClear
+                visible: !root.collapsed && root.session.searchQuery.length > 0
+                anchors.right: parent.right
+                anchors.rightMargin: Appearance.padding.normal
+                anchors.verticalCenter: parent.verticalCenter
+
+                text: "close"
+                font.pointSize: Appearance.font.size.normal
+                color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
+
+                StateLayer {
+                    function onClicked() {
+                        searchField.text = "";
+                        root.session.searchQuery = "";
+                        root.searchDropdownOpen = false;
+                    }
+                    radius: Appearance.rounding.full
+                    color: Colours.palette.m3onSurface
                 }
             }
         }
@@ -157,8 +234,10 @@ ColumnLayout {
 
             radius: root.collapsed ? Appearance.rounding.normal : Appearance.rounding.full
             color: {
-                if (root.session.configPopoutOpen)
-                    return Qt.alpha(Colours.palette.m3secondaryContainer, root.collapsed ? 0.16 : 0.12);
+                if (root.session.configPopoutOpen && root.collapsed)
+                    return Qt.alpha(Colours.palette.m3secondaryContainer, 0.16);
+                if (root.configDropdownOpen && !root.collapsed)
+                    return Qt.alpha(Colours.palette.m3secondaryContainer, 0.12);
                 if (!root.collapsed)
                     return Qt.alpha(Colours.palette.m3surfaceContainerHighest, 0.6);
                 return "transparent";
@@ -180,6 +259,9 @@ ColumnLayout {
                     if (root.collapsed) {
                         root.session.configPopoutOpen = !root.session.configPopoutOpen;
                         root.session.searchPopoutOpen = false;
+                    } else {
+                        root.configDropdownOpen = !root.configDropdownOpen;
+                        root.searchDropdownOpen = false;
                     }
                 }
                 radius: parent.radius
@@ -195,7 +277,9 @@ ColumnLayout {
                 text: root.session.activeConfig === "global" ? "language" : "monitor"
                 font.pointSize: root.collapsed ? Appearance.font.size.large : Appearance.font.size.larger
                 color: {
-                    if (root.session.configPopoutOpen)
+                    if (root.session.configPopoutOpen && root.collapsed)
+                        return Colours.palette.m3primary;
+                    if (root.configDropdownOpen && !root.collapsed)
                         return Colours.palette.m3primary;
                     return Qt.alpha(Colours.palette.m3onSurface, 0.5);
                 }
@@ -219,19 +303,19 @@ ColumnLayout {
                 }
             }
 
+            // Collapsed label
             StyledText {
-                id: configLabel
-
-                x: root.collapsed ? (parent.width - width) / 2 : configIcon.x + configIcon.width + Appearance.spacing.normal
-                y: root.collapsed ? parent.height - height - 6 : (parent.height - height) / 2
+                visible: root.collapsed
+                x: (parent.width - width) / 2
+                y: parent.height - height - 6
 
                 text: root.session.activeConfig === "global" ? "Global" : root.session.activeConfig
-                font.pointSize: root.collapsed ? Appearance.font.size.small - 1 : Appearance.font.size.normal
+                font.pointSize: Appearance.font.size.small - 1
                 font.weight: Font.Medium
                 color: {
-                    if (root.session.configPopoutOpen)
+                    if (root.session.configPopoutOpen && root.collapsed)
                         return Colours.palette.m3primary;
-                    return Qt.alpha(Colours.palette.m3onSurface, root.collapsed ? 0.7 : 0.6);
+                    return Qt.alpha(Colours.palette.m3onSurface, 0.7);
                 }
 
                 opacity: root.collapsed ? 0.8 : 1
@@ -243,13 +327,27 @@ ColumnLayout {
                         easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                     }
                 }
-                Behavior on font.pointSize {
-                    NumberAnimation {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
-                    }
+                Behavior on color {
+                    CAnim {}
                 }
+            }
+
+            // Expanded label
+            StyledText {
+                visible: !root.collapsed
+                anchors.left: configIcon.right
+                anchors.leftMargin: Appearance.spacing.normal
+                anchors.verticalCenter: parent.verticalCenter
+
+                text: root.session.activeConfig === "global" ? "Global" : root.session.activeConfig
+                font.pointSize: Appearance.font.size.normal
+                font.weight: Font.Medium
+                color: {
+                    if (root.configDropdownOpen)
+                        return Colours.palette.m3primary;
+                    return Qt.alpha(Colours.palette.m3onSurface, 0.6);
+                }
+
                 Behavior on color {
                     CAnim {}
                 }
@@ -265,7 +363,7 @@ ColumnLayout {
                 text: "expand_more"
                 font.pointSize: Appearance.font.size.normal
                 color: Qt.alpha(Colours.palette.m3onSurface, 0.4)
-                rotation: root.session.configPopoutOpen ? 180 : 0
+                rotation: (root.session.configPopoutOpen && root.collapsed) || (root.configDropdownOpen && !root.collapsed) ? 180 : 0
                 opacity: root.collapsed ? 0 : 1
 
                 Behavior on rotation {
@@ -290,5 +388,198 @@ ColumnLayout {
         Layout.rightMargin: Appearance.padding.normal
         Layout.topMargin: root.collapsed ? 8 : Appearance.spacing.normal
         color: Qt.alpha(Colours.palette.m3onSurface, 0.08)
+    }
+
+    }
+
+    // Search results dropdown (expanded)
+    Rectangle {
+        id: searchDropdown
+        z: 10
+        x: 0
+        y: searchItem.y + searchItem.height + 4
+        width: root.width
+        height: root.searchDropdownOpen && !root.collapsed ? searchResultsCol.implicitHeight + Appearance.padding.normal * 2 : 0
+        radius: Appearance.rounding.normal
+        color: Colours.tPalette.m3surfaceContainerHigh
+        clip: true
+        visible: height > 0
+
+        Behavior on height {
+            NumberAnimation { duration: 300; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1] }
+        }
+
+        Column {
+            id: searchResultsCol
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.normal
+            spacing: 2
+
+            Repeater {
+                model: root.session.searchQuery.length > 0 ? getSearchResults(root.session.searchQuery) : []
+
+                delegate: Item {
+                    id: searchResultDelegate
+                    required property var modelData
+
+                    width: searchResultsCol.width
+                    height: 44
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: Appearance.spacing.normal
+                        anchors.rightMargin: Appearance.spacing.normal
+                        spacing: Appearance.spacing.normal
+
+                        MaterialIcon {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: searchResultDelegate.modelData.icon || "settings"
+                            font.pointSize: Appearance.font.size.normal
+                            color: Colours.palette.m3primary
+                        }
+
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - parent.spacing - 24
+
+                            StyledText {
+                                text: searchResultDelegate.modelData.title
+                                font.pointSize: Appearance.font.size.normal
+                                font.weight: Font.Medium
+                                color: Colours.palette.m3onSurface
+                            }
+                            StyledText {
+                                text: searchResultDelegate.modelData.category + (searchResultDelegate.modelData.tab ? " · " + searchResultDelegate.modelData.tab : "")
+                                font.pointSize: Appearance.font.size.small - 1
+                                color: Qt.alpha(Colours.palette.m3onSurface, 0.4)
+                            }
+                        }
+                    }
+
+                    StateLayer {
+                        function onClicked() {
+                            searchField.text = "";
+                            root.session.searchQuery = "";
+                            root.session.setSearchNavigate(searchResultDelegate.modelData.categoryId, searchResultDelegate.modelData.tab || "");
+                            root.searchDropdownOpen = false;
+                        }
+                        radius: Appearance.rounding.small
+                        color: Colours.palette.m3onSurface
+                    }
+                }
+            }
+        }
+    }
+
+    // Config dropdown (expanded)
+    Rectangle {
+        id: configDropdown
+        z: 10
+        x: 0
+        y: configItem.y + configItem.height + 4
+        width: root.width
+        height: root.configDropdownOpen && !root.collapsed ? configDropdownCol.implicitHeight + Appearance.padding.normal * 2 : 0
+        radius: Appearance.rounding.normal
+        color: Colours.tPalette.m3surfaceContainerHigh
+        clip: true
+        visible: height > 0
+
+        Behavior on height {
+            NumberAnimation { duration: 300; easing.type: Easing.BezierSpline; easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1] }
+        }
+
+        Column {
+            id: configDropdownCol
+            anchors.fill: parent
+            anchors.margins: Appearance.padding.normal
+            spacing: 2
+
+            Repeater {
+                model: root.configModel
+
+                delegate: Item {
+                    id: configDropdownDelegate
+                    required property var modelData
+
+                    width: configDropdownCol.width
+                    height: 44
+
+                    readonly property bool isActive: root.session.activeConfig === modelData.id
+
+                    Row {
+                        anchors.fill: parent
+                        anchors.leftMargin: Appearance.spacing.normal
+                        anchors.rightMargin: Appearance.spacing.normal
+                        spacing: Appearance.spacing.normal
+
+                        MaterialIcon {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: configDropdownDelegate.modelData.icon
+                            font.pointSize: Appearance.font.size.normal
+                            color: configDropdownDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                        }
+
+                        Column {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width - parent.spacing - 24
+
+                            StyledText {
+                                text: configDropdownDelegate.modelData.label
+                                font.pointSize: Appearance.font.size.normal
+                                font.weight: Font.Medium
+                                color: configDropdownDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                            }
+                            StyledText {
+                                text: configDropdownDelegate.modelData.desc
+                                font.pointSize: Appearance.font.size.small - 1
+                                color: Qt.alpha(Colours.palette.m3onSurface, 0.4)
+                            }
+                        }
+                    }
+
+                    StateLayer {
+                        function onClicked() {
+                            root.session.activeConfig = configDropdownDelegate.modelData.id;
+                            root.configDropdownOpen = false;
+                        }
+                        radius: Appearance.rounding.small
+                        color: Colours.palette.m3onSurface
+                    }
+                }
+            }
+        }
+    }
+
+    function getSearchResults(query) {
+        const results = [];
+        const categories = NexusRegistry.getCategories();
+
+        for (const cat of categories) {
+            if (cat.label.toLowerCase().includes(query.toLowerCase())) {
+                results.push({
+                    categoryId: cat.id,
+                    title: cat.label,
+                    category: cat.label,
+                    icon: cat.icon,
+                    tab: ""
+                });
+            }
+
+            if (cat.children) {
+                for (const child of cat.children) {
+                    if (child.label.toLowerCase().includes(query.toLowerCase())) {
+                        results.push({
+                            categoryId: child.id,
+                            title: child.label,
+                            category: cat.label,
+                            icon: child.icon,
+                            tab: ""
+                        });
+                    }
+                }
+            }
+        }
+
+        return results.slice(0, 8);
     }
 }
