@@ -128,6 +128,9 @@ Item {
                         radius: Appearance.rounding.small
                         color: "transparent"
 
+                        onXChanged: if (tabItem.index === root.activeTabIndex) tabIndicator.targetX = tabItem.x
+                        onWidthChanged: if (tabItem.index === root.activeTabIndex) tabIndicator.targetWidth = tabItem.width
+
                         StyledText {
                             id: tabLabel
                             anchors.centerIn: parent

@@ -90,7 +90,7 @@ ColumnLayout {
         clip: true
         contentHeight: resultsColumn.height
         boundsBehavior: Flickable.StopAtBounds
-        visible: root.session.searchQuery.length > 0 && getSearchResults(root.session.searchQuery).length > 0
+        visible: root.session.searchQuery.length > 0 && NexusRegistry.searchSettings(root.session.searchQuery).length > 0
 
         Column {
             id: resultsColumn
@@ -99,7 +99,7 @@ ColumnLayout {
 
             Repeater {
                 id: resultsRepeater
-                model: getSearchResults(root.session.searchQuery)
+                model: NexusRegistry.searchSettings(root.session.searchQuery)
 
                 delegate: Item {
                     id: resultDelegate
@@ -125,11 +125,19 @@ ColumnLayout {
                         anchors.rightMargin: Appearance.spacing.normal
                         spacing: Appearance.spacing.normal
 
-                        MaterialIcon {
+                        Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
-                            text: resultDelegate.modelData.icon || "settings"
-                            font.pointSize: Appearance.font.size.larger
-                            color: Colours.palette.m3onSurface
+                            width: 18
+                            height: 18
+                            radius: 5
+                            color: Qt.alpha(Colours.palette.m3primary, 0.1)
+
+                            MaterialIcon {
+                                anchors.centerIn: parent
+                                text: "arrow_forward"
+                                font.pointSize: Appearance.font.size.small - 1
+                                color: Colours.palette.m3primary
+                            }
                         }
 
                         Column {
@@ -137,14 +145,14 @@ ColumnLayout {
                             width: parent.width - parent.spacing - 32
 
                             StyledText {
-                                text: resultDelegate.modelData.title
+                                text: resultDelegate.modelData.label
                                 font.pointSize: Appearance.font.size.normal
                                 font.weight: Font.Medium
                                 color: Colours.palette.m3onSurface
                             }
 
                             StyledText {
-                                text: resultDelegate.modelData.category + (resultDelegate.modelData.tab ? " · " + resultDelegate.modelData.tab : "")
+                                text: resultDelegate.modelData.categoryLabel + (resultDelegate.modelData.tab ? " › " + resultDelegate.modelData.tab : "")
                                 font.pointSize: Appearance.font.size.small - 1
                                 color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
                             }
@@ -182,7 +190,7 @@ ColumnLayout {
 
     // No results
     Item {
-        visible: root.session.searchQuery.length > 0 && getSearchResults(root.session.searchQuery).length === 0
+        visible: root.session.searchQuery.length > 0 && NexusRegistry.searchSettings(root.session.searchQuery).length === 0
         Layout.fillWidth: true
         Layout.preferredHeight: 100
 
@@ -216,37 +224,4 @@ ColumnLayout {
         }
     }
 
-    function getSearchResults(query) {
-        // Mock search results - replace with actual search implementation
-        const results = [];
-        const categories = NexusRegistry.getCategories();
-
-        for (const cat of categories) {
-            if (cat.label.toLowerCase().includes(query.toLowerCase())) {
-                results.push({
-                    categoryId: cat.id,
-                    title: cat.label,
-                    category: cat.label,
-                    icon: cat.icon,
-                    tab: ""
-                });
-            }
-
-            if (cat.children) {
-                for (const child of cat.children) {
-                    if (child.label.toLowerCase().includes(query.toLowerCase())) {
-                        results.push({
-                            categoryId: child.id,
-                            title: child.label,
-                            category: cat.label,
-                            icon: child.icon,
-                            tab: ""
-                        });
-                    }
-                }
-            }
-        }
-
-        return results.slice(0, 8);
-    }
 }
