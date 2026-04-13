@@ -52,6 +52,7 @@ Item {
         spacing: 0
 
         SidebarHeader {
+            z: 10
             Layout.fillWidth: true
             Layout.leftMargin: Appearance.padding.normal
             session: root.session
