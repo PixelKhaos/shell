@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 import qs.modules.nexus
 
 Item {
@@ -17,21 +17,6 @@ Item {
 
     property int activeTabIndex: 0
 
-    onActiveConfigChanged: {
-        activeTabIndex = 0;
-        tabIndicatorUpdate.restart();
-    }
-
-    onActiveTabIndexChanged: {
-        tabIndicatorUpdate.restart();
-    }
-
-    Timer {
-        id: tabIndicatorUpdate
-        interval: 0
-        onTriggered: root.updateTabIndicator()
-    }
-
     function updateTabIndicator() {
         const item = tabRepeater.itemAt(activeTabIndex);
         if (item) {
@@ -43,20 +28,41 @@ Item {
         }
     }
 
-    Connections {
-        target: session
-        function onForcedTabChanged() {
-            if (session.forcedTab !== "") {
-                const tabList = root.tabs;
-                for (let i = 0; i < tabList.length; i++) {
-                    if (tabList[i] === session.forcedTab) {
-                        root.activeTabIndex = i;
-                        break;
-                    }
+    function onForcedTabChanged() {
+        if (session.forcedTab !== "") {
+            const tabList = root.tabs;
+            for (let i = 0; i < tabList.length; i++) {
+                if (tabList[i] === session.forcedTab) {
+                    root.activeTabIndex = i;
+                    break;
                 }
-                session.consumeForcedTab();
             }
+            session.consumeForcedTab();
         }
+    }
+
+    onActiveConfigChanged: {
+        activeTabIndex = 0;
+        tabIndicatorUpdate.restart();
+    }
+
+    onActiveTabIndexChanged: {
+        tabIndicatorUpdate.restart();
+    }
+
+    Timer {
+        id: tabIndicatorUpdate
+
+        interval: 0
+        onTriggered: root.updateTabIndicator()
+    }
+
+    Connections {
+        function onForcedTabChanged() {
+            root.onForcedTabChanged();
+        }
+
+        target: session
     }
 
     ColumnLayout {
@@ -109,12 +115,14 @@ Item {
 
             Row {
                 id: tabRow
+
                 anchors.left: parent.left
                 anchors.bottom: parent.bottom
                 spacing: 4
 
                 Repeater {
                     id: tabRepeater
+
                     model: root.tabs
 
                     delegate: Rectangle {
@@ -135,6 +143,7 @@ Item {
 
                         StyledText {
                             id: tabLabel
+
                             anchors.centerIn: parent
                             text: tabItem.modelData
                             font.pointSize: Appearance.font.size.normal
@@ -150,6 +159,7 @@ Item {
                             function onClicked() {
                                 root.activeTabIndex = tabItem.index;
                             }
+
                             radius: Appearance.rounding.small
                             color: root.activeTabIndex === tabItem.index ? Colours.palette.m3primary : Colours.palette.m3onSurface
                         }
@@ -160,15 +170,15 @@ Item {
             Rectangle {
                 id: tabIndicator
 
+                property real targetX: 0
+                property real targetWidth: 0
+
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: -8
                 height: 3
                 radius: 1.5
                 color: Colours.palette.m3primary
                 visible: root.tabs.length > 0
-
-                property real targetX: 0
-                property real targetWidth: 0
 
                 x: targetX
                 width: targetWidth
@@ -199,12 +209,11 @@ Item {
             Loader {
                 id: panelLoader
 
-                anchors.fill: parent
-                asynchronous: true
-
                 readonly property string targetSource: root.activeConfig ? "panels/" + root.activeConfig.id.charAt(0).toUpperCase() + root.activeConfig.id.slice(1) + "Panel.qml" : ""
                 property string resolvedSource: targetSource
 
+                anchors.fill: parent
+                asynchronous: true
                 source: resolvedSource
 
                 onTargetSourceChanged: resolvedSource = targetSource
@@ -225,12 +234,13 @@ Item {
             }
 
             Connections {
-                target: root
                 function onActiveTabIndexChanged() {
                     if (panelLoader.item && panelLoader.item.hasOwnProperty("activeTabIndex")) {
                         panelLoader.item.activeTabIndex = root.activeTabIndex;
                     }
                 }
+
+                target: root
             }
         }
     }

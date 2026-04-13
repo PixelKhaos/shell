@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 import ".."
 
 Item {
@@ -49,6 +49,7 @@ Item {
             function onClicked() {
                 root.session.setCategory(root.modelData.id);
             }
+
             color: root.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
         }
 

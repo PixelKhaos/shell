@@ -5,8 +5,8 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 import qs.modules.nexus
 import "./components"
 
@@ -23,6 +23,7 @@ Item {
 
     readonly property NexusSession session: NexusSession {
         id: session
+
         nexusRoot: root
     }
 
@@ -33,6 +34,7 @@ Item {
 
     RowLayout {
         id: mainLayout
+
         anchors.fill: parent
         spacing: 0
 
@@ -57,6 +59,7 @@ Item {
 
             Sidebar {
                 id: sidebar
+
                 anchors.fill: parent
                 anchors.leftMargin: 5
                 anchors.rightMargin: 5
@@ -100,9 +103,9 @@ Item {
                 anchors.right: parent.right
                 width: 40
                 height: 40
-                color: Colours.tPalette.m3surfaceContainer
-
                 property bool hovered: closeMA.containsMouse
+
+                color: Colours.tPalette.m3surfaceContainer
 
                 MaterialIcon {
                     anchors.centerIn: parent
@@ -113,6 +116,7 @@ Item {
 
                 MouseArea {
                     id: closeMA
+
                     anchors.fill: parent
                     hoverEnabled: true
                     onClicked: root.close()
@@ -122,15 +126,14 @@ Item {
             Rectangle {
                 id: maximizeBtn
 
+                property bool hovered: maxMA.containsMouse
+
                 anchors.top: parent.top
                 anchors.right: closeBtn.left
                 width: 44
                 height: 40
                 color: Colours.tPalette.m3surfaceContainer
-
                 bottomLeftRadius: Appearance.rounding.small
-
-                property bool hovered: maxMA.containsMouse
 
                 MaterialIcon {
                     anchors.centerIn: parent
@@ -141,6 +144,7 @@ Item {
 
                 MouseArea {
                     id: maxMA
+
                     anchors.fill: parent
                     hoverEnabled: true
                     onClicked: {
@@ -162,18 +166,18 @@ Item {
         x: sidebarContainer.width + 8
         y: sidebar.flyoutTop
 
+        onHoverEntered: sidebar.cancelFlyoutClose()
+        onHoverExited: sidebar.scheduleFlyoutClose()
+        onChildClicked: function (id) {
+            session.setCategory(id);
+        }
+
         Behavior on y {
             NumberAnimation {
                 duration: 300
                 easing.type: Easing.BezierSpline
                 easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
             }
-        }
-
-        onHoverEntered: sidebar.cancelFlyoutClose()
-        onHoverExited: sidebar.scheduleFlyoutClose()
-        onChildClicked: function (id) {
-            session.setCategory(id);
         }
     }
 

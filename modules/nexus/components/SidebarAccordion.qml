@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 import ".."
 
 Item {
@@ -45,6 +45,7 @@ Item {
 
     Column {
         id: col
+
         width: parent.width - (Appearance.padding.large / 2)
         topPadding: Appearance.spacing.small
         leftPadding: Appearance.padding.large
@@ -55,6 +56,7 @@ Item {
 
             delegate: Item {
                 id: childDelegate
+
                 required property var modelData
 
                 width: col.width
@@ -78,6 +80,7 @@ Item {
                         function onClicked() {
                             root.session.setCategory(childDelegate.modelData.id);
                         }
+
                         color: childDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                     }
 

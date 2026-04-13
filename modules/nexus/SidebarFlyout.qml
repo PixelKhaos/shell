@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 import qs.modules.nexus
 
 Item {
@@ -26,7 +26,6 @@ Item {
     implicitWidth: drawer.targetWidth + 2
     implicitHeight: drawer.targetHeight
 
-    // Track previous category for crossfade
     property string _prevCategory: ""
     property var _prevCat: null
 
@@ -89,6 +88,7 @@ Item {
 
             NumberAnimation {
                 id: contentFadeOut
+
                 target: contentContainer
                 property: "opacity"
                 from: 1
@@ -103,6 +103,7 @@ Item {
 
             NumberAnimation {
                 id: contentFadeIn
+
                 target: contentContainer
                 property: "opacity"
                 from: 0
@@ -161,6 +162,7 @@ Item {
                                 function onClicked() {
                                     root.childClicked(flyoutChild.modelData.id);
                                 }
+
                                 radius: Appearance.rounding.normal
                                 color: flyoutChild.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                             }
