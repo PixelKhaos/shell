@@ -4,8 +4,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 import ".."
 
 Item {

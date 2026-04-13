@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 
 Item {
     id: root

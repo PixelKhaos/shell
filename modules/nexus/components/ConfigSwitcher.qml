@@ -3,8 +3,8 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 import ".."
 
 ColumnLayout {
@@ -47,6 +47,7 @@ ColumnLayout {
 
         delegate: Item {
             id: configDelegate
+
             required property var modelData
 
             Layout.fillWidth: true
@@ -115,6 +116,7 @@ ColumnLayout {
                         root.session.activeConfig = configDelegate.modelData.id;
                         root.session.configPopoutOpen = false;
                     }
+
                     radius: parent.radius
                     color: Colours.palette.m3onSurface
                 }

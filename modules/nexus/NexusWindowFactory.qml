@@ -52,6 +52,7 @@ Singleton {
 
                 Connections {
                     target: Hyprland
+
                     function onToplevelsChanged() {
                         const our = Hyprland.toplevels.values.find(t => t.title === win.title);
                         if (our) {

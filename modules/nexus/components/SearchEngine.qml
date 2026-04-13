@@ -4,8 +4,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import qs.components
-import qs.config
 import qs.services
+import qs.config
 import ".."
 
 ColumnLayout {
@@ -68,6 +68,7 @@ ColumnLayout {
                             root.session.searchQuery = "";
                             searchField.forceActiveFocus();
                         }
+
                         radius: Appearance.rounding.full
                         color: Colours.palette.m3onSurface
                     }
@@ -94,15 +95,18 @@ ColumnLayout {
 
         Column {
             id: resultsColumn
+
             width: parent.width
             spacing: 0
 
             Repeater {
                 id: resultsRepeater
+
                 model: NexusRegistry.searchSettings(root.session.searchQuery)
 
                 delegate: Item {
                     id: resultDelegate
+
                     required property var modelData
 
                     width: parent.width
@@ -216,6 +220,7 @@ ColumnLayout {
     // Clear search when popout closes
     Connections {
         target: root.session
+
         function onSearchPopoutOpenChanged() {
             if (!root.session.searchPopoutOpen) {
                 searchField.text = "";
