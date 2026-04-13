@@ -264,62 +264,242 @@ QtObject {
 
     readonly property var settingDefinitions: [
         // Appearance
-        { label: "Theme Mode", category: "appearance", tab: "Wallpaper & Scheme", keywords: ["theme", "dark", "light", "auto", "mode"] },
-        { label: "Color Scheme", category: "appearance", tab: "Wallpaper & Scheme", keywords: ["color", "scheme", "catppuccin", "everforest", "nord", "gruvbox"] },
-        { label: "Wallpaper", category: "appearance", tab: "Wallpaper & Scheme", keywords: ["wallpaper", "background", "desktop", "image"] },
-        { label: "UI Font", category: "appearance", tab: "Typography & Motion", keywords: ["font", "typography", "text", "roboto"] },
-        { label: "Animation Speed", category: "appearance", tab: "Typography & Motion", keywords: ["animation", "speed", "motion"] },
-        { label: "Window Shadows", category: "appearance", tab: "Effects", keywords: ["shadow", "window", "effect"] },
-        { label: "Corner Rounding", category: "appearance", tab: "Effects", keywords: ["corner", "rounding", "radius"] },
+        {
+            label: "Theme Mode",
+            category: "appearance",
+            tab: "Wallpaper & Scheme",
+            keywords: ["theme", "dark", "light", "auto", "mode"]
+        },
+        {
+            label: "Color Scheme",
+            category: "appearance",
+            tab: "Wallpaper & Scheme",
+            keywords: ["color", "scheme", "catppuccin", "everforest", "nord", "gruvbox"]
+        },
+        {
+            label: "Wallpaper",
+            category: "appearance",
+            tab: "Wallpaper & Scheme",
+            keywords: ["wallpaper", "background", "desktop", "image"]
+        },
+        {
+            label: "UI Font",
+            category: "appearance",
+            tab: "Typography & Motion",
+            keywords: ["font", "typography", "text", "roboto"]
+        },
+        {
+            label: "Animation Speed",
+            category: "appearance",
+            tab: "Typography & Motion",
+            keywords: ["animation", "speed", "motion"]
+        },
+        {
+            label: "Window Shadows",
+            category: "appearance",
+            tab: "Effects",
+            keywords: ["shadow", "window", "effect"]
+        },
+        {
+            label: "Corner Rounding",
+            category: "appearance",
+            tab: "Effects",
+            keywords: ["corner", "rounding", "radius"]
+        },
 
         // Taskbar
-        { label: "Taskbar Auto-hide", category: "taskbar", tab: "General", keywords: ["taskbar", "auto", "hide", "autohide"] },
-        { label: "Workspace Indicator", category: "taskbar", tab: "Workspaces", keywords: ["workspace", "indicator", "taskbar"] },
-        { label: "Status Icons", category: "taskbar", tab: "Systray & Status", keywords: ["status", "icons", "tray", "system"] },
+        {
+            label: "Taskbar Auto-hide",
+            category: "taskbar",
+            tab: "General",
+            keywords: ["taskbar", "auto", "hide", "autohide"]
+        },
+        {
+            label: "Workspace Indicator",
+            category: "taskbar",
+            tab: "Workspaces",
+            keywords: ["workspace", "indicator", "taskbar"]
+        },
+        {
+            label: "Status Icons",
+            category: "taskbar",
+            tab: "Systray & Status",
+            keywords: ["status", "icons", "tray", "system"]
+        },
 
         // Launcher
-        { label: "Launcher Enabled", category: "launcher", tab: "General", keywords: ["launcher", "enabled", "toggle"] },
-        { label: "Launcher Apps", category: "launcher", tab: "General", keywords: ["launcher", "apps", "applications"] },
-        { label: "Favorite Apps", category: "launcher", tab: "Applications", keywords: ["favorite", "apps", "pin", "starred"] },
-        { label: "Actions", category: "launcher", tab: "Actions", keywords: ["actions", "special", "commands", "calculator"] },
+        {
+            label: "Launcher Enabled",
+            category: "launcher",
+            tab: "General",
+            keywords: ["launcher", "enabled", "toggle"]
+        },
+        {
+            label: "Launcher Apps",
+            category: "launcher",
+            tab: "General",
+            keywords: ["launcher", "apps", "applications"]
+        },
+        {
+            label: "Favorite Apps",
+            category: "launcher",
+            tab: "Applications",
+            keywords: ["favorite", "apps", "pin", "starred"]
+        },
+        {
+            label: "Actions",
+            category: "launcher",
+            tab: "Actions",
+            keywords: ["actions", "special", "commands", "calculator"]
+        },
 
         // Dashboard
-        { label: "Widget Management", category: "dashboard", tab: "Dashboard", keywords: ["widget", "manage", "dashboard"] },
-        { label: "Media Widget", category: "dashboard", tab: "Media", keywords: ["media", "player", "music", "album"] },
-        { label: "System Monitor", category: "dashboard", tab: "Performance", keywords: ["system", "monitor", "cpu", "ram"] },
-        { label: "Weather Widget", category: "dashboard", tab: "Weather", keywords: ["weather", "temperature", "forecast"] },
+        {
+            label: "Widget Management",
+            category: "dashboard",
+            tab: "Dashboard",
+            keywords: ["widget", "manage", "dashboard"]
+        },
+        {
+            label: "Media Widget",
+            category: "dashboard",
+            tab: "Media",
+            keywords: ["media", "player", "music", "album"]
+        },
+        {
+            label: "System Monitor",
+            category: "dashboard",
+            tab: "Performance",
+            keywords: ["system", "monitor", "cpu", "ram"]
+        },
+        {
+            label: "Weather Widget",
+            category: "dashboard",
+            tab: "Weather",
+            keywords: ["weather", "temperature", "forecast"]
+        },
 
         // Display
-        { label: "Display Resolution", category: "display", tab: "General", keywords: ["display", "monitor", "resolution", "refresh"] },
-        { label: "Night Light", category: "display", tab: "Night Light", keywords: ["night", "light", "blue", "eye", "temperature"] },
+        {
+            label: "Display Resolution",
+            category: "display",
+            tab: "General",
+            keywords: ["display", "monitor", "resolution", "refresh"]
+        },
+        {
+            label: "Night Light",
+            category: "display",
+            tab: "Night Light",
+            keywords: ["night", "light", "blue", "eye", "temperature"]
+        },
 
         // Network
-        { label: "Wi-Fi Settings", category: "network", tab: "Wireless", keywords: ["wifi", "wireless", "network", "connect"] },
-        { label: "Ethernet Settings", category: "network", tab: "Ethernet", keywords: ["ethernet", "wired", "lan"] },
-        { label: "VPN Connections", category: "network", tab: "VPN", keywords: ["vpn", "wireguard", "tunnel", "privacy"] },
+        {
+            label: "Wi-Fi Settings",
+            category: "network",
+            tab: "Wireless",
+            keywords: ["wifi", "wireless", "network", "connect"]
+        },
+        {
+            label: "Ethernet Settings",
+            category: "network",
+            tab: "Ethernet",
+            keywords: ["ethernet", "wired", "lan"]
+        },
+        {
+            label: "VPN Connections",
+            category: "network",
+            tab: "VPN",
+            keywords: ["vpn", "wireguard", "tunnel", "privacy"]
+        },
 
         // Audio
-        { label: "Audio Output", category: "audio", tab: "Output & Input", keywords: ["audio", "output", "speaker", "headphone", "volume"] },
-        { label: "Microphone", category: "audio", tab: "Output & Input", keywords: ["audio", "input", "microphone", "mic"] },
-        { label: "Per-App Volume", category: "audio", tab: "Applications", keywords: ["application", "volume", "per", "app", "mixer"] },
+        {
+            label: "Audio Output",
+            category: "audio",
+            tab: "Output & Input",
+            keywords: ["audio", "output", "speaker", "headphone", "volume"]
+        },
+        {
+            label: "Microphone",
+            category: "audio",
+            tab: "Output & Input",
+            keywords: ["audio", "input", "microphone", "mic"]
+        },
+        {
+            label: "Per-App Volume",
+            category: "audio",
+            tab: "Applications",
+            keywords: ["application", "volume", "per", "app", "mixer"]
+        },
 
         // Bluetooth
-        { label: "Bluetooth Devices", category: "bluetooth", tab: "Devices", keywords: ["bluetooth", "device", "pair", "connect"] },
-        { label: "Bluetooth Settings", category: "bluetooth", tab: "Settings", keywords: ["bluetooth", "discoverable", "codec"] },
+        {
+            label: "Bluetooth Devices",
+            category: "bluetooth",
+            tab: "Devices",
+            keywords: ["bluetooth", "device", "pair", "connect"]
+        },
+        {
+            label: "Bluetooth Settings",
+            category: "bluetooth",
+            tab: "Settings",
+            keywords: ["bluetooth", "discoverable", "codec"]
+        },
 
         // Power
-        { label: "Power Mode", category: "power", tab: "Power Modes & Inhibit", keywords: ["power", "mode", "balanced", "performance"] },
-        { label: "Battery Behavior", category: "power", tab: "Battery Behavior", keywords: ["battery", "charge", "health", "cycle"] },
+        {
+            label: "Power Mode",
+            category: "power",
+            tab: "Power Modes & Inhibit",
+            keywords: ["power", "mode", "balanced", "performance"]
+        },
+        {
+            label: "Battery Behavior",
+            category: "power",
+            tab: "Battery Behavior",
+            keywords: ["battery", "charge", "health", "cycle"]
+        },
 
         // Notifications
-        { label: "Notification Settings", category: "notifications", tab: "General", keywords: ["notification", "alert", "badge", "sound"] },
-        { label: "Per-App Notifications", category: "notifications", tab: "Applications", keywords: ["notification", "application", "per", "app"] },
-        { label: "Do Not Disturb", category: "notifications", tab: "On-Screen-Display", keywords: ["do", "not", "disturb", "dnd", "quiet"] },
+        {
+            label: "Notification Settings",
+            category: "notifications",
+            tab: "General",
+            keywords: ["notification", "alert", "badge", "sound"]
+        },
+        {
+            label: "Per-App Notifications",
+            category: "notifications",
+            tab: "Applications",
+            keywords: ["notification", "application", "per", "app"]
+        },
+        {
+            label: "Do Not Disturb",
+            category: "notifications",
+            tab: "On-Screen-Display",
+            keywords: ["do", "not", "disturb", "dnd", "quiet"]
+        },
 
         // Plugins
-        { label: "Plugin Management", category: "plugins", tab: "General", keywords: ["plugin", "extension", "addon", "manage"] },
-        { label: "Launcher Plugins", category: "plugins", tab: "Launcher", keywords: ["launcher", "plugin", "extension"] },
-        { label: "Taskbar Plugins", category: "plugins", tab: "Taskbar", keywords: ["taskbar", "plugin", "extension"] }
+        {
+            label: "Plugin Management",
+            category: "plugins",
+            tab: "General",
+            keywords: ["plugin", "extension", "addon", "manage"]
+        },
+        {
+            label: "Launcher Plugins",
+            category: "plugins",
+            tab: "Launcher",
+            keywords: ["launcher", "plugin", "extension"]
+        },
+        {
+            label: "Taskbar Plugins",
+            category: "plugins",
+            tab: "Taskbar",
+            keywords: ["taskbar", "plugin", "extension"]
+        }
     ]
 
     function buildSearchIndex() {
@@ -346,17 +526,24 @@ QtObject {
         const catLower = item.categoryLabel.toLowerCase();
 
         // Exact label match gets highest score
-        if (labelLower === query) score += 15;
-        else if (labelLower.includes(query)) score += 10;
+        if (labelLower === query)
+            score += 15;
+        else if (labelLower.includes(query))
+            score += 10;
 
         for (const term of terms) {
-            if (labelLower.includes(term)) score += 5;
-            if (catLower.includes(term)) score += 2;
+            if (labelLower.includes(term))
+                score += 5;
+            if (catLower.includes(term))
+                score += 2;
 
             for (const kw of item.keywords) {
-                if (kw === term) score += 4;
-                else if (kw.startsWith(term)) score += 3;
-                else if (kw.includes(term)) score += 1;
+                if (kw === term)
+                    score += 4;
+                else if (kw.startsWith(term))
+                    score += 3;
+                else if (kw.includes(term))
+                    score += 1;
             }
         }
 
@@ -364,17 +551,16 @@ QtObject {
     }
 
     function searchSettings(query, maxResults) {
-        if (!query || !query.trim()) return [];
+        if (!query || !query.trim())
+            return [];
         maxResults = maxResults || 8;
 
         const lower = query.toLowerCase().trim();
         const terms = lower.split(/\s+/);
         const index = root.buildSearchIndex();
 
-        return index
-            .map(item => Object.assign({}, item, { score: root.calculateScore(item, lower, terms) }))
-            .filter(item => item.score > 0)
-            .sort((a, b) => b.score - a.score)
-            .slice(0, maxResults);
+        return index.map(item => Object.assign({}, item, {
+                score: root.calculateScore(item, lower, terms)
+            })).filter(item => item.score > 0).sort((a, b) => b.score - a.score).slice(0, maxResults);
     }
 }
