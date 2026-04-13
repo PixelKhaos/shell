@@ -9,31 +9,51 @@ import qs.services
 Item {
     id: root
 
-    property string activeTab: ""
+    property int activeTabIndex: 0
 
-    ColumnLayout {
-        anchors.centerIn: parent
-        spacing: Appearance.spacing.normal
+    StackLayout {
+        anchors.fill: parent
+        currentIndex: root.activeTabIndex
 
-        MaterialIcon {
-            Layout.alignment: Qt.AlignHCenter
-            text: "construction"
-            font.pointSize: Appearance.font.size.extraLarge
-            color: Qt.alpha(Colours.palette.m3onSurface, 0.3)
+        ColumnLayout {
+            anchors.centerIn: parent
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: Appearance.spacing.normal
+
+            MaterialIcon {
+                Layout.alignment: Qt.AlignHCenter
+                text: "construction"
+                font.pointSize: Appearance.font.size.extraLarge
+                color: Qt.alpha(Colours.palette.m3onSurface, 0.3)
+            }
+
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: qsTr("Panel not yet implemented")
+                font.pointSize: Appearance.font.size.larger
+                color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
+            }
+
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: qsTr("This settings page will be available in a future update.")
+                font.pointSize: Appearance.font.size.normal
+                color: Qt.alpha(Colours.palette.m3onSurface, 0.35)
+            }
         }
 
-        StyledText {
-            Layout.alignment: Qt.AlignHCenter
-            text: qsTr("Panel not yet implemented")
-            font.pointSize: Appearance.font.size.larger
-            color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
-        }
+        ColumnLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: Appearance.spacing.normal
 
-        StyledText {
-            Layout.alignment: Qt.AlignHCenter
-            text: qsTr("This settings page will be available in a future update.")
-            font.pointSize: Appearance.font.size.normal
-            color: Qt.alpha(Colours.palette.m3onSurface, 0.35)
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: qsTr("Second tab placeholder")
+                font.pointSize: Appearance.font.size.larger
+                color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
+            }
         }
     }
 }

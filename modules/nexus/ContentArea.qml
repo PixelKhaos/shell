@@ -200,17 +200,22 @@ Item {
                 anchors.fill: parent
                 asynchronous: true
 
-                source: root.activeConfig ? "panels/" + root.activeConfig.id.charAt(0).toUpperCase() + root.activeConfig.id.slice(1) + "Panel.qml" : ""
+                readonly property string targetSource: root.activeConfig ? "panels/" + root.activeConfig.id.charAt(0).toUpperCase() + root.activeConfig.id.slice(1) + "Panel.qml" : ""
+                property string resolvedSource: targetSource
+
+                source: resolvedSource
+
+                onTargetSourceChanged: resolvedSource = targetSource
 
                 onStatusChanged: {
-                    if (status === Loader.Error) {
-                        source = "panels/PlaceholderPanel.qml";
+                    if (status === Loader.Error && resolvedSource !== "panels/PlaceholderPanel.qml") {
+                        Qt.callLater(() => { resolvedSource = "panels/PlaceholderPanel.qml" });
                     }
                 }
 
-                onSourceChanged: {
-                    if (item && item.hasOwnProperty("activeTab")) {
-                        item.activeTab = root.tabs[root.activeTabIndex] || "";
+                onLoaded: {
+                    if (item && item.hasOwnProperty("activeTabIndex")) {
+                        item.activeTabIndex = root.activeTabIndex;
                     }
                 }
             }
@@ -218,8 +223,8 @@ Item {
             Connections {
                 target: root
                 function onActiveTabIndexChanged() {
-                    if (panelLoader.item && panelLoader.item.hasOwnProperty("activeTab")) {
-                        panelLoader.item.activeTab = root.tabs[root.activeTabIndex] || "";
+                    if (panelLoader.item && panelLoader.item.hasOwnProperty("activeTabIndex")) {
+                        panelLoader.item.activeTabIndex = root.activeTabIndex;
                     }
                 }
             }
