@@ -12,10 +12,15 @@ ColumnLayout {
 
     required property NexusSession session
 
-    spacing: Appearance.spacing.small
-
     readonly property var configModel: {
-        const items = [{ id: "global", label: "Global", icon: "language", desc: "Settings apply everywhere" }];
+        const items = [
+            {
+                id: "global",
+                label: "Global",
+                icon: "language",
+                desc: "Settings apply everywhere"
+            }
+        ];
         for (const screen of Screens.screens) {
             items.push({
                 id: screen.name,
@@ -26,6 +31,8 @@ ColumnLayout {
         }
         return items;
     }
+
+    spacing: Appearance.spacing.small
 
     StyledText {
         text: "Editing Context"

@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import qs.components
 import qs.services
 import qs.config
@@ -13,21 +12,19 @@ Item {
     required property NexusSession session
 
     property string flyoutCategory: ""
-
     property bool open: false
+    readonly property var currentCat: flyoutCategory !== "" ? NexusRegistry.getById(flyoutCategory) : null
+    readonly property int childCount: currentCat?.children?.length ?? 0
+
+    property string _prevCategory: ""
+    property var _prevCat: null
 
     signal hoverEntered
     signal hoverExited
     signal childClicked(string id)
 
-    readonly property var currentCat: flyoutCategory !== "" ? NexusRegistry.getById(flyoutCategory) : null
-    readonly property int childCount: currentCat && currentCat.children ? currentCat.children.length : 0
-
     implicitWidth: drawer.targetWidth + 2
     implicitHeight: drawer.targetHeight
-
-    property string _prevCategory: ""
-    property var _prevCat: null
 
     onFlyoutCategoryChanged: {
         if (flyoutCategory !== "" && flyoutCategory !== _prevCategory) {
@@ -38,17 +35,12 @@ Item {
     Rectangle {
         id: drawer
 
+        property real targetWidth: 100
+        property real targetHeight: (root.currentCat?.children?.length ?? 0) * 68 + 46 || 80
+
         width: root.open ? targetWidth : 0
         height: targetHeight
         clip: true
-
-        property real targetWidth: 100
-        property real targetHeight: {
-            if (!root.currentCat || !root.currentCat.children)
-                return 80;
-            return root.currentCat.children.length * 68 + 46;
-        }
-
         color: Colours.tPalette.m3surfaceContainer
         radius: 0
         topRightRadius: Appearance.rounding.small
@@ -144,10 +136,10 @@ Item {
 
                         required property var modelData
 
+                        readonly property bool isActive: root.session.activeCategory === flyoutChild.modelData.id
+
                         width: childColumn.width
                         height: 64
-
-                        readonly property bool isActive: root.session.activeCategory === flyoutChild.modelData.id
 
                         Rectangle {
                             anchors.fill: parent

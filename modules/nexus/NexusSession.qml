@@ -19,6 +19,7 @@ QtObject {
     property bool configPopoutOpen: false
 
     readonly property var activeCategoryConfig: NexusRegistry.getById(activeCategory)
+    property string _savedExpandedCategory: ""
 
     function setCategory(id) {
         activeCategory = id;
@@ -36,8 +37,6 @@ QtObject {
         forcedTab = "";
         return tab;
     }
-
-    property string _savedExpandedCategory: ""
 
     function toggleSidebar() {
         if (!sidebarCollapsed) {

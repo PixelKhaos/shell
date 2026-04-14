@@ -16,13 +16,6 @@ Item {
     property string flyoutCategory: ""
     property real flyoutTop: 0
 
-    Timer {
-        id: flyoutCloseTimer
-
-        interval: 250
-        onTriggered: root.flyoutCategory = ""
-    }
-
     function openFlyout(categoryId, itemGlobalY) {
         flyoutCloseTimer.stop();
         root.flyoutCategory = categoryId;
@@ -44,6 +37,13 @@ Item {
         flyoutCloseTimer.stop();
     }
 
+    Timer {
+        id: flyoutCloseTimer
+
+        interval: 250
+        onTriggered: root.flyoutCategory = ""
+    }
+
     ColumnLayout {
         id: layout
 
@@ -56,7 +56,7 @@ Item {
             z: 10
             Layout.fillWidth: true
             Layout.leftMargin: Appearance.padding.normal
-            session: root.session
+            session: root.session // qmllint disable incompatible-type
         }
 
         Flickable {
@@ -90,7 +90,7 @@ Item {
                         width: navColumn.width
 
                         SidebarNavItem {
-                            session: root.session
+                            session: root.session // qmllint disable incompatible-type
                             modelData: catDelegate.modelData
                             onFlyoutRequested: function (itemY) {
                                 root.openFlyout(catDelegate.catId, itemY);
@@ -100,7 +100,7 @@ Item {
 
                         SidebarAccordion {
                             visible: !root.session.sidebarCollapsed && catDelegate.hasChildren
-                            session: root.session
+                            session: root.session // qmllint disable incompatible-type
                             childItems: catDelegate.hasChildren ? catDelegate.modelData.children : []
                             open: root.session.expandedCategory === catDelegate.catId
                         }
@@ -124,7 +124,7 @@ Item {
                 model: NexusRegistry.getBottomItems()
 
                 delegate: SidebarBottomItem {
-                    session: root.session
+                    session: root.session // qmllint disable incompatible-type
                 }
             }
         }

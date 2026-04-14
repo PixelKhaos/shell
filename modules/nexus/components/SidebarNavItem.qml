@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import qs.components
 import qs.services
 import qs.config
@@ -17,7 +16,7 @@ Item {
     readonly property bool isDirect: modelData.isDirect
     readonly property bool hasChildren: modelData.children && modelData.children.length > 0
     readonly property bool isActive: session.activeCategory === catId
-    readonly property bool isChildActive: NexusRegistry.isChildActive(catId, session.activeCategory)
+    readonly property bool isChildActive: NexusRegistry.isChildActive(catId, session.activeCategory) // qmllint disable missing-property
     readonly property bool collapsed: session.sidebarCollapsed
 
     signal flyoutRequested(real itemY)
@@ -146,6 +145,7 @@ Item {
             color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
             font.pointSize: Appearance.font.size.normal
             rotation: root.session.expandedCategory === root.catId ? 180 : 0
+            opacity: root.collapsed ? 0 : 1
 
             Behavior on rotation {
                 NumberAnimation {
@@ -155,7 +155,6 @@ Item {
                 }
             }
 
-            opacity: root.collapsed ? 0 : 1
             Behavior on opacity {
                 Anim {}
             }

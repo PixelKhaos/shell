@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import qs.components
 import qs.services
 import qs.config
@@ -14,7 +13,7 @@ Item {
     required property var childItems
     required property bool open
 
-    width: parent ? parent.width + 2: 0
+    width: parent ? parent.width + 2 : 0
     height: open ? col.implicitHeight : 0
     clip: true
 
@@ -59,10 +58,10 @@ Item {
 
                 required property var modelData
 
+                readonly property bool isActive: root.session.activeCategory === childDelegate.modelData.id
+
                 width: col.width
                 height: 36
-
-                readonly property bool isActive: root.session.activeCategory === childDelegate.modelData.id
 
                 StyledRect {
                     anchors.fill: parent
