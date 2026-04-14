@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import Caelestia.Blobs
 import qs.components
 import qs.services
 import qs.config
@@ -32,6 +33,50 @@ Item {
     implicitWidth: implicitHeight * 1.67
     implicitHeight: screen.height * 0.85
 
+    Item {
+        id: blobLayer
+
+        anchors.fill: parent
+
+        BlobGroup {
+            id: blobGroup
+
+            color: Colours.tPalette.m3surfaceContainer
+            smoothing: 16
+
+            Behavior on color {
+                CAnim {}
+            }
+        }
+
+        // Border frame
+        BlobInvertedRect {
+            property real pad: 50
+
+            anchors.fill: parent
+            anchors.margins: -pad
+            group: blobGroup
+            radius: Appearance.rounding.small
+            borderLeft: sidebarContainer.width + 10 + pad
+            borderTop: 10 + pad
+            borderRight: 10 + pad
+            borderBottom: 10 + pad
+        }
+
+        BlobRect {
+            id: notchBlob
+
+            group: blobGroup
+            x: root.width - (closeBtn.width + maximizeBtn.width)
+            y: 0
+            implicitWidth: closeBtn.width + maximizeBtn.width
+            implicitHeight: closeBtn.height
+            radius: 0
+            bottomLeftRadius: Appearance.rounding.small
+            deformScale: 0
+        }
+    }
+
     RowLayout {
         id: mainLayout
 
@@ -47,7 +92,7 @@ Item {
 
             topLeftRadius: root.rounding
             bottomLeftRadius: root.rounding
-            color: Colours.tPalette.m3surfaceContainer
+            color: "transparent"
 
             Behavior on Layout.preferredWidth {
                 NumberAnimation {
@@ -75,9 +120,8 @@ Item {
 
             topRightRadius: root.rounding
             bottomRightRadius: root.rounding
-            color: Colours.tPalette.m3surfaceContainer
+            color: "transparent"
 
-            // Inner content
             Item {
                 anchors.fill: parent
                 anchors.margins: 10
@@ -87,7 +131,7 @@ Item {
 
                     anchors.fill: parent
                     radius: Appearance.rounding.small
-                    color: Colours.tPalette.m3surface
+                    color: "transparent"
                     clip: true
 
                     ContentArea {
@@ -96,64 +140,125 @@ Item {
                     }
                 }
             }
+        }
+    }
 
-            Rectangle {
-                id: closeBtn
+    // Overlay blobs
+    Item {
+        x: sidebarContainer.width
+        y: 0
+        width: root.width - sidebarContainer.width
+        height: root.height
+        clip: true
 
-                property bool hovered: closeMA.containsMouse
+        BlobRect {
+            id: flyoutBlob
 
-                anchors.top: parent.top
-                anchors.right: parent.right
-                width: 40
-                height: 40
+            group: blobGroup
+            x: flyout.x - sidebarContainer.width
+            y: flyout.y
+            implicitWidth: flyout.drawerWidth
+            implicitHeight: flyout.drawerHeight
+            radius: Appearance.rounding.small
+            topLeftRadius: 0
+            bottomLeftRadius: 0
+            topRightRadius: flyout.y <= 0 ? 0 : Appearance.rounding.small
+            deformScale: 0.00001
+            stiffness: 200
+            damping: 16
+        }
 
-                color: Colours.tPalette.m3surfaceContainer
+        BlobRect {
+            id: searchPopoutBlob
 
-                MaterialIcon {
-                    anchors.centerIn: parent
-                    text: "close"
-                    font.pointSize: Appearance.font.size.larger
-                    color: closeBtn.hovered ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
-                }
+            group: blobGroup
+            x: searchPopoutContent.x - sidebarContainer.width
+            y: searchPopoutContent.y
+            implicitWidth: searchPopoutContent.drawerWidth
+            implicitHeight: searchPopoutContent.drawerHeight
+            visible: session.sidebarCollapsed
+            radius: Appearance.rounding.normal
+            topLeftRadius: 0
+            topRightRadius: 0
+            bottomLeftRadius: 0
+            deformScale: 0.00001
+            stiffness: 200
+            damping: 16
+        }
 
-                MouseArea {
-                    id: closeMA
+        BlobRect {
+            id: configPopoutBlob
 
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: root.close()
-                }
-            }
+            group: blobGroup
+            x: configPopoutContent.x - sidebarContainer.width
+            y: 0
+            implicitWidth: configPopoutContent.drawerWidth
+            implicitHeight: configPopoutContent.drawerHeight
+            visible: session.sidebarCollapsed
+            radius: Appearance.rounding.normal
+            topLeftRadius: 0
+            topRightRadius: 0
+            bottomLeftRadius: 0
+            deformScale: 0.00001
+            stiffness: 200
+            damping: 16
+        }
+    }
 
-            Rectangle {
-                id: maximizeBtn
+    Rectangle {
+        id: closeBtn
 
-                property bool hovered: maxMA.containsMouse
+        property bool hovered: closeMA.containsMouse
 
-                anchors.top: parent.top
-                anchors.right: closeBtn.left
-                width: 44
-                height: 40
-                color: Colours.tPalette.m3surfaceContainer
-                bottomLeftRadius: Appearance.rounding.small
+        x: root.width - width
+        y: 0
+        width: 40
+        height: 40
 
-                MaterialIcon {
-                    anchors.centerIn: parent
-                    text: root.floating ? "fullscreen" : "fullscreen_exit"
-                    font.pointSize: Appearance.font.size.normal
-                    color: maximizeBtn.hovered ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-                }
+        color: "transparent"
 
-                MouseArea {
-                    id: maxMA
+        MaterialIcon {
+            anchors.centerIn: parent
+            text: "close"
+            font.pointSize: Appearance.font.size.larger
+            color: closeBtn.hovered ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
+        }
 
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        Hyprland.dispatch("togglefloating");
-                        root.floating = !root.floating;
-                    }
-                }
+        MouseArea {
+            id: closeMA
+
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: root.close()
+        }
+    }
+
+    Rectangle {
+        id: maximizeBtn
+
+        property bool hovered: maxMA.containsMouse
+
+        x: root.width - closeBtn.width - width
+        y: 0
+        width: 44
+        height: 40
+        color: "transparent"
+
+        MaterialIcon {
+            anchors.centerIn: parent
+            text: root.floating ? "fullscreen" : "fullscreen_exit"
+            font.pointSize: Appearance.font.size.normal
+            color: maximizeBtn.hovered ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
+        }
+
+        MouseArea {
+            id: maxMA
+
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: {
+                Hyprland.dispatch("togglefloating");
+                root.floating = !root.floating;
             }
         }
     }
@@ -165,7 +270,7 @@ Item {
         flyoutCategory: sidebar.flyoutCategory
         open: session.sidebarCollapsed && sidebar.flyoutCategory !== ""
 
-        x: sidebarContainer.width + 8
+        x: sidebarContainer.width
         y: sidebar.flyoutTop
 
         onHoverEntered: sidebar.cancelFlyoutClose()
@@ -183,8 +288,9 @@ Item {
         }
     }
 
-    // Search popout
     SidebarPopout {
+        id: searchPopoutContent
+
         x: sidebarContainer.width
         y: 0
         visible: session.sidebarCollapsed
@@ -198,11 +304,13 @@ Item {
         }
     }
 
-    // Config popout
     SidebarPopout {
+        id: configPopoutContent
+
         x: sidebarContainer.width
-        y: 50
+        y: 0
         visible: session.sidebarCollapsed
+        touchingTop: true
 
         open: session.configPopoutOpen
         popoutWidth: 275

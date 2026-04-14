@@ -2,7 +2,6 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
-import qs.services
 import qs.config
 
 Item {
@@ -13,24 +12,23 @@ Item {
     property int popoutPadding: 16
     property bool touchingTop: false
 
+    readonly property real drawerWidth: drawer.width
+    readonly property real drawerHeight: drawer.height
+
     default property alias content: contentLayout.children
 
-    implicitWidth: root.open ? popoutWidth + 20 : 0
-    implicitHeight: drawer.height + 20
+    implicitWidth: drawer.width
+    implicitHeight: drawer.height
 
     Rectangle {
         id: drawer
 
-        x: 10
-        y: 10
         clip: true
         width: root.open ? root.popoutWidth : 0
         height: contentLayout.implicitHeight + root.popoutPadding * 2
 
-        color: Colours.tPalette.m3surfaceContainer
+        color: "transparent"
         radius: 0
-        topRightRadius: root.touchingTop ? 0 : Appearance.rounding.normal
-        bottomRightRadius: Appearance.rounding.normal
 
         Behavior on width {
             NumberAnimation {

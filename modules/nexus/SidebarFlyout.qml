@@ -15,6 +15,8 @@ Item {
     property bool open: false
     readonly property var currentCat: flyoutCategory !== "" ? NexusRegistry.getById(flyoutCategory) : null
     readonly property int childCount: currentCat?.children?.length ?? 0
+    readonly property real drawerWidth: drawer.width
+    readonly property real drawerHeight: drawer.height
 
     property string _prevCategory: ""
     property var _prevCat: null
@@ -39,12 +41,10 @@ Item {
         property real targetHeight: (root.currentCat?.children?.length ?? 0) * 68 + 46 || 80
 
         width: root.open ? targetWidth : 0
-        height: targetHeight
+        height: root.open ? targetHeight : drawer.height
         clip: true
-        color: Colours.tPalette.m3surfaceContainer
+        color: "transparent"
         radius: 0
-        topRightRadius: Appearance.rounding.small
-        bottomRightRadius: Appearance.rounding.small
 
         Behavior on width {
             NumberAnimation {
