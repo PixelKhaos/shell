@@ -30,7 +30,7 @@ Item {
 
     onFlyoutCategoryChanged: {
         if (flyoutCategory === "") {
-            _prevCategory = ""; 
+            _prevCategory = "";
             contentFadeOut.start();
         } else if (_prevCategory === "") {
             _prevCategory = flyoutCategory;
@@ -57,17 +57,17 @@ Item {
 
         Behavior on width {
             NumberAnimation {
-                duration: 300
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
             }
         }
 
         Behavior on height {
             NumberAnimation {
-                duration: 300
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
             }
         }
 
@@ -104,6 +104,7 @@ Item {
 
             NumberAnimation {
                 id: contentFadeIn
+                
                 target: contentContainer
                 property: "opacity"
                 from: 0

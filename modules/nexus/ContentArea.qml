@@ -185,16 +185,16 @@ Item {
 
                 Behavior on x {
                     NumberAnimation {
-                        duration: Appearance.anim.durations.normal
+                        duration: Appearance.anim.durations.expressiveDefaultSpatial
                         easing.type: Easing.BezierSpline
-                        easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                     }
                 }
                 Behavior on width {
                     NumberAnimation {
-                        duration: Appearance.anim.durations.normal
+                        duration: Appearance.anim.durations.expressiveDefaultSpatial
                         easing.type: Easing.BezierSpline
-                        easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                     }
                 }
             }

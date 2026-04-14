@@ -28,8 +28,7 @@ Item {
         nexusRoot: root
     }
 
-    readonly property bool flyoutOverlapsSearch: flyout.open && searchPopoutContent.open && flyout.y < searchPopoutContent.y + searchPopoutContent.drawerHeight && flyout.y + flyout.drawerHeight > searchPopoutContent.y
-    readonly property bool flyoutOverlapsConfig: flyout.open && configPopoutContent.open && flyout.y < configPopoutContent.y + configPopoutContent.drawerHeight && flyout.y + flyout.drawerHeight > configPopoutContent.y
+    readonly property bool flyoutOverlapsPopout: flyout.open && unifiedPopout.open && flyout.y < unifiedPopout.y + unifiedPopout.drawerHeight && flyout.y + flyout.drawerHeight > unifiedPopout.y
 
     signal close
 
@@ -101,7 +100,7 @@ Item {
                 NumberAnimation {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                 }
             }
 
@@ -172,31 +171,13 @@ Item {
         }
 
         BlobRect {
-            id: searchPopoutBlob
+            id: popoutBlob
 
             group: blobGroup
-            x: searchPopoutContent.x - sidebarContainer.width
-            y: searchPopoutContent.y
-            implicitWidth: searchPopoutContent.drawerWidth
-            implicitHeight: searchPopoutContent.drawerHeight
-            visible: session.sidebarCollapsed
-            radius: Appearance.rounding.normal
-            topLeftRadius: 0
-            topRightRadius: 0
-            bottomLeftRadius: 0
-            deformScale: 0.00001
-            stiffness: 200
-            damping: 16
-        }
-
-        BlobRect {
-            id: configPopoutBlob
-
-            group: blobGroup
-            x: configPopoutContent.x - sidebarContainer.width
-            y: 0
-            implicitWidth: configPopoutContent.drawerWidth
-            implicitHeight: configPopoutContent.drawerHeight
+            x: unifiedPopout.x - sidebarContainer.width
+            y: unifiedPopout.y
+            implicitWidth: unifiedPopout.drawerWidth
+            implicitHeight: unifiedPopout.drawerHeight
             visible: session.sidebarCollapsed
             radius: Appearance.rounding.normal
             topLeftRadius: 0
@@ -283,49 +264,49 @@ Item {
         }
 
         Behavior on y {
+            enabled: flyout.open
+            
             NumberAnimation {
-                duration: 300
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
             }
         }
     }
 
-    SidebarPopout {
-        id: searchPopoutContent
-
-        x: sidebarContainer.width
-        y: 0
-        visible: session.sidebarCollapsed
-        touchingTop: true
-        extraLeftMargin: root.flyoutOverlapsSearch ? flyout.drawerWidth : 0
-        flyoutDrawerWidth: flyout.drawerWidth
-        flyoutOpen: flyout.open
-
-        open: session.searchPopoutOpen
-        popoutWidth: 280
+    Component {
+        id: searchComponent
 
         SearchEngine {
             session: root.session // qmllint disable incompatible-type
         }
     }
 
+    Component {
+        id: configComponent
+
+        ConfigSwitcher {
+            session: root.session // qmllint disable incompatible-type
+        }
+    }
+
     SidebarPopout {
-        id: configPopoutContent
+        id: unifiedPopout
 
         x: sidebarContainer.width
         y: 0
         visible: session.sidebarCollapsed
         touchingTop: true
-        extraLeftMargin: root.flyoutOverlapsConfig ? flyout.drawerWidth : 0
+        extraLeftMargin: root.flyoutOverlapsPopout ? flyout.drawerWidth : 0
         flyoutDrawerWidth: flyout.drawerWidth
         flyoutOpen: flyout.open
 
-        open: session.configPopoutOpen
-        popoutWidth: 275
+        open: session.searchPopoutOpen || session.configPopoutOpen
+        popoutType: session.searchPopoutOpen ? "search" : session.configPopoutOpen ? "config" : ""
+        popoutWidth: popoutType === "search" ? 280 : 275
 
-        ConfigSwitcher {
-            session: root.session // qmllint disable incompatible-type
+        Component.onCompleted: {
+            setComponents(searchComponent, configComponent);
         }
     }
 
