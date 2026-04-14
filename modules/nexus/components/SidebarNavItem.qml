@@ -21,7 +21,7 @@ Item {
 
     property bool hovered: false
     property bool flyoutActive: false
-    
+
     signal flyoutRequested(real itemY)
     signal flyoutCloseRequested
 

@@ -104,7 +104,7 @@ Item {
 
             NumberAnimation {
                 id: contentFadeIn
-                
+
                 target: contentContainer
                 property: "opacity"
                 from: 0

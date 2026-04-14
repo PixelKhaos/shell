@@ -38,7 +38,7 @@ Item {
     function cancelFlyoutClose() {
         flyoutCloseTimer.stop();
     }
-    
+
     Timer {
         id: openDelayTimer
 
@@ -48,8 +48,6 @@ Item {
             root._pendingCategory = "";
         }
     }
-
-
 
     Timer {
         id: flyoutCloseTimer

@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import qs.components
 import qs.services
@@ -16,6 +17,11 @@ Item {
     readonly property var tabs: activeConfig ? activeConfig.tabs : []
 
     property int activeTabIndex: 0
+    property string _prevCategory: ""
+    property var _prevConfig: null
+    property var _prevTabs: []
+    property bool _categoryTransitioning: false
+    property real _slideOffset: 0
 
     function updateTabIndicator() {
         const item = tabRepeater.itemAt(activeTabIndex);
@@ -42,11 +48,39 @@ Item {
     }
 
     onActiveConfigChanged: {
-        activeTabIndex = 0;
+        if (session.activeCategory === "") {
+            _prevCategory = "";
+            _prevConfig = null;
+            _prevTabs = [];
+            activeTabIndex = 0;
+            tabSwipeView.currentIndex = 0;
+            contentContainer.opacity = 0;
+            _slideOffset = 0;
+            _categoryTransitioning = false;
+        } else if (_prevCategory === "") {
+            _prevCategory = session.activeCategory;
+            _prevConfig = activeConfig;
+            _prevTabs = tabs;
+            activeTabIndex = 0;
+            tabSwipeView.currentIndex = 0;
+            contentFadeOut.stop();
+            contentContainer.opacity = 0;
+            _slideOffset = contentContainer.height * 0.15;
+            contentFadeIn.restart();
+            _categoryTransitioning = false;
+        } else {
+            activeTabIndex = 0;
+            tabSwipeView.currentIndex = 0;
+            _categoryTransitioning = true;
+            contentFadeOut.start();
+        }
         tabIndicatorUpdate.restart();
     }
 
     onActiveTabIndexChanged: {
+        if (!_categoryTransitioning && _prevCategory === session.activeCategory && _prevCategory !== "") {
+            tabSwipeView.currentIndex = activeTabIndex;
+        }
         tabIndicatorUpdate.restart();
     }
 
@@ -65,13 +99,77 @@ Item {
         target: root.session
     }
 
+    ParallelAnimation {
+        id: contentFadeOut
+
+        onFinished: {
+            root._prevCategory = root.session.activeCategory;
+            root._prevConfig = root.activeConfig;
+            root._prevTabs = root.tabs;
+            tabSwipeView.currentIndex = 0;
+            root._slideOffset = contentContainer.height * 0.15;
+            contentFadeIn.start();
+        }
+
+        NumberAnimation {
+            target: contentContainer
+            property: "opacity"
+            from: 1
+            to: 0
+            duration: 150
+            easing.type: Easing.InOutQuad
+        }
+
+        NumberAnimation {
+            target: root
+            property: "_slideOffset"
+            from: 0
+            to: -contentContainer.height * 0.15
+            duration: 150
+            easing.type: Easing.InOutQuad
+        }
+    }
+
+    ParallelAnimation {
+        id: contentFadeIn
+
+        onFinished: {
+            root._categoryTransitioning = false;
+        }
+
+        NumberAnimation {
+            target: contentContainer
+            property: "opacity"
+            from: 0
+            to: 1
+            duration: 250
+            easing.type: Easing.InOutQuad
+        }
+
+        NumberAnimation {
+            target: root
+            property: "_slideOffset"
+            from: contentContainer.height * 0.15
+            to: 0
+            duration: 250
+            easing.type: Easing.InOutQuad
+        }
+    }
+
     ColumnLayout {
+        id: contentContainer
+
         anchors.fill: parent
         anchors.rightMargin: Appearance.padding.large * 2
         anchors.leftMargin: Appearance.padding.large * 2
         anchors.topMargin: Appearance.padding.large
         anchors.bottomMargin: Appearance.padding.large
         spacing: Appearance.spacing.normal
+        opacity: 1
+
+        transform: Translate {
+            y: root._slideOffset // qmllint disable Quick.layout-positioning
+        }
 
         // Header: title + description
         ColumnLayout {
@@ -81,17 +179,17 @@ Item {
             spacing: Appearance.spacing.small / 2
 
             StyledText {
-                Layout.fillWidth: true
-                text: root.activeConfig ? root.activeConfig.title : ""
-                font.pointSize: Appearance.font.size.extraLarge
-                font.weight: Font.Medium
+                text: root._prevConfig?.label ?? ""
+                font.pointSize: Appearance.font.size.larger + 4
+                font.weight: Font.DemiBold
+                color: Colours.palette.m3onSurface
             }
 
             StyledText {
-                Layout.fillWidth: true
-                text: root.activeConfig ? root.activeConfig.description : ""
+                text: root._prevConfig?.description ?? ""
                 font.pointSize: Appearance.font.size.normal
-                color: Qt.alpha(Colours.palette.m3onSurface, 0.6)
+                color: Qt.alpha(Colours.palette.m3onSurface, 0.7)
+                visible: root._prevConfig && root._prevConfig.description
             }
         }
 
@@ -101,7 +199,7 @@ Item {
             Layout.fillWidth: true
             Layout.topMargin: Appearance.spacing.smaller
             Layout.preferredHeight: 48
-            visible: root.tabs.length > 0
+            visible: root._prevTabs.length > 0
 
             // Track line
             Rectangle {
@@ -123,7 +221,7 @@ Item {
                 Repeater {
                     id: tabRepeater
 
-                    model: root.tabs
+                    model: root._prevTabs
 
                     delegate: Rectangle {
                         id: tabItem
@@ -178,7 +276,7 @@ Item {
                 height: 3
                 radius: 1.5
                 color: Colours.palette.m3primary
-                visible: root.tabs.length > 0
+                visible: root._prevTabs.length > 0
 
                 x: targetX
                 width: targetWidth
@@ -201,46 +299,60 @@ Item {
         }
 
         // Panel content
-        Item {
+        SwipeView {
+            id: tabSwipeView
+
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.topMargin: Appearance.spacing.normal
 
-            Loader {
-                id: panelLoader
+            interactive: false
+            currentIndex: root.activeTabIndex
+            clip: true
 
-                readonly property string targetSource: root.activeConfig ? "panels/" + root.activeConfig.id.charAt(0).toUpperCase() + root.activeConfig.id.slice(1) + "Panel.qml" : ""
-                property string resolvedSource: targetSource
+            Repeater {
+                model: root._prevTabs.length > 0 ? root._prevTabs.length : 1
 
-                anchors.fill: parent
-                asynchronous: true
-                source: resolvedSource
+                delegate: Item {
+                    required property int index
 
-                onTargetSourceChanged: resolvedSource = targetSource
+                    Loader {
+                        id: tabPanelLoader
 
-                onStatusChanged: {
-                    if (status === Loader.Error && resolvedSource !== "panels/PlaceholderPanel.qml") {
-                        Qt.callLater(() => {
-                            resolvedSource = "panels/PlaceholderPanel.qml";
-                        });
+                        readonly property string targetSource: {
+                            if (!root._prevConfig)
+                                return "";
+                            if (root._prevTabs.length === 0) {
+                                // e.g panels/AppearancePanel.qml, uses lowercase def from registry and matches to Pascal cased file
+                                return "panels/" + root._prevConfig.id.charAt(0).toUpperCase() + root._prevConfig.id.slice(1) + "Panel.qml";
+                            }
+                            return "panels/" + root._prevConfig.id.charAt(0).toUpperCase() + root._prevConfig.id.slice(1) + "Panel.qml";
+                        }
+                        property string resolvedSource: targetSource
+
+                        anchors.centerIn: parent
+                        width: parent.width
+                        height: parent.height
+                        asynchronous: true
+                        source: resolvedSource
+
+                        onTargetSourceChanged: resolvedSource = targetSource
+
+                        onStatusChanged: {
+                            if (status === Loader.Error && resolvedSource !== "panels/PlaceholderPanel.qml") {
+                                Qt.callLater(() => {
+                                    resolvedSource = "panels/PlaceholderPanel.qml";
+                                });
+                            }
+                        }
+
+                        onLoaded: {
+                            if (item && item.hasOwnProperty("activeTabIndex")) {
+                                item.activeTabIndex = parent.index;
+                            }
+                        }
                     }
                 }
-
-                onLoaded: {
-                    if (item && item.hasOwnProperty("activeTabIndex")) {
-                        item.activeTabIndex = root.activeTabIndex;
-                    }
-                }
-            }
-
-            Connections {
-                function onActiveTabIndexChanged() {
-                    if (panelLoader.item && panelLoader.item.hasOwnProperty("activeTabIndex")) {
-                        panelLoader.item.activeTabIndex = root.activeTabIndex;
-                    }
-                }
-
-                target: root
             }
         }
     }
