@@ -29,7 +29,16 @@ Item {
     implicitHeight: drawer.targetHeight
 
     onFlyoutCategoryChanged: {
-        if (flyoutCategory !== "" && flyoutCategory !== _prevCategory) {
+        if (flyoutCategory === "") {
+            _prevCategory = ""; 
+            contentFadeOut.start();
+        } else if (_prevCategory === "") {
+            _prevCategory = flyoutCategory;
+            _prevCat = NexusRegistry.getById(flyoutCategory);
+            contentFadeOut.stop();
+            contentContainer.opacity = 0;
+            contentFadeIn.restart();
+        } else {
             contentFadeOut.start();
         }
     }
@@ -85,7 +94,7 @@ Item {
                 property: "opacity"
                 from: 1
                 to: 0
-                duration: 80
+                duration: 120
                 onFinished: {
                     root._prevCategory = root.flyoutCategory;
                     root._prevCat = root.currentCat;
@@ -95,12 +104,11 @@ Item {
 
             NumberAnimation {
                 id: contentFadeIn
-
                 target: contentContainer
                 property: "opacity"
                 from: 0
                 to: 1
-                duration: 150
+                duration: 250
             }
 
             // Category label
@@ -111,7 +119,7 @@ Item {
                 anchors.left: parent.left
                 anchors.right: parent.right
 
-                text: root.currentCat ? root.currentCat.label : ""
+                text: root._prevCat?.label ?? ""
                 color: Qt.alpha(Colours.palette.m3onSurface, 0.35)
                 font.pointSize: Appearance.font.size.small - 1
                 font.capitalization: Font.AllUppercase
@@ -129,7 +137,7 @@ Item {
                 spacing: 6
 
                 Repeater {
-                    model: root.currentCat && root.currentCat.children ? root.currentCat.children : []
+                    model: root._prevCat?.children ?? []
 
                     delegate: Item {
                         id: flyoutChild
