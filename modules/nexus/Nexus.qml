@@ -84,6 +84,7 @@ Item {
 
                 StyledRect {
                     id: contentInner
+
                     anchors.fill: parent
                     radius: Appearance.rounding.small
                     color: Colours.tPalette.m3surface
@@ -99,11 +100,12 @@ Item {
             Rectangle {
                 id: closeBtn
 
+                property bool hovered: closeMA.containsMouse
+
                 anchors.top: parent.top
                 anchors.right: parent.right
                 width: 40
                 height: 40
-                property bool hovered: closeMA.containsMouse
 
                 color: Colours.tPalette.m3surfaceContainer
 
@@ -192,7 +194,7 @@ Item {
         popoutWidth: 280
 
         SearchEngine {
-            session: root.session
+            session: root.session // qmllint disable incompatible-type
         }
     }
 
@@ -206,7 +208,7 @@ Item {
         popoutWidth: 275
 
         ConfigSwitcher {
-            session: root.session
+            session: root.session // qmllint disable incompatible-type
         }
     }
 

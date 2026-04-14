@@ -62,7 +62,7 @@ Item {
             root.onForcedTabChanged();
         }
 
-        target: session
+        target: root.session
     }
 
     ColumnLayout {

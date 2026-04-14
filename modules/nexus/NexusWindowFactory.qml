@@ -48,17 +48,17 @@ Singleton {
                 anchors.fill: parent
                 screen: win.screen
                 onClose: win.destroy()
-                floating: !Hyprland.focusedToplevel?.lastIpcObject?.floating ?? true
+                floating: !(Hyprland.activeToplevel?.lastIpcObject.floating ?? true)
 
                 Connections {
-                    target: Hyprland
-
                     function onToplevelsChanged() {
                         const our = Hyprland.toplevels.values.find(t => t.title === win.title);
                         if (our) {
-                            nexus.floating = our.lastIpcObject?.floating ?? true;
+                            nexus.floating = our.lastIpcObject.floating;
                         }
                     }
+
+                    target: Hyprland
                 }
             }
 

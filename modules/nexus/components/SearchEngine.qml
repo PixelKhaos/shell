@@ -84,14 +84,14 @@ ColumnLayout {
         color: Qt.alpha(Colours.palette.m3onSurface, 0.1)
     }
 
-    // Search results 
+    // Search results
     Flickable {
         Layout.fillWidth: true
         Layout.preferredHeight: Math.min(resultsColumn.height, 300)
         clip: true
         contentHeight: resultsColumn.height
         boundsBehavior: Flickable.StopAtBounds
-        visible: root.session.searchQuery.length > 0 && NexusRegistry.searchSettings(root.session.searchQuery).length > 0
+        visible: root.session.searchQuery.length > 0 && NexusRegistry.searchSettings(root.session.searchQuery).length > 0 // qmllint disable missing-property
 
         Column {
             id: resultsColumn
@@ -102,7 +102,7 @@ ColumnLayout {
             Repeater {
                 id: resultsRepeater
 
-                model: NexusRegistry.searchSettings(root.session.searchQuery)
+                model: NexusRegistry.searchSettings(root.session.searchQuery) // qmllint disable missing-property
 
                 delegate: Item {
                     id: resultDelegate
@@ -113,14 +113,14 @@ ColumnLayout {
                     height: 56
 
                     StateLayer {
-                        anchors.fill: parent
-                        radius: Appearance.rounding.normal
-                        color: Colours.palette.m3onSurface
-
                         function onClicked() {
                             root.session.setSearchNavigate(resultDelegate.modelData.categoryId, resultDelegate.modelData.tab || "");
                             root.session.searchPopoutOpen = false;
                         }
+
+                        anchors.fill: parent
+                        radius: Appearance.rounding.normal
+                        color: Colours.palette.m3onSurface
                     }
 
                     Row {
@@ -194,7 +194,7 @@ ColumnLayout {
 
     // No results
     Item {
-        visible: root.session.searchQuery.length > 0 && NexusRegistry.searchSettings(root.session.searchQuery).length === 0
+        visible: root.session.searchQuery.length > 0 && NexusRegistry.searchSettings(root.session.searchQuery).length === 0 // qmllint disable missing-property
         Layout.fillWidth: true
         Layout.preferredHeight: 100
 
@@ -219,14 +219,13 @@ ColumnLayout {
 
     // Clear search when popout closes
     Connections {
-        target: root.session
-
         function onSearchPopoutOpenChanged() {
             if (!root.session.searchPopoutOpen) {
                 searchField.text = "";
                 root.session.searchQuery = "";
             }
         }
-    }
 
+        target: root.session
+    }
 }
