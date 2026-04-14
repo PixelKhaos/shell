@@ -28,6 +28,9 @@ Item {
         nexusRoot: root
     }
 
+    readonly property bool flyoutOverlapsSearch: flyout.open && searchPopoutContent.open && flyout.y < searchPopoutContent.y + searchPopoutContent.drawerHeight && flyout.y + flyout.drawerHeight > searchPopoutContent.y
+    readonly property bool flyoutOverlapsConfig: flyout.open && configPopoutContent.open && flyout.y < configPopoutContent.y + configPopoutContent.drawerHeight && flyout.y + flyout.drawerHeight > configPopoutContent.y
+
     signal close
 
     implicitWidth: implicitHeight * 1.67
@@ -295,6 +298,9 @@ Item {
         y: 0
         visible: session.sidebarCollapsed
         touchingTop: true
+        extraLeftMargin: root.flyoutOverlapsSearch ? flyout.drawerWidth : 0
+        flyoutDrawerWidth: flyout.drawerWidth
+        flyoutOpen: flyout.open
 
         open: session.searchPopoutOpen
         popoutWidth: 280
@@ -311,6 +317,9 @@ Item {
         y: 0
         visible: session.sidebarCollapsed
         touchingTop: true
+        extraLeftMargin: root.flyoutOverlapsConfig ? flyout.drawerWidth : 0
+        flyoutDrawerWidth: flyout.drawerWidth
+        flyoutOpen: flyout.open
 
         open: session.configPopoutOpen
         popoutWidth: 275

@@ -15,10 +15,10 @@ Item {
 
     property string flyoutCategory: ""
     property real flyoutTop: 0
+    property string _pendingCategory: ""
 
     function openFlyout(categoryId, itemGlobalY) {
         flyoutCloseTimer.stop();
-        root.flyoutCategory = categoryId;
 
         const cat = NexusRegistry.getById(categoryId);
         const childCount = cat && cat.children ? cat.children.length : 0;
@@ -26,7 +26,19 @@ Item {
         let top = itemGlobalY - flyoutHeight / 2 + 20;
         if (top < 10)
             top = 10;
+
         root.flyoutTop = top;
+        _pendingCategory = categoryId;
+        openDelayTimer.start();
+    }
+
+    Timer {
+        id: openDelayTimer
+        interval: 50
+        onTriggered: {
+            root.flyoutCategory = root._pendingCategory;
+            root._pendingCategory = "";
+        }
     }
 
     function scheduleFlyoutClose() {
