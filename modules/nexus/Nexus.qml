@@ -265,7 +265,7 @@ Item {
 
         Behavior on y {
             enabled: flyout.open
-            
+
             NumberAnimation {
                 duration: Appearance.anim.durations.expressiveDefaultSpatial
                 easing.type: Easing.BezierSpline

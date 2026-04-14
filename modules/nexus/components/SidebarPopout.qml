@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import qs.config
 
 Item {
@@ -109,14 +108,14 @@ Item {
 
             Loader {
                 id: contentLoader
-                
+
                 anchors.fill: parent
                 sourceComponent: root._prevType === "search" ? root._searchComponent : root._prevType === "config" ? root._configComponent : null
             }
 
             Behavior on anchors.leftMargin {
                 enabled: root.flyoutOpen === (root.flyoutDrawerWidth >= 100)
-                
+
                 NumberAnimation {
                     duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.type: Easing.BezierSpline
