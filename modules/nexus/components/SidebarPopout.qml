@@ -8,6 +8,7 @@ Item {
     id: root
 
     required property bool open
+    property string popoutType: ""
     property int popoutWidth: 320
     property int popoutPadding: 16
     property bool touchingTop: false
@@ -18,79 +19,108 @@ Item {
     readonly property real drawerWidth: drawer.width
     readonly property real drawerHeight: drawer.height
 
-    default property alias content: contentLayout.children
+    property string _prevType: ""
+    property Component _searchComponent: null
+    property Component _configComponent: null
+
+    function setComponents(searchComp, configComp) {
+        _searchComponent = searchComp;
+        _configComponent = configComp;
+    }
 
     implicitWidth: drawer.width
     implicitHeight: drawer.height
+
+    onPopoutTypeChanged: {
+        if (popoutType === "") {
+            _prevType = "";
+            contentFadeOut.start();
+        } else if (_prevType === "") {
+            _prevType = popoutType;
+            contentContainer.opacity = 0;
+            contentFadeOut.stop();
+            contentFadeIn.restart();
+        } else {
+            contentFadeOut.start();
+        }
+    }
 
     Rectangle {
         id: drawer
 
         clip: true
         width: root.open ? root.popoutWidth + root.extraLeftMargin : 0
-        height: contentLayout.implicitHeight + root.popoutPadding * 2
+        height: (contentLoader.item?.implicitHeight ?? 0) + root.popoutPadding * 2 // qmllint disable missing-property
 
         color: "transparent"
         radius: 0
 
         Behavior on width {
             enabled: root.flyoutOpen === (root.flyoutDrawerWidth >= 100)
+
             NumberAnimation {
-                duration: 350
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
                 easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
             }
         }
 
-        ColumnLayout {
-            id: contentLayout
+        Behavior on height {
+            NumberAnimation {
+                duration: Appearance.anim.durations.expressiveDefaultSpatial
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            }
+        }
+
+        Item {
+            id: contentContainer
 
             anchors.fill: parent
             anchors.leftMargin: root.open ? root.popoutPadding + root.extraLeftMargin : 0
             anchors.rightMargin: root.open ? root.popoutPadding : 0
             anchors.topMargin: root.open ? root.popoutPadding : 0
             anchors.bottomMargin: root.open ? root.popoutPadding : 0
-            spacing: Appearance.spacing.normal
+            opacity: 1
 
-            opacity: root.open ? 1 : 0
+            NumberAnimation {
+                id: contentFadeOut
 
-            Behavior on opacity {
-                NumberAnimation {
-                    duration: root.open ? 200 : 120
-                    easing.type: Easing.InOutQuad
+                target: contentContainer
+                property: "opacity"
+                from: 1
+                to: 0
+                duration: 120
+                onFinished: {
+                    root._prevType = root.popoutType;
+                    contentFadeIn.start();
                 }
+            }
+
+            NumberAnimation {
+                id: contentFadeIn
+
+                target: contentContainer
+                property: "opacity"
+                from: 0
+                to: 1
+                duration: 250
+            }
+
+            Loader {
+                id: contentLoader
+                
+                anchors.fill: parent
+                sourceComponent: root._prevType === "search" ? root._searchComponent : root._prevType === "config" ? root._configComponent : null
             }
 
             Behavior on anchors.leftMargin {
                 enabled: root.flyoutOpen === (root.flyoutDrawerWidth >= 100)
+                
                 NumberAnimation {
-                    duration: 350
+                    duration: Appearance.anim.durations.expressiveDefaultSpatial
                     easing.type: Easing.BezierSpline
-                    easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
-                }
-            }
-
-            Behavior on anchors.rightMargin {
-                NumberAnimation {
-                    duration: 350
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
-                }
-            }
-
-            Behavior on anchors.topMargin {
-                NumberAnimation {
-                    duration: 350
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
-                }
-            }
-
-            Behavior on anchors.bottomMargin {
-                NumberAnimation {
-                    duration: 350
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
                 }
             }
         }

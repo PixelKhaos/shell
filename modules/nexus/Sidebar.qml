@@ -31,16 +31,6 @@ Item {
         _pendingCategory = categoryId;
         openDelayTimer.start();
     }
-
-    Timer {
-        id: openDelayTimer
-        interval: 50
-        onTriggered: {
-            root.flyoutCategory = root._pendingCategory;
-            root._pendingCategory = "";
-        }
-    }
-
     function scheduleFlyoutClose() {
         flyoutCloseTimer.restart();
     }
@@ -48,6 +38,18 @@ Item {
     function cancelFlyoutClose() {
         flyoutCloseTimer.stop();
     }
+    
+    Timer {
+        id: openDelayTimer
+
+        interval: 50
+        onTriggered: {
+            root.flyoutCategory = root._pendingCategory;
+            root._pendingCategory = "";
+        }
+    }
+
+
 
     Timer {
         id: flyoutCloseTimer
@@ -104,6 +106,7 @@ Item {
                         SidebarNavItem {
                             session: root.session // qmllint disable incompatible-type
                             modelData: catDelegate.modelData
+                            flyoutActive: root.flyoutCategory === catDelegate.catId
                             onFlyoutRequested: function (itemY) {
                                 root.openFlyout(catDelegate.catId, itemY);
                             }

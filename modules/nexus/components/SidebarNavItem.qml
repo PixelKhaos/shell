@@ -19,6 +19,9 @@ Item {
     readonly property bool isChildActive: NexusRegistry.isChildActive(catId, session.activeCategory) // qmllint disable missing-property
     readonly property bool collapsed: session.sidebarCollapsed
 
+    property bool hovered: false
+    property bool flyoutActive: false
+    
     signal flyoutRequested(real itemY)
     signal flyoutCloseRequested
 
@@ -76,13 +79,27 @@ Item {
         MaterialIcon {
             id: navIcon
 
-            x: root.collapsed ? (parent.width - width) / 2 : Appearance.padding.large
+            x: {
+                if (!root.collapsed)
+                    return Appearance.padding.large;
+                const baseX = (parent.width - width) / 2;
+                return root.hasChildren && (root.hovered || root.flyoutActive) ? baseX - 6 : baseX;
+            }
             y: root.collapsed ? (parent.height - height) / 2 - 10 : (parent.height - height) / 2
 
             text: root.modelData.icon
             color: root.isActive || root.isChildActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
             font.pointSize: root.collapsed ? Appearance.font.size.large + 2 : Appearance.font.size.larger
             fill: root.isActive || root.isChildActive ? 1 : 0
+            scale: root.collapsed && root.hasChildren && (root.hovered || root.flyoutActive) ? 0.8 : 1.0
+
+            Behavior on scale {
+                NumberAnimation {
+                    duration: Appearance.anim.durations.expressiveDefaultSpatial
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                }
+            }
 
             Behavior on x {
                 NumberAnimation {
@@ -160,9 +177,40 @@ Item {
             }
         }
 
+        MaterialIcon {
+            id: doubleChevron
+
+            visible: root.collapsed && root.hasChildren
+            x: (parent.width - width) / 2 + 15
+            y: (parent.height - height) / 2 - 10
+
+            text: "keyboard_double_arrow_right"
+            color: root.isActive || root.isChildActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
+            font.pointSize: Appearance.font.size.large
+            opacity: (root.hovered || root.flyoutActive) ? 0.9 : 0.0
+            scale: (root.hovered || root.flyoutActive) ? 0.9 : 0.6
+
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Appearance.anim.durations.expressiveDefaultSpatial
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                }
+            }
+
+            Behavior on scale {
+                NumberAnimation {
+                    duration: Appearance.anim.durations.expressiveDefaultSpatial
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                }
+            }
+        }
+
         HoverHandler {
             enabled: root.collapsed && root.hasChildren
             onHoveredChanged: {
+                root.hovered = hovered;
                 if (hovered) {
                     root.flyoutRequested(root.mapToItem(null, 0, 0).y);
                 } else {
