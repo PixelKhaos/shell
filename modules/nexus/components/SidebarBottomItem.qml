@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import ".."
 
 Item {
@@ -20,24 +20,22 @@ Item {
 
     Behavior on height {
         NumberAnimation {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.type: Easing.BezierSpline
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            duration: Tokens.anim.durations.expressiveDefaultSpatial
+            easing: Tokens.anim.expressiveDefaultSpatial
         }
     }
 
     StyledRect {
         anchors.fill: parent
-        anchors.leftMargin: Appearance.padding.normal
+        anchors.leftMargin: Tokens.padding.normal
 
-        radius: root.collapsed ? Appearance.rounding.normal : Appearance.rounding.full
+        radius: root.collapsed ? Tokens.rounding.normal : Tokens.rounding.full
         color: root.isActive ? Qt.alpha(Colours.palette.m3secondaryContainer, 1) : "transparent"
 
         Behavior on radius {
             NumberAnimation {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: Tokens.anim.durations.expressiveDefaultSpatial
+                easing: Tokens.anim.expressiveDefaultSpatial
             }
         }
         Behavior on color {
@@ -55,26 +53,24 @@ Item {
         MaterialIcon {
             id: btmIcon
 
-            x: root.collapsed ? (parent.width - width) / 2 : Appearance.padding.large
+            x: root.collapsed ? (parent.width - width) / 2 : Tokens.padding.large
             y: root.collapsed ? (parent.height - height) / 2 - 10 : (parent.height - height) / 2
 
             text: root.modelData.icon
             color: root.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-            font.pointSize: root.collapsed ? Appearance.font.size.large + 2 : Appearance.font.size.larger
+            font.pointSize: root.collapsed ? Tokens.font.size.large + 2 : Tokens.font.size.larger
             fill: root.isActive ? 1 : 0
 
             Behavior on x {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
             Behavior on font.pointSize {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
             Behavior on fill {
@@ -83,28 +79,26 @@ Item {
         }
 
         StyledText {
-            x: root.collapsed ? (parent.width - width) / 2 : btmIcon.x + btmIcon.width + Appearance.spacing.normal
+            x: root.collapsed ? (parent.width - width) / 2 : btmIcon.x + btmIcon.width + Tokens.spacing.normal
             y: root.collapsed ? parent.height - height - 6 : (parent.height - height) / 2
 
             text: root.modelData.label
             color: root.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-            font.pointSize: root.collapsed ? Appearance.font.size.small - 1 : Appearance.font.size.normal
+            font.pointSize: root.collapsed ? Tokens.font.size.small - 1 : Tokens.font.size.normal
             font.capitalization: Font.Capitalize
 
             opacity: root.collapsed ? 0.8 : 1
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
             Behavior on font.pointSize {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
         }

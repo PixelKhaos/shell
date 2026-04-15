@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import qs.modules.nexus
 
 Item {
@@ -160,11 +160,11 @@ Item {
         id: contentContainer
 
         anchors.fill: parent
-        anchors.rightMargin: Appearance.padding.large * 2
-        anchors.leftMargin: Appearance.padding.large * 2
-        anchors.topMargin: Appearance.padding.large
-        anchors.bottomMargin: Appearance.padding.large
-        spacing: Appearance.spacing.normal
+        anchors.rightMargin: Tokens.padding.large * 2
+        anchors.leftMargin: Tokens.padding.large * 2
+        anchors.topMargin: Tokens.padding.large
+        anchors.bottomMargin: Tokens.padding.large
+        spacing: Tokens.spacing.normal
         opacity: 1
 
         transform: Translate {
@@ -174,20 +174,20 @@ Item {
         // Header: title + description
         ColumnLayout {
             Layout.fillWidth: true
-            Layout.topMargin: Appearance.padding.smaller
+            Layout.topMargin: Tokens.padding.smaller
 
-            spacing: Appearance.spacing.small / 2
+            spacing: Tokens.spacing.small / 2
 
             StyledText {
                 text: root._prevConfig?.label ?? ""
-                font.pointSize: Appearance.font.size.larger + 4
+                font.pointSize: Tokens.font.size.larger + 4
                 font.weight: Font.DemiBold
                 color: Colours.palette.m3onSurface
             }
 
             StyledText {
                 text: root._prevConfig?.description ?? ""
-                font.pointSize: Appearance.font.size.normal
+                font.pointSize: Tokens.font.size.normal
                 color: Qt.alpha(Colours.palette.m3onSurface, 0.7)
                 visible: root._prevConfig && root._prevConfig.description
             }
@@ -197,7 +197,7 @@ Item {
             id: tabBar
 
             Layout.fillWidth: true
-            Layout.topMargin: Appearance.spacing.smaller
+            Layout.topMargin: Tokens.spacing.smaller
             Layout.preferredHeight: 48
             visible: root._prevTabs.length > 0
 
@@ -229,9 +229,9 @@ Item {
                         required property string modelData
                         required property int index
 
-                        width: tabLabel.implicitWidth + Appearance.padding.large * 2
+                        width: tabLabel.implicitWidth + Tokens.padding.large * 2
                         height: 48
-                        radius: Appearance.rounding.small
+                        radius: Tokens.rounding.small
                         color: "transparent"
 
                         onXChanged: if (tabItem.index === root.activeTabIndex)
@@ -244,7 +244,7 @@ Item {
 
                             anchors.centerIn: parent
                             text: tabItem.modelData
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Tokens.font.size.normal
                             font.weight: Font.Medium
                             color: root.activeTabIndex === tabItem.index ? Colours.palette.m3primary : Colours.palette.m3onSurface
 
@@ -258,7 +258,7 @@ Item {
                                 root.activeTabIndex = tabItem.index;
                             }
 
-                            radius: Appearance.rounding.small
+                            radius: Tokens.rounding.small
                             color: root.activeTabIndex === tabItem.index ? Colours.palette.m3primary : Colours.palette.m3onSurface
                         }
                     }
@@ -283,16 +283,14 @@ Item {
 
                 Behavior on x {
                     NumberAnimation {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                        duration: Tokens.anim.durations.expressiveDefaultSpatial
+                        easing: Tokens.anim.expressiveDefaultSpatial
                     }
                 }
                 Behavior on width {
                     NumberAnimation {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                        duration: Tokens.anim.durations.expressiveDefaultSpatial
+                        easing: Tokens.anim.expressiveDefaultSpatial
                     }
                 }
             }
@@ -304,7 +302,7 @@ Item {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.topMargin: Appearance.spacing.normal
+            Layout.topMargin: Tokens.spacing.normal
 
             interactive: false
             currentIndex: root.activeTabIndex

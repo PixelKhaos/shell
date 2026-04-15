@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import qs.config
+import Caelestia.Config
 
 Item {
     id: root
@@ -58,17 +58,15 @@ Item {
             enabled: root.flyoutOpen === (root.flyoutDrawerWidth >= 100)
 
             NumberAnimation {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: Tokens.anim.durations.expressiveDefaultSpatial
+                easing: Tokens.anim.expressiveDefaultSpatial
             }
         }
 
         Behavior on height {
             NumberAnimation {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: Tokens.anim.durations.expressiveDefaultSpatial
+                easing: Tokens.anim.expressiveDefaultSpatial
             }
         }
 
@@ -117,9 +115,8 @@ Item {
                 enabled: root.flyoutOpen === (root.flyoutDrawerWidth >= 100)
 
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
         }

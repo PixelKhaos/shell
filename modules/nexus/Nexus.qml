@@ -5,9 +5,9 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
 import Caelestia.Blobs
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import qs.modules.nexus
 import "./components"
 
@@ -16,7 +16,7 @@ Item {
 
     required property ShellScreen screen
 
-    readonly property int rounding: floating ? 0 : Appearance.rounding.normal
+    readonly property int rounding: floating ? 0 : Tokens.rounding.normal
 
     property bool floating: false
     property alias active: session.activeCategory
@@ -58,7 +58,7 @@ Item {
             anchors.fill: parent
             anchors.margins: -pad
             group: blobGroup
-            radius: Appearance.rounding.small
+            radius: Tokens.rounding.small
             borderLeft: sidebarContainer.width + 10 + pad
             borderTop: 10 + pad
             borderRight: 10 + pad
@@ -74,7 +74,7 @@ Item {
             implicitWidth: closeBtn.width + maximizeBtn.width
             implicitHeight: closeBtn.height
             radius: 0
-            bottomLeftRadius: Appearance.rounding.small
+            bottomLeftRadius: Tokens.rounding.small
             deformScale: 0
         }
     }
@@ -98,9 +98,8 @@ Item {
 
             Behavior on Layout.preferredWidth {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
 
@@ -132,7 +131,7 @@ Item {
                     id: contentInner
 
                     anchors.fill: parent
-                    radius: Appearance.rounding.small
+                    radius: Tokens.rounding.small
                     color: "transparent"
                     clip: true
 
@@ -161,10 +160,10 @@ Item {
             y: flyout.y
             implicitWidth: flyout.drawerWidth
             implicitHeight: flyout.drawerHeight
-            radius: Appearance.rounding.small
+            radius: Tokens.rounding.small
             topLeftRadius: 0
             bottomLeftRadius: 0
-            topRightRadius: flyout.y <= 0 ? 0 : Appearance.rounding.small
+            topRightRadius: flyout.y <= 0 ? 0 : Tokens.rounding.small
             deformScale: 0.00001
             stiffness: 200
             damping: 16
@@ -179,7 +178,7 @@ Item {
             implicitWidth: unifiedPopout.drawerWidth
             implicitHeight: unifiedPopout.drawerHeight
             visible: session.sidebarCollapsed
-            radius: Appearance.rounding.normal
+            radius: Tokens.rounding.normal
             topLeftRadius: 0
             topRightRadius: 0
             bottomLeftRadius: 0
@@ -204,7 +203,7 @@ Item {
         MaterialIcon {
             anchors.centerIn: parent
             text: "close"
-            font.pointSize: Appearance.font.size.larger
+            font.pointSize: Tokens.font.size.larger
             color: closeBtn.hovered ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
         }
 
@@ -231,7 +230,7 @@ Item {
         MaterialIcon {
             anchors.centerIn: parent
             text: root.floating ? "fullscreen" : "fullscreen_exit"
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Tokens.font.size.normal
             color: maximizeBtn.hovered ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
         }
 
@@ -267,9 +266,8 @@ Item {
             enabled: flyout.open
 
             NumberAnimation {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: Tokens.anim.durations.expressiveDefaultSpatial
+                easing: Tokens.anim.expressiveDefaultSpatial
             }
         }
     }

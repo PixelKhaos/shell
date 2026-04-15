@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import qs.modules.nexus
 
 Item {
@@ -57,17 +57,15 @@ Item {
 
         Behavior on width {
             NumberAnimation {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: Tokens.anim.durations.expressiveDefaultSpatial
+                easing: Tokens.anim.expressiveDefaultSpatial
             }
         }
 
         Behavior on height {
             NumberAnimation {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: Tokens.anim.durations.expressiveDefaultSpatial
+                easing: Tokens.anim.expressiveDefaultSpatial
             }
         }
 
@@ -122,7 +120,7 @@ Item {
 
                 text: root._prevCat?.label ?? ""
                 color: Qt.alpha(Colours.palette.m3onSurface, 0.35)
-                font.pointSize: Appearance.font.size.small - 1
+                font.pointSize: Tokens.font.size.small - 1
                 font.capitalization: Font.AllUppercase
                 font.weight: Font.DemiBold
                 horizontalAlignment: Text.AlignHCenter
@@ -152,7 +150,7 @@ Item {
 
                         Rectangle {
                             anchors.fill: parent
-                            radius: Appearance.rounding.normal
+                            radius: Tokens.rounding.normal
                             color: flyoutChild.isActive ? Qt.alpha(Colours.palette.m3primary, 0.16) : "transparent"
 
                             Behavior on color {
@@ -164,7 +162,7 @@ Item {
                                     root.childClicked(flyoutChild.modelData.id);
                                 }
 
-                                radius: Appearance.rounding.normal
+                                radius: Tokens.rounding.normal
                                 color: flyoutChild.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                             }
 
@@ -176,7 +174,7 @@ Item {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: flyoutChild.modelData.icon
                                     color: flyoutChild.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                                    font.pointSize: Appearance.font.size.larger
+                                    font.pointSize: Tokens.font.size.larger
                                     fill: flyoutChild.isActive ? 1 : 0
 
                                     Behavior on fill {
@@ -188,7 +186,7 @@ Item {
                                     anchors.horizontalCenter: parent.horizontalCenter
                                     text: flyoutChild.modelData.label.length > 12 ? flyoutChild.modelData.label.substring(0, 11) + "…" : flyoutChild.modelData.label
                                     color: flyoutChild.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                                    font.pointSize: Appearance.font.size.small - 1
+                                    font.pointSize: Tokens.font.size.small - 1
                                     font.capitalization: Font.Capitalize
                                     font.weight: Font.Medium
                                 }
