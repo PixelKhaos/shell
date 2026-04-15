@@ -2,9 +2,9 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import ".."
 
 ColumnLayout {
@@ -32,11 +32,11 @@ ColumnLayout {
         return items;
     }
 
-    spacing: Appearance.spacing.small
+    spacing: Tokens.spacing.small
 
     StyledText {
         text: "Editing Context"
-        font.pointSize: Appearance.font.size.small
+        font.pointSize: Tokens.font.size.small
         font.weight: Font.DemiBold
         font.capitalization: Font.AllUppercase
         color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
@@ -64,7 +64,7 @@ ColumnLayout {
 
             StyledRect {
                 anchors.fill: parent
-                radius: Appearance.rounding.normal
+                radius: Tokens.rounding.normal
                 color: configDelegate.isActive ? Qt.alpha(Colours.palette.m3primary, 0.12) : "transparent"
 
                 Behavior on color {
@@ -73,13 +73,13 @@ ColumnLayout {
 
                 RowLayout {
                     anchors.fill: parent
-                    anchors.leftMargin: Appearance.spacing.normal
-                    anchors.rightMargin: Appearance.spacing.normal
-                    spacing: Appearance.spacing.normal
+                    anchors.leftMargin: Tokens.spacing.normal
+                    anchors.rightMargin: Tokens.spacing.normal
+                    spacing: Tokens.spacing.normal
 
                     MaterialIcon {
                         text: configDelegate.modelData.icon
-                        font.pointSize: Appearance.font.size.larger
+                        font.pointSize: Tokens.font.size.larger
                         color: configDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                         fill: configDelegate.isActive ? 1 : 0
 
@@ -94,7 +94,7 @@ ColumnLayout {
 
                         StyledText {
                             text: configDelegate.modelData.label
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Tokens.font.size.normal
                             font.weight: Font.Medium
                             color: configDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
 
@@ -105,7 +105,7 @@ ColumnLayout {
 
                         StyledText {
                             text: configDelegate.modelData.desc
-                            font.pointSize: Appearance.font.size.small - 1
+                            font.pointSize: Tokens.font.size.small - 1
                             color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
                         }
                     }
@@ -113,7 +113,7 @@ ColumnLayout {
                     MaterialIcon {
                         visible: configDelegate.isActive
                         text: "check"
-                        font.pointSize: Appearance.font.size.normal
+                        font.pointSize: Tokens.font.size.normal
                         color: Colours.palette.m3primary
                     }
                 }

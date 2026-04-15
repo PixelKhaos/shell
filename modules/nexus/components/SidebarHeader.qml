@@ -3,9 +3,9 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import ".."
 
 Item {
@@ -56,9 +56,8 @@ Item {
 
             Behavior on Layout.preferredHeight {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
 
@@ -67,7 +66,7 @@ Item {
 
                 anchors.fill: parent
 
-                radius: root.collapsed ? Appearance.rounding.normal : Appearance.rounding.full
+                radius: root.collapsed ? Tokens.rounding.normal : Tokens.rounding.full
                 color: {
                     if (root.session.searchPopoutOpen && root.collapsed)
                         return Qt.alpha(Colours.palette.m3secondaryContainer, 0.16);
@@ -78,9 +77,8 @@ Item {
 
                 Behavior on radius {
                     NumberAnimation {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                        duration: Tokens.anim.durations.expressiveDefaultSpatial
+                        easing: Tokens.anim.expressiveDefaultSpatial
                     }
                 }
                 Behavior on color {
@@ -102,11 +100,11 @@ Item {
                 MaterialIcon {
                     id: searchIcon
 
-                    x: root.collapsed ? (parent.width - width) / 2 : Appearance.padding.large
+                    x: root.collapsed ? (parent.width - width) / 2 : Tokens.padding.large
                     y: root.collapsed ? (parent.height - height) / 2 - 8 : (parent.height - height) / 2
 
                     text: "search"
-                    font.pointSize: root.collapsed ? Appearance.font.size.large : Appearance.font.size.larger
+                    font.pointSize: root.collapsed ? Tokens.font.size.large : Tokens.font.size.larger
                     color: {
                         if (root.session.searchPopoutOpen && root.collapsed)
                             return Colours.palette.m3primary;
@@ -115,16 +113,14 @@ Item {
 
                     Behavior on x {
                         NumberAnimation {
-                            duration: Appearance.anim.durations.expressiveDefaultSpatial
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                            duration: Tokens.anim.durations.expressiveDefaultSpatial
+                            easing: Tokens.anim.expressiveDefaultSpatial
                         }
                     }
                     Behavior on font.pointSize {
                         NumberAnimation {
-                            duration: Appearance.anim.durations.expressiveDefaultSpatial
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                            duration: Tokens.anim.durations.expressiveDefaultSpatial
+                            easing: Tokens.anim.expressiveDefaultSpatial
                         }
                     }
                     Behavior on color {
@@ -139,7 +135,7 @@ Item {
                     y: parent.height - height - 6
 
                     text: "Search"
-                    font.pointSize: Appearance.font.size.small - 1
+                    font.pointSize: Tokens.font.size.small - 1
                     color: {
                         if (root.session.searchPopoutOpen && root.collapsed)
                             return Colours.palette.m3primary;
@@ -150,9 +146,8 @@ Item {
 
                     Behavior on opacity {
                         NumberAnimation {
-                            duration: Appearance.anim.durations.expressiveDefaultSpatial
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                            duration: Tokens.anim.durations.expressiveDefaultSpatial
+                            easing: Tokens.anim.expressiveDefaultSpatial
                         }
                     }
                     Behavior on color {
@@ -166,13 +161,13 @@ Item {
 
                     visible: !root.collapsed
                     anchors.left: searchIcon.right
-                    anchors.leftMargin: Appearance.spacing.normal
+                    anchors.leftMargin: Tokens.spacing.normal
                     anchors.right: parent.right
-                    anchors.rightMargin: searchClear.visible ? searchClear.width + Appearance.spacing.normal : Appearance.padding.large
+                    anchors.rightMargin: searchClear.visible ? searchClear.width + Tokens.spacing.normal : Tokens.padding.large
                     anchors.verticalCenter: parent.verticalCenter
 
                     placeholderText: "Search settings..."
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Tokens.font.size.normal
                     color: Colours.palette.m3onSurface
                     placeholderTextColor: Qt.alpha(Colours.palette.m3onSurface, 0.3)
                     background: Item {}
@@ -206,11 +201,11 @@ Item {
 
                     visible: !root.collapsed && root.session.searchQuery.length > 0
                     anchors.right: parent.right
-                    anchors.rightMargin: Appearance.padding.normal
+                    anchors.rightMargin: Tokens.padding.normal
                     anchors.verticalCenter: parent.verticalCenter
 
                     text: "close"
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Tokens.font.size.normal
                     color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
 
                     StateLayer {
@@ -220,7 +215,7 @@ Item {
                             root.searchDropdownOpen = false;
                         }
 
-                        radius: Appearance.rounding.full
+                        radius: Tokens.rounding.full
                         color: Colours.palette.m3onSurface
                     }
                 }
@@ -236,9 +231,8 @@ Item {
 
             Behavior on Layout.preferredHeight {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
 
@@ -246,7 +240,7 @@ Item {
                 id: configBtn
 
                 anchors.fill: parent
-                radius: root.collapsed ? Appearance.rounding.normal : Appearance.rounding.full
+                radius: root.collapsed ? Tokens.rounding.normal : Tokens.rounding.full
                 color: {
                     if (root.session.configPopoutOpen && root.collapsed)
                         return Qt.alpha(Colours.palette.m3secondaryContainer, 0.16);
@@ -259,9 +253,8 @@ Item {
 
                 Behavior on radius {
                     NumberAnimation {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                        duration: Tokens.anim.durations.expressiveDefaultSpatial
+                        easing: Tokens.anim.expressiveDefaultSpatial
                     }
                 }
                 Behavior on color {
@@ -286,11 +279,11 @@ Item {
                 MaterialIcon {
                     id: configIcon
 
-                    x: root.collapsed ? (parent.width - width) / 2 : Appearance.padding.large
+                    x: root.collapsed ? (parent.width - width) / 2 : Tokens.padding.large
                     y: root.collapsed ? (parent.height - height) / 2 - 8 : (parent.height - height) / 2
 
                     text: root.session.activeConfig === "global" ? "language" : "monitor"
-                    font.pointSize: root.collapsed ? Appearance.font.size.large : Appearance.font.size.larger
+                    font.pointSize: root.collapsed ? Tokens.font.size.large : Tokens.font.size.larger
                     color: {
                         if (root.session.configPopoutOpen && root.collapsed)
                             return Colours.palette.m3primary;
@@ -301,16 +294,14 @@ Item {
 
                     Behavior on x {
                         NumberAnimation {
-                            duration: Appearance.anim.durations.expressiveDefaultSpatial
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                            duration: Tokens.anim.durations.expressiveDefaultSpatial
+                            easing: Tokens.anim.expressiveDefaultSpatial
                         }
                     }
                     Behavior on font.pointSize {
                         NumberAnimation {
-                            duration: Appearance.anim.durations.expressiveDefaultSpatial
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                            duration: Tokens.anim.durations.expressiveDefaultSpatial
+                            easing: Tokens.anim.expressiveDefaultSpatial
                         }
                     }
                     Behavior on color {
@@ -325,7 +316,7 @@ Item {
                     y: parent.height - height - 6
 
                     text: root.session.activeConfig === "global" ? "Global" : root.session.activeConfig
-                    font.pointSize: Appearance.font.size.small - 1
+                    font.pointSize: Tokens.font.size.small - 1
                     font.weight: Font.Medium
                     color: {
                         if (root.session.configPopoutOpen && root.collapsed)
@@ -337,9 +328,8 @@ Item {
 
                     Behavior on opacity {
                         NumberAnimation {
-                            duration: Appearance.anim.durations.expressiveDefaultSpatial
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                            duration: Tokens.anim.durations.expressiveDefaultSpatial
+                            easing: Tokens.anim.expressiveDefaultSpatial
                         }
                     }
                     Behavior on color {
@@ -351,11 +341,11 @@ Item {
                 StyledText {
                     visible: !root.collapsed
                     anchors.left: configIcon.right
-                    anchors.leftMargin: Appearance.spacing.normal
+                    anchors.leftMargin: Tokens.spacing.normal
                     anchors.verticalCenter: parent.verticalCenter
 
                     text: root.session.activeConfig === "global" ? "Global" : root.session.activeConfig
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Tokens.font.size.normal
                     font.weight: Font.Medium
                     color: {
                         if (root.configDropdownOpen)
@@ -372,20 +362,19 @@ Item {
                     id: configChevron
 
                     anchors.right: parent.right
-                    anchors.rightMargin: Appearance.padding.large
+                    anchors.rightMargin: Tokens.padding.large
                     anchors.verticalCenter: parent.verticalCenter
 
                     text: "expand_more"
-                    font.pointSize: Appearance.font.size.normal
+                    font.pointSize: Tokens.font.size.normal
                     color: Qt.alpha(Colours.palette.m3onSurface, 0.4)
                     rotation: (root.session.configPopoutOpen && root.collapsed) || (root.configDropdownOpen && !root.collapsed) ? 180 : 0
                     opacity: root.collapsed ? 0 : 1
 
                     Behavior on rotation {
                         NumberAnimation {
-                            duration: Appearance.anim.durations.small
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                            duration: Tokens.anim.durations.small
+                            easing: [0.34, 1.56, 0.64, 1, 1, 1]
                         }
                     }
                     Behavior on opacity {
@@ -399,9 +388,9 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            Layout.leftMargin: Appearance.padding.normal
-            Layout.rightMargin: Appearance.padding.normal
-            Layout.topMargin: root.collapsed ? 8 : Appearance.spacing.normal
+            Layout.leftMargin: Tokens.padding.normal
+            Layout.rightMargin: Tokens.padding.normal
+            Layout.topMargin: root.collapsed ? 8 : Tokens.spacing.normal
             color: Qt.alpha(Colours.palette.m3onSurface, 0.08)
         }
     }
@@ -414,8 +403,8 @@ Item {
         x: 0
         y: searchItem.y + searchItem.height + 4
         width: root.width
-        height: root.searchDropdownOpen && !root.collapsed ? searchResultsCol.implicitHeight + Appearance.padding.normal * 2 : 0
-        radius: Appearance.rounding.normal
+        height: root.searchDropdownOpen && !root.collapsed ? searchResultsCol.implicitHeight + Tokens.padding.normal * 2 : 0
+        radius: Tokens.rounding.normal
         color: Colours.tPalette.m3surfaceContainerHigh
         clip: true
         visible: height > 0
@@ -423,8 +412,7 @@ Item {
         Behavior on height {
             NumberAnimation {
                 duration: 300
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                easing: [0.34, 1.56, 0.64, 1, 1, 1]
             }
         }
 
@@ -432,7 +420,7 @@ Item {
             id: searchResultsCol
 
             anchors.fill: parent
-            anchors.margins: Appearance.padding.normal
+            anchors.margins: Tokens.padding.normal
             spacing: 2
 
             Repeater {
@@ -448,9 +436,9 @@ Item {
 
                     Row {
                         anchors.fill: parent
-                        anchors.leftMargin: Appearance.spacing.normal
-                        anchors.rightMargin: Appearance.spacing.normal
-                        spacing: Appearance.spacing.normal
+                        anchors.leftMargin: Tokens.spacing.normal
+                        anchors.rightMargin: Tokens.spacing.normal
+                        spacing: Tokens.spacing.normal
 
                         Rectangle {
                             anchors.verticalCenter: parent.verticalCenter
@@ -462,7 +450,7 @@ Item {
                             MaterialIcon {
                                 anchors.centerIn: parent
                                 text: "arrow_forward"
-                                font.pointSize: Appearance.font.size.small - 1
+                                font.pointSize: Tokens.font.size.small - 1
                                 color: Colours.palette.m3primary
                             }
                         }
@@ -473,13 +461,13 @@ Item {
 
                             StyledText {
                                 text: searchResultDelegate.modelData.label
-                                font.pointSize: Appearance.font.size.normal
+                                font.pointSize: Tokens.font.size.normal
                                 font.weight: Font.Medium
                                 color: Colours.palette.m3onSurface
                             }
                             StyledText {
                                 text: searchResultDelegate.modelData.categoryLabel + (searchResultDelegate.modelData.tab ? " › " + searchResultDelegate.modelData.tab : "")
-                                font.pointSize: Appearance.font.size.small - 1
+                                font.pointSize: Tokens.font.size.small - 1
                                 color: Qt.alpha(Colours.palette.m3onSurface, 0.4)
                             }
                         }
@@ -493,7 +481,7 @@ Item {
                             root.searchDropdownOpen = false;
                         }
 
-                        radius: Appearance.rounding.small
+                        radius: Tokens.rounding.small
                         color: Colours.palette.m3onSurface
                     }
                 }
@@ -509,8 +497,8 @@ Item {
         x: 0
         y: configItem.y + configItem.height + 4
         width: root.width
-        height: root.configDropdownOpen && !root.collapsed ? configDropdownCol.implicitHeight + Appearance.padding.normal * 2 : 0
-        radius: Appearance.rounding.normal
+        height: root.configDropdownOpen && !root.collapsed ? configDropdownCol.implicitHeight + Tokens.padding.normal * 2 : 0
+        radius: Tokens.rounding.normal
         color: Colours.tPalette.m3surfaceContainerHigh
         clip: true
         visible: height > 0
@@ -518,8 +506,7 @@ Item {
         Behavior on height {
             NumberAnimation {
                 duration: 300
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                easing: [0.34, 1.56, 0.64, 1, 1, 1]
             }
         }
 
@@ -527,7 +514,7 @@ Item {
             id: configDropdownCol
 
             anchors.fill: parent
-            anchors.margins: Appearance.padding.normal
+            anchors.margins: Tokens.padding.normal
             spacing: 2
 
             Repeater {
@@ -544,14 +531,14 @@ Item {
 
                     Row {
                         anchors.fill: parent
-                        anchors.leftMargin: Appearance.spacing.normal
-                        anchors.rightMargin: Appearance.spacing.normal
-                        spacing: Appearance.spacing.normal
+                        anchors.leftMargin: Tokens.spacing.normal
+                        anchors.rightMargin: Tokens.spacing.normal
+                        spacing: Tokens.spacing.normal
 
                         MaterialIcon {
                             anchors.verticalCenter: parent.verticalCenter
                             text: configDropdownDelegate.modelData.icon
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Tokens.font.size.normal
                             color: configDropdownDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                         }
 
@@ -561,13 +548,13 @@ Item {
 
                             StyledText {
                                 text: configDropdownDelegate.modelData.label
-                                font.pointSize: Appearance.font.size.normal
+                                font.pointSize: Tokens.font.size.normal
                                 font.weight: Font.Medium
                                 color: configDropdownDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
                             }
                             StyledText {
                                 text: configDropdownDelegate.modelData.desc
-                                font.pointSize: Appearance.font.size.small - 1
+                                font.pointSize: Tokens.font.size.small - 1
                                 color: Qt.alpha(Colours.palette.m3onSurface, 0.4)
                             }
                         }
@@ -579,7 +566,7 @@ Item {
                             root.configDropdownOpen = false;
                         }
 
-                        radius: Appearance.rounding.small
+                        radius: Tokens.rounding.small
                         color: Colours.palette.m3onSurface
                     }
                 }

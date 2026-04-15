@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import ".."
 
 Item {
@@ -30,9 +30,8 @@ Item {
 
     Behavior on height {
         NumberAnimation {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.type: Easing.BezierSpline
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            duration: Tokens.anim.durations.expressiveDefaultSpatial
+            easing: Tokens.anim.expressiveDefaultSpatial
         }
     }
 
@@ -40,9 +39,9 @@ Item {
         id: navBtn
 
         anchors.fill: parent
-        anchors.leftMargin: Appearance.padding.normal
+        anchors.leftMargin: Tokens.padding.normal
 
-        radius: root.collapsed ? Appearance.rounding.normal : Appearance.rounding.full
+        radius: root.collapsed ? Tokens.rounding.normal : Tokens.rounding.full
         color: {
             if (root.isActive || root.isChildActive)
                 return Qt.alpha(Colours.palette.m3primary, 0.16);
@@ -51,9 +50,8 @@ Item {
 
         Behavior on radius {
             NumberAnimation {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: Tokens.anim.durations.expressiveDefaultSpatial
+                easing: Tokens.anim.expressiveDefaultSpatial
             }
         }
 
@@ -81,7 +79,7 @@ Item {
 
             x: {
                 if (!root.collapsed)
-                    return Appearance.padding.large;
+                    return Tokens.padding.large;
                 const baseX = (parent.width - width) / 2;
                 return root.hasChildren && (root.hovered || root.flyoutActive) ? baseX - 6 : baseX;
             }
@@ -89,30 +87,27 @@ Item {
 
             text: root.modelData.icon
             color: root.isActive || root.isChildActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
-            font.pointSize: root.collapsed ? Appearance.font.size.large + 2 : Appearance.font.size.larger
+            font.pointSize: root.collapsed ? Tokens.font.size.large + 2 : Tokens.font.size.larger
             fill: root.isActive || root.isChildActive ? 1 : 0
             scale: root.collapsed && root.hasChildren && (root.hovered || root.flyoutActive) ? 0.8 : 1.0
 
             Behavior on scale {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
 
             Behavior on x {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
             Behavior on font.pointSize {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
             Behavior on fill {
@@ -123,12 +118,12 @@ Item {
         StyledText {
             id: navLabel
 
-            x: root.collapsed ? (parent.width - width) / 2 : navIcon.x + navIcon.width + Appearance.spacing.normal
+            x: root.collapsed ? (parent.width - width) / 2 : navIcon.x + navIcon.width + Tokens.spacing.normal
             y: root.collapsed ? parent.height - height - 6 : (parent.height - height) / 2
 
             text: root.collapsed ? (root.modelData.label.length > 8 ? root.modelData.label.substring(0, 7) + "…" : root.modelData.label) : root.modelData.label
             color: root.isActive || root.isChildActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
-            font.pointSize: root.collapsed ? Appearance.font.size.small - 1 : Appearance.font.size.normal
+            font.pointSize: root.collapsed ? Tokens.font.size.small - 1 : Tokens.font.size.normal
             font.capitalization: Font.Capitalize
             font.weight: Font.Medium
 
@@ -136,16 +131,14 @@ Item {
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
             Behavior on font.pointSize {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
         }
@@ -155,20 +148,19 @@ Item {
 
             visible: root.hasChildren && !root.collapsed
             anchors.right: parent.right
-            anchors.rightMargin: Appearance.padding.large
+            anchors.rightMargin: Tokens.padding.large
             anchors.verticalCenter: parent.verticalCenter
 
             text: "expand_more"
             color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
-            font.pointSize: Appearance.font.size.normal
+            font.pointSize: Tokens.font.size.normal
             rotation: root.session.expandedCategory === root.catId ? 180 : 0
             opacity: root.collapsed ? 0 : 1
 
             Behavior on rotation {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.small
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: [0.34, 1.56, 0.64, 1, 1, 1]
+                    duration: Tokens.anim.durations.small
+                    easing: [0.34, 1.56, 0.64, 1, 1, 1]
                 }
             }
 
@@ -186,23 +178,21 @@ Item {
 
             text: "keyboard_double_arrow_right"
             color: root.isActive || root.isChildActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
-            font.pointSize: Appearance.font.size.large
+            font.pointSize: Tokens.font.size.large
             opacity: (root.hovered || root.flyoutActive) ? 0.9 : 0.0
             scale: (root.hovered || root.flyoutActive) ? 0.9 : 0.6
 
             Behavior on opacity {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
 
             Behavior on scale {
                 NumberAnimation {
-                    duration: Appearance.anim.durations.expressiveDefaultSpatial
-                    easing.type: Easing.BezierSpline
-                    easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                    duration: Tokens.anim.durations.expressiveDefaultSpatial
+                    easing: Tokens.anim.expressiveDefaultSpatial
                 }
             }
         }

@@ -1,9 +1,9 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import ".."
 
 Item {
@@ -19,15 +19,14 @@ Item {
 
     Behavior on height {
         NumberAnimation {
-            duration: Appearance.anim.durations.expressiveDefaultSpatial
-            easing.type: Easing.BezierSpline
-            easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+            duration: Tokens.anim.durations.expressiveDefaultSpatial
+            easing: Tokens.anim.expressiveDefaultSpatial
         }
     }
 
     // Vertical line indicator
     Rectangle {
-        x: Appearance.padding.large + 16
+        x: Tokens.padding.large + 16
         y: 0
         width: 1
         height: root.open ? col.height : 0
@@ -35,9 +34,8 @@ Item {
 
         Behavior on height {
             NumberAnimation {
-                duration: Appearance.anim.durations.expressiveDefaultSpatial
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                duration: Tokens.anim.durations.expressiveDefaultSpatial
+                easing: Tokens.anim.expressiveDefaultSpatial
             }
         }
     }
@@ -45,10 +43,10 @@ Item {
     Column {
         id: col
 
-        width: parent.width - (Appearance.padding.large / 2)
-        topPadding: Appearance.spacing.small
-        leftPadding: Appearance.padding.large
-        spacing: Appearance.spacing.small
+        width: parent.width - (Tokens.padding.large / 2)
+        topPadding: Tokens.spacing.small
+        leftPadding: Tokens.padding.large
+        spacing: Tokens.spacing.small
 
         Repeater {
             model: root.childItems
@@ -65,10 +63,10 @@ Item {
 
                 StyledRect {
                     anchors.fill: parent
-                    anchors.leftMargin: Appearance.padding.larger * 2
-                    anchors.rightMargin: Appearance.padding.normal
+                    anchors.leftMargin: Tokens.padding.larger * 2
+                    anchors.rightMargin: Tokens.padding.normal
 
-                    radius: Appearance.rounding.full
+                    radius: Tokens.rounding.full
                     color: childDelegate.isActive ? Qt.alpha(Colours.palette.m3primary, 0.16) : "transparent"
 
                     Behavior on color {
@@ -85,15 +83,15 @@ Item {
 
                     Row {
                         anchors.left: parent.left
-                        anchors.leftMargin: Appearance.padding.large
+                        anchors.leftMargin: Tokens.padding.large
                         anchors.verticalCenter: parent.verticalCenter
-                        spacing: Appearance.spacing.normal
+                        spacing: Tokens.spacing.normal
 
                         MaterialIcon {
                             anchors.verticalCenter: parent.verticalCenter
                             text: childDelegate.modelData.icon
                             color: childDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                            font.pointSize: Appearance.font.size.normal
+                            font.pointSize: Tokens.font.size.normal
                             fill: childDelegate.isActive ? 1 : 0
                         }
 
@@ -101,7 +99,7 @@ Item {
                             anchors.verticalCenter: parent.verticalCenter
                             text: childDelegate.modelData.label
                             color: childDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
-                            font.pointSize: Appearance.font.size.smaller
+                            font.pointSize: Tokens.font.size.smaller
                             font.capitalization: Font.Capitalize
                         }
                     }

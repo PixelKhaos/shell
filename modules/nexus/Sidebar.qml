@@ -2,9 +2,9 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Caelestia.Config
 import qs.components
 import qs.services
-import qs.config
 import qs.modules.nexus
 import "./components"
 
@@ -60,14 +60,14 @@ Item {
         id: layout
 
         anchors.fill: parent
-        anchors.topMargin: Appearance.padding.large
-        anchors.bottomMargin: Appearance.padding.smaller
+        anchors.topMargin: Tokens.padding.large
+        anchors.bottomMargin: Tokens.padding.smaller
         spacing: 0
 
         SidebarHeader {
             z: 10
             Layout.fillWidth: true
-            Layout.leftMargin: Appearance.padding.normal
+            Layout.leftMargin: Tokens.padding.normal
             session: root.session // qmllint disable incompatible-type
         }
 
@@ -76,7 +76,7 @@ Item {
 
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.topMargin: Appearance.spacing.normal
+            Layout.topMargin: Tokens.spacing.normal
             clip: true
             contentHeight: navColumn.height
             boundsBehavior: Flickable.StopAtBounds
@@ -85,7 +85,7 @@ Item {
                 id: navColumn
 
                 width: navFlick.width
-                spacing: Appearance.spacing.small
+                spacing: Tokens.spacing.small
 
                 Repeater {
                     model: NexusRegistry.getCategories()
@@ -125,13 +125,13 @@ Item {
         // Spacer
         Item {
             Layout.fillHeight: false
-            Layout.preferredHeight: Appearance.spacing.large
+            Layout.preferredHeight: Tokens.spacing.large
         }
 
         // Bottom items
         Column {
             Layout.fillWidth: true
-            spacing: Appearance.spacing.small
+            spacing: Tokens.spacing.small
 
             Repeater {
                 model: NexusRegistry.getBottomItems()
@@ -146,29 +146,28 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 1
-            Layout.bottomMargin: Appearance.spacing.normal
-            Layout.topMargin: Appearance.spacing.normal
-            Layout.leftMargin: Appearance.padding.large
+            Layout.bottomMargin: Tokens.spacing.normal
+            Layout.topMargin: Tokens.spacing.normal
+            Layout.leftMargin: Tokens.padding.large
             color: Qt.alpha(Colours.palette.m3onSurface, 0.08)
         }
 
         // Collapse toggle
         Item {
             Layout.fillWidth: true
-            Layout.leftMargin: Appearance.padding.large / 1.5
+            Layout.leftMargin: Tokens.padding.large / 1.5
             Layout.preferredHeight: 48
 
             StyledRect {
                 width: parent.width
                 height: 40
-                radius: Appearance.rounding.full
+                radius: Tokens.rounding.full
                 color: "transparent"
 
                 Behavior on width {
                     NumberAnimation {
-                        duration: Appearance.anim.durations.expressiveDefaultSpatial
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.anim.curves.expressiveDefaultSpatial
+                        duration: Tokens.anim.durations.expressiveDefaultSpatial
+                        easing: Tokens.anim.expressiveDefaultSpatial
                     }
                 }
 
@@ -184,7 +183,7 @@ Item {
                     anchors.centerIn: parent
                     text: root.session.sidebarCollapsed ? "keyboard_double_arrow_right" : "keyboard_double_arrow_left"
                     color: Colours.palette.m3onSurface
-                    font.pointSize: Appearance.font.size.large
+                    font.pointSize: Tokens.font.size.large
                 }
             }
         }
