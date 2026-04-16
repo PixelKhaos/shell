@@ -29,9 +29,8 @@ Item {
     height: collapsed ? 68 : 40
 
     Behavior on height {
-        NumberAnimation {
-            duration: Tokens.anim.durations.expressiveDefaultSpatial
-            easing: Tokens.anim.expressiveDefaultSpatial
+        Anim {
+            type: Anim.DefaultSpatial
         }
     }
 
@@ -49,9 +48,8 @@ Item {
         }
 
         Behavior on radius {
-            NumberAnimation {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+            Anim {
+                type: Anim.DefaultSpatial
             }
         }
 
@@ -92,22 +90,19 @@ Item {
             scale: root.collapsed && root.hasChildren && (root.hovered || root.flyoutActive) ? 0.8 : 1.0
 
             Behavior on scale {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
 
             Behavior on x {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
             Behavior on font.pointSize {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
             Behavior on fill {
@@ -130,15 +125,13 @@ Item {
             opacity: root.collapsed ? 0.8 : 1
 
             Behavior on opacity {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
             Behavior on font.pointSize {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
         }
@@ -158,14 +151,15 @@ Item {
             opacity: root.collapsed ? 0 : 1
 
             Behavior on rotation {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.small
-                    easing: [0.34, 1.56, 0.64, 1, 1, 1]
+                Anim {
+                    type: Anim.StandardSmall
                 }
             }
 
             Behavior on opacity {
-                Anim {}
+                Anim {
+                    type: Anim.StandardSmall
+                }
             }
         }
 
@@ -183,16 +177,14 @@ Item {
             scale: (root.hovered || root.flyoutActive) ? 0.9 : 0.6
 
             Behavior on opacity {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
 
             Behavior on scale {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
         }

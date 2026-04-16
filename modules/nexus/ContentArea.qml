@@ -282,15 +282,13 @@ Item {
                 width: targetWidth
 
                 Behavior on x {
-                    NumberAnimation {
-                        duration: Tokens.anim.durations.expressiveDefaultSpatial
-                        easing: Tokens.anim.expressiveDefaultSpatial
+                    Anim {
+                        type: Anim.DefaultSpatial
                     }
                 }
                 Behavior on width {
-                    NumberAnimation {
-                        duration: Tokens.anim.durations.expressiveDefaultSpatial
-                        easing: Tokens.anim.expressiveDefaultSpatial
+                    Anim {
+                        type: Anim.DefaultSpatial
                     }
                 }
             }
@@ -317,15 +315,8 @@ Item {
                     Loader {
                         id: tabPanelLoader
 
-                        readonly property string targetSource: {
-                            if (!root._prevConfig)
-                                return "";
-                            if (root._prevTabs.length === 0) {
-                                // e.g panels/AppearancePanel.qml, uses lowercase def from registry and matches to Pascal cased file
-                                return "panels/" + root._prevConfig.id.charAt(0).toUpperCase() + root._prevConfig.id.slice(1) + "Panel.qml";
-                            }
-                            return "panels/" + root._prevConfig.id.charAt(0).toUpperCase() + root._prevConfig.id.slice(1) + "Panel.qml";
-                        }
+                        readonly property string panelId: root._prevConfig ? root._prevConfig.id.charAt(0).toUpperCase() + root._prevConfig.id.slice(1) : ""
+                        readonly property string targetSource: panelId ? "panels/" + panelId + "/Main.qml" : ""
                         property string resolvedSource: targetSource
 
                         anchors.centerIn: parent

@@ -19,9 +19,8 @@ Item {
     height: collapsed ? 68 : 40
 
     Behavior on height {
-        NumberAnimation {
-            duration: Tokens.anim.durations.expressiveDefaultSpatial
-            easing: Tokens.anim.expressiveDefaultSpatial
+        Anim {
+            type: Anim.DefaultSpatial
         }
     }
 
@@ -33,9 +32,8 @@ Item {
         color: root.isActive ? Qt.alpha(Colours.palette.m3secondaryContainer, 1) : "transparent"
 
         Behavior on radius {
-            NumberAnimation {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+            Anim {
+                type: Anim.DefaultSpatial
             }
         }
         Behavior on color {
@@ -62,19 +60,19 @@ Item {
             fill: root.isActive ? 1 : 0
 
             Behavior on x {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
             Behavior on font.pointSize {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
             Behavior on fill {
-                Anim {}
+                Anim {
+                    type: Anim.DefaultSpatial
+                }
             }
         }
 
@@ -90,15 +88,13 @@ Item {
             opacity: root.collapsed ? 0.8 : 1
 
             Behavior on opacity {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
             Behavior on font.pointSize {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
         }

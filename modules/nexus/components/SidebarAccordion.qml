@@ -18,9 +18,8 @@ Item {
     clip: true
 
     Behavior on height {
-        NumberAnimation {
-            duration: Tokens.anim.durations.expressiveDefaultSpatial
-            easing: Tokens.anim.expressiveDefaultSpatial
+        Anim {
+            type: Anim.DefaultSpatial
         }
     }
 
@@ -33,9 +32,8 @@ Item {
         color: Qt.alpha(Colours.palette.m3onSurface, 0.12)
 
         Behavior on height {
-            NumberAnimation {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+            Anim {
+                type: Anim.DefaultSpatial
             }
         }
     }
