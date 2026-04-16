@@ -165,9 +165,8 @@ Item {
                 color: "transparent"
 
                 Behavior on width {
-                    NumberAnimation {
-                        duration: Tokens.anim.durations.expressiveDefaultSpatial
-                        easing: Tokens.anim.expressiveDefaultSpatial
+                    Anim {
+                        type: Anim.DefaultSpatial
                     }
                 }
 

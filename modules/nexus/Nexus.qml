@@ -97,9 +97,8 @@ Item {
             color: "transparent"
 
             Behavior on Layout.preferredWidth {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
 
@@ -265,9 +264,8 @@ Item {
         Behavior on y {
             enabled: flyout.open
 
-            NumberAnimation {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+            Anim {
+                type: Anim.DefaultSpatial
             }
         }
     }

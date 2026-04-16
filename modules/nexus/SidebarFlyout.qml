@@ -56,16 +56,14 @@ Item {
         radius: 0
 
         Behavior on width {
-            NumberAnimation {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+            Anim {
+                type: Anim.DefaultSpatial
             }
         }
 
         Behavior on height {
-            NumberAnimation {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+            Anim {
+                type: Anim.DefaultSpatial
             }
         }
 

@@ -1,7 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import Caelestia.Config
+import qs.components
 
 Item {
     id: root
@@ -57,16 +57,14 @@ Item {
         Behavior on width {
             enabled: root.flyoutOpen === (root.flyoutDrawerWidth >= 100)
 
-            NumberAnimation {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+            Anim {
+                type: Anim.DefaultSpatial
             }
         }
 
         Behavior on height {
-            NumberAnimation {
-                duration: Tokens.anim.durations.expressiveDefaultSpatial
-                easing: Tokens.anim.expressiveDefaultSpatial
+            Anim {
+                type: Anim.DefaultSpatial
             }
         }
 
@@ -114,9 +112,8 @@ Item {
             Behavior on anchors.leftMargin {
                 enabled: root.flyoutOpen === (root.flyoutDrawerWidth >= 100)
 
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
         }

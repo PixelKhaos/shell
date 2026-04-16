@@ -55,9 +55,8 @@ Item {
             Layout.preferredHeight: root.collapsed ? 64 : 44
 
             Behavior on Layout.preferredHeight {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
 
@@ -76,9 +75,8 @@ Item {
                 }
 
                 Behavior on radius {
-                    NumberAnimation {
-                        duration: Tokens.anim.durations.expressiveDefaultSpatial
-                        easing: Tokens.anim.expressiveDefaultSpatial
+                    Anim {
+                        type: Anim.DefaultSpatial
                     }
                 }
                 Behavior on color {
@@ -112,15 +110,13 @@ Item {
                     }
 
                     Behavior on x {
-                        NumberAnimation {
-                            duration: Tokens.anim.durations.expressiveDefaultSpatial
-                            easing: Tokens.anim.expressiveDefaultSpatial
+                        Anim {
+                            type: Anim.DefaultSpatial
                         }
                     }
                     Behavior on font.pointSize {
-                        NumberAnimation {
-                            duration: Tokens.anim.durations.expressiveDefaultSpatial
-                            easing: Tokens.anim.expressiveDefaultSpatial
+                        Anim {
+                            type: Anim.DefaultSpatial
                         }
                     }
                     Behavior on color {
@@ -145,9 +141,8 @@ Item {
                     opacity: root.collapsed ? 0.8 : 1
 
                     Behavior on opacity {
-                        NumberAnimation {
-                            duration: Tokens.anim.durations.expressiveDefaultSpatial
-                            easing: Tokens.anim.expressiveDefaultSpatial
+                        Anim {
+                            type: Anim.DefaultSpatial
                         }
                     }
                     Behavior on color {
@@ -230,9 +225,8 @@ Item {
             Layout.topMargin: root.collapsed ? 4 : 8
 
             Behavior on Layout.preferredHeight {
-                NumberAnimation {
-                    duration: Tokens.anim.durations.expressiveDefaultSpatial
-                    easing: Tokens.anim.expressiveDefaultSpatial
+                Anim {
+                    type: Anim.DefaultSpatial
                 }
             }
 
@@ -252,9 +246,8 @@ Item {
                 }
 
                 Behavior on radius {
-                    NumberAnimation {
-                        duration: Tokens.anim.durations.expressiveDefaultSpatial
-                        easing: Tokens.anim.expressiveDefaultSpatial
+                    Anim {
+                        type: Anim.DefaultSpatial
                     }
                 }
                 Behavior on color {
@@ -293,15 +286,13 @@ Item {
                     }
 
                     Behavior on x {
-                        NumberAnimation {
-                            duration: Tokens.anim.durations.expressiveDefaultSpatial
-                            easing: Tokens.anim.expressiveDefaultSpatial
+                        Anim {
+                            type: Anim.DefaultSpatial
                         }
                     }
                     Behavior on font.pointSize {
-                        NumberAnimation {
-                            duration: Tokens.anim.durations.expressiveDefaultSpatial
-                            easing: Tokens.anim.expressiveDefaultSpatial
+                        Anim {
+                            type: Anim.DefaultSpatial
                         }
                     }
                     Behavior on color {
@@ -327,9 +318,8 @@ Item {
                     opacity: root.collapsed ? 0.8 : 1
 
                     Behavior on opacity {
-                        NumberAnimation {
-                            duration: Tokens.anim.durations.expressiveDefaultSpatial
-                            easing: Tokens.anim.expressiveDefaultSpatial
+                        Anim {
+                            type: Anim.DefaultSpatial
                         }
                     }
                     Behavior on color {
@@ -372,13 +362,14 @@ Item {
                     opacity: root.collapsed ? 0 : 1
 
                     Behavior on rotation {
-                        NumberAnimation {
-                            duration: Tokens.anim.durations.small
-                            easing: [0.34, 1.56, 0.64, 1, 1, 1]
+                        Anim {
+                            type: Anim.StandardSmall
                         }
                     }
                     Behavior on opacity {
-                        Anim {}
+                        Anim {
+                            type: Anim.StandardSmall
+                        }
                     }
                 }
             }
@@ -410,9 +401,8 @@ Item {
         visible: height > 0
 
         Behavior on height {
-            NumberAnimation {
-                duration: 300
-                easing: [0.34, 1.56, 0.64, 1, 1, 1]
+            Anim {
+                type: Anim.Emphasized
             }
         }
 
