@@ -36,34 +36,16 @@ Item {
     implicitWidth: implicitHeight * 1.67
     implicitHeight: screen.height * 0.85
 
-    StyledRect {
-        id: contentOuter
+    ContentArea {
+        anchors.left: sidebar.right
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.margins: 10
+        anchors.leftMargin: 0
 
-        Layout.fillWidth: true
-        Layout.fillHeight: true
-
-        topRightRadius: root.rounding
-        bottomRightRadius: root.rounding
-        color: "transparent"
-
-        Item {
-            anchors.fill: parent
-            anchors.margins: 10
-
-            StyledRect {
-                id: contentInner
-
-                anchors.fill: parent
-                radius: Tokens.rounding.small
-                color: "transparent"
-                clip: true
-
-                ContentArea {
-                    anchors.fill: parent
-                    session: root.session
-                }
-            }
-        }
+        clip: true
+        session: root.session
     }
 
     Item {
