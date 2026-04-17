@@ -34,7 +34,7 @@ Item {
     signal close
 
     implicitWidth: implicitHeight * 1.67
-    implicitHeight: screen.height * 0.85
+    implicitHeight: Math.min(1000, screen.height * 0.85)
 
     ContentArea {
         anchors.left: sidebar.right
