@@ -7,6 +7,7 @@ import Quickshell.Hyprland
 import Caelestia.Blobs
 import Caelestia.Config
 import qs.components
+import qs.components.controls
 import qs.services
 import qs.modules.nexus
 import "./components"
@@ -63,7 +64,7 @@ Item {
             id: blobGroup
 
             color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 1)
-            smoothing: 16
+            smoothing: 28
 
             Behavior on color {
                 CAnim {}
@@ -87,9 +88,9 @@ Item {
 
             anchors.right: parent.right
             group: blobGroup
-            implicitWidth: closeBtn.width + maximizeBtn.width
-            implicitHeight: closeBtn.height
-            bottomLeftRadius: Tokens.rounding.small
+            implicitWidth: windowControls.width + windowControls.anchors.rightMargin * 2
+            implicitHeight: windowControls.height + windowControls.anchors.topMargin * 2
+            bottomLeftRadius: Tokens.rounding.normal
             deformScale: 0
         }
 
@@ -145,61 +146,31 @@ Item {
         }
     }
 
-    Rectangle {
-        id: closeBtn
+    RowLayout {
+        id: windowControls
 
-        property bool hovered: closeMA.containsMouse
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.topMargin: Tokens.padding.smaller
+        anchors.rightMargin: Tokens.padding.normal
+        spacing: 0
 
-        x: root.width - width
-        y: 0
-        width: 40
-        height: 40
-
-        color: "transparent"
-
-        MaterialIcon {
-            anchors.centerIn: parent
-            text: "close"
-            font.pointSize: Tokens.font.size.larger
-            color: closeBtn.hovered ? Colours.palette.m3error : Colours.palette.m3onSurfaceVariant
-        }
-
-        MouseArea {
-            id: closeMA
-
-            anchors.fill: parent
-            hoverEnabled: true
-            onClicked: root.close()
-        }
-    }
-
-    Rectangle {
-        id: maximizeBtn
-
-        property bool hovered: maxMA.containsMouse
-
-        x: root.width - closeBtn.width - width
-        y: 0
-        width: 44
-        height: 40
-        color: "transparent"
-
-        MaterialIcon {
-            anchors.centerIn: parent
-            text: root.floating ? "fullscreen" : "fullscreen_exit"
-            font.pointSize: Tokens.font.size.normal
-            color: maximizeBtn.hovered ? Colours.palette.m3primary : Colours.palette.m3onSurfaceVariant
-        }
-
-        MouseArea {
-            id: maxMA
-
-            anchors.fill: parent
-            hoverEnabled: true
+        IconButton {
+            type: IconButton.Text
+            icon: root.floating ? "pip" : "pip_exit" // Yes, I know this looks reversed but it really isn't
+            label.fill: 0
+            inactiveOnColour: Colours.palette.m3onSurfaceVariant
             onClicked: {
                 Hyprland.dispatch("togglefloating");
                 root.floating = !root.floating;
             }
+        }
+
+        IconButton {
+            type: IconButton.Text
+            icon: "close"
+            inactiveOnColour: Colours.palette.m3onSurfaceVariant
+            onClicked: root.close()
         }
     }
 
