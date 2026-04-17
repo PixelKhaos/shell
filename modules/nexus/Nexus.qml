@@ -10,7 +10,7 @@ import qs.components
 import qs.components.controls
 import qs.services
 import qs.modules.nexus
-import "./components"
+import qs.modules.nexus.components
 
 Item {
     id: root

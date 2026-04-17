@@ -4,7 +4,7 @@ import QtQuick
 import Caelestia.Config
 import qs.components
 import qs.services
-import ".."
+import qs.modules.nexus
 
 Item {
     id: root
