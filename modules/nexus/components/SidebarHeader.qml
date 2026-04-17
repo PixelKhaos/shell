@@ -1,12 +1,12 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
 import qs.services
-import ".."
+import qs.modules.nexus
 
 Item {
     id: root
@@ -85,14 +85,13 @@ Item {
 
                 // Collapsed mode: click to open popout
                 StateLayer {
-                    function onClicked() {
-                        root.session.searchPopoutOpen = !root.session.searchPopoutOpen;
-                        root.session.configPopoutOpen = false;
-                    }
-
                     visible: root.collapsed
                     radius: parent.radius
                     color: Colours.palette.m3onSurface
+                    onClicked: {
+                        root.session.searchPopoutOpen = !root.session.searchPopoutOpen;
+                        root.session.configPopoutOpen = false;
+                    }
                 }
 
                 MaterialIcon {
@@ -204,14 +203,13 @@ Item {
                     color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
 
                     StateLayer {
-                        function onClicked() {
+                        radius: Tokens.rounding.full
+                        color: Colours.palette.m3onSurface
+                        onClicked: {
                             searchField.text = "";
                             root.session.searchQuery = "";
                             root.searchDropdownOpen = false;
                         }
-
-                        radius: Tokens.rounding.full
-                        color: Colours.palette.m3onSurface
                     }
                 }
             }
@@ -255,7 +253,9 @@ Item {
                 }
 
                 StateLayer {
-                    function onClicked() {
+                    radius: parent.radius
+                    color: Colours.palette.m3onSurface
+                    onClicked: {
                         if (root.collapsed) {
                             root.session.configPopoutOpen = !root.session.configPopoutOpen;
                             root.session.searchPopoutOpen = false;
@@ -264,9 +264,6 @@ Item {
                             root.searchDropdownOpen = false;
                         }
                     }
-
-                    radius: parent.radius
-                    color: Colours.palette.m3onSurface
                 }
 
                 MaterialIcon {
@@ -464,15 +461,14 @@ Item {
                     }
 
                     StateLayer {
-                        function onClicked() {
+                        radius: Tokens.rounding.small
+                        color: Colours.palette.m3onSurface
+                        onClicked: {
                             searchField.text = "";
                             root.session.searchQuery = "";
                             root.session.setSearchNavigate(searchResultDelegate.modelData.categoryId, searchResultDelegate.modelData.tab || "");
                             root.searchDropdownOpen = false;
                         }
-
-                        radius: Tokens.rounding.small
-                        color: Colours.palette.m3onSurface
                     }
                 }
             }
@@ -551,13 +547,12 @@ Item {
                     }
 
                     StateLayer {
-                        function onClicked() {
+                        radius: Tokens.rounding.small
+                        color: Colours.palette.m3onSurface
+                        onClicked: {
                             root.session.activeConfig = configDropdownDelegate.modelData.id;
                             root.configDropdownOpen = false;
                         }
-
-                        radius: Tokens.rounding.small
-                        color: Colours.palette.m3onSurface
                     }
                 }
             }

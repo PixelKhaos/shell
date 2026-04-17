@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
 import qs.services
-import ".."
+import qs.modules.nexus
 
 ColumnLayout {
     id: root
@@ -119,13 +119,12 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    function onClicked() {
+                    radius: parent.radius
+                    color: Colours.palette.m3onSurface
+                    onClicked: {
                         root.session.activeConfig = configDelegate.modelData.id;
                         root.session.configPopoutOpen = false;
                     }
-
-                    radius: parent.radius
-                    color: Colours.palette.m3onSurface
                 }
             }
         }

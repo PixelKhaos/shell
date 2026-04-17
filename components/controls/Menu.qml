@@ -1,10 +1,10 @@
 pragma ComponentBehavior: Bound
 
-import ".."
 import "../effects"
 import QtQuick
 import QtQuick.Layouts
 import Caelestia.Config
+import qs.components
 import qs.services
 
 Elevation {
@@ -52,15 +52,14 @@ Elevation {
                     color: Qt.alpha(Colours.palette.m3secondaryContainer, active ? 1 : 0)
 
                     StateLayer {
-                        function onClicked(): void {
+                        color: item.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+                        disabled: !root.expanded
+                        onClicked: {
                             root.itemSelected(item.modelData);
                             root.active = item.modelData;
                             item.modelData.clicked();
                             root.expanded = false;
                         }
-
-                        color: item.active ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
-                        disabled: !root.expanded
                     }
 
                     RowLayout {

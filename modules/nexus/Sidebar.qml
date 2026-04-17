@@ -6,7 +6,7 @@ import Caelestia.Config
 import qs.components
 import qs.services
 import qs.modules.nexus
-import "./components"
+import qs.modules.nexus.components
 
 Item {
     id: root
@@ -60,6 +60,8 @@ Item {
         id: layout
 
         anchors.fill: parent
+        anchors.leftMargin: Tokens.padding.small
+        anchors.rightMargin: Tokens.padding.small
         anchors.topMargin: Tokens.padding.large
         anchors.bottomMargin: Tokens.padding.smaller
         spacing: 0
@@ -171,11 +173,8 @@ Item {
                 }
 
                 StateLayer {
-                    function onClicked() {
-                        root.session.toggleSidebar();
-                    }
-
                     color: Colours.palette.m3onSurface
+                    onClicked: root.session.toggleSidebar()
                 }
 
                 MaterialIcon {

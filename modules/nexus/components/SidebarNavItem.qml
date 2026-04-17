@@ -4,7 +4,7 @@ import QtQuick
 import Caelestia.Config
 import qs.components
 import qs.services
-import ".."
+import qs.modules.nexus
 
 Item {
     id: root
@@ -58,7 +58,8 @@ Item {
         }
 
         StateLayer {
-            function onClicked() {
+            color: root.isActive || root.isChildActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
+            onClicked: {
                 if (root.isDirect) {
                     root.session.setCategory(root.catId);
                 } else if (root.collapsed) {
@@ -68,8 +69,6 @@ Item {
                     root.session.expandedCategory = root.session.expandedCategory === root.catId ? "" : root.catId;
                 }
             }
-
-            color: root.isActive || root.isChildActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
         }
 
         MaterialIcon {
