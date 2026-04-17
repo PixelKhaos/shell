@@ -17,6 +17,7 @@ Item {
     required property ShellScreen screen
 
     readonly property int rounding: floating ? 0 : Tokens.rounding.normal
+    readonly property int borderPad: 50
 
     property bool floating: false
     property alias active: session.activeCategory
@@ -35,15 +36,51 @@ Item {
     implicitWidth: implicitHeight * 1.67
     implicitHeight: screen.height * 0.85
 
+    StyledRect {
+        id: contentOuter
+
+        Layout.fillWidth: true
+        Layout.fillHeight: true
+
+        topRightRadius: root.rounding
+        bottomRightRadius: root.rounding
+        color: "transparent"
+
+        Item {
+            anchors.fill: parent
+            anchors.margins: 10
+
+            StyledRect {
+                id: contentInner
+
+                anchors.fill: parent
+                radius: Tokens.rounding.small
+                color: "transparent"
+                clip: true
+
+                ContentArea {
+                    anchors.fill: parent
+                    session: root.session
+                }
+            }
+        }
+    }
+
     Item {
         id: blobLayer
 
         anchors.fill: parent
+        opacity: Colours.tPalette.m3surfaceContainer.a
+        layer.enabled: true // So children don't opacity stack
+
+        Behavior on opacity {
+            Anim {}
+        }
 
         BlobGroup {
             id: blobGroup
 
-            color: Colours.tPalette.m3surfaceContainer
+            color: Qt.alpha(Colours.tPalette.m3surfaceContainer, 1)
             smoothing: 16
 
             Behavior on color {
@@ -53,116 +90,39 @@ Item {
 
         // Border frame
         BlobInvertedRect {
-            property real pad: 50
-
             anchors.fill: parent
-            anchors.margins: -pad
+            anchors.margins: -root.borderPad
             group: blobGroup
             radius: Tokens.rounding.small
-            borderLeft: sidebarContainer.width + 10 + pad
-            borderTop: 10 + pad
-            borderRight: 10 + pad
-            borderBottom: 10 + pad
+            borderLeft: sidebar.width + 10 + root.borderPad
+            borderTop: 10 + root.borderPad
+            borderRight: 10 + root.borderPad
+            borderBottom: 10 + root.borderPad
         }
 
         BlobRect {
             id: notchBlob
 
+            anchors.right: parent.right
             group: blobGroup
-            x: root.width - (closeBtn.width + maximizeBtn.width)
-            y: 0
             implicitWidth: closeBtn.width + maximizeBtn.width
             implicitHeight: closeBtn.height
-            radius: 0
             bottomLeftRadius: Tokens.rounding.small
             deformScale: 0
         }
-    }
-
-    RowLayout {
-        id: mainLayout
-
-        anchors.fill: parent
-        spacing: 0
-
-        StyledRect {
-            id: sidebarContainer
-
-            Layout.fillHeight: true
-            Layout.preferredWidth: session.sidebarCollapsed ? 100 : 250
-            clip: false
-
-            topLeftRadius: root.rounding
-            bottomLeftRadius: root.rounding
-            color: "transparent"
-
-            Behavior on Layout.preferredWidth {
-                Anim {
-                    type: Anim.DefaultSpatial
-                }
-            }
-
-            Sidebar {
-                id: sidebar
-
-                anchors.fill: parent
-                anchors.leftMargin: 5
-                anchors.rightMargin: 5
-                session: root.session
-            }
-        }
-
-        StyledRect {
-            id: contentOuter
-
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-
-            topRightRadius: root.rounding
-            bottomRightRadius: root.rounding
-            color: "transparent"
-
-            Item {
-                anchors.fill: parent
-                anchors.margins: 10
-
-                StyledRect {
-                    id: contentInner
-
-                    anchors.fill: parent
-                    radius: Tokens.rounding.small
-                    color: "transparent"
-                    clip: true
-
-                    ContentArea {
-                        anchors.fill: parent
-                        session: root.session
-                    }
-                }
-            }
-        }
-    }
-
-    // Overlay blobs
-    Item {
-        x: sidebarContainer.width
-        y: 0
-        width: root.width - sidebarContainer.width
-        height: root.height
-        clip: true
 
         BlobRect {
             id: flyoutBlob
 
             group: blobGroup
-            x: flyout.x - sidebarContainer.width
+            x: flyout.x
             y: flyout.y
             implicitWidth: flyout.drawerWidth
             implicitHeight: flyout.drawerHeight
             radius: Tokens.rounding.small
-            topLeftRadius: 0
-            bottomLeftRadius: 0
-            topRightRadius: flyout.y <= 0 ? 0 : Tokens.rounding.small
+            // topLeftRadius: 0
+            // bottomLeftRadius: 0
+            // topRightRadius: flyout.y <= 0 ? 0 : Tokens.rounding.small
             deformScale: 0.00001
             stiffness: 200
             damping: 16
@@ -172,18 +132,34 @@ Item {
             id: popoutBlob
 
             group: blobGroup
-            x: unifiedPopout.x - sidebarContainer.width
+            x: unifiedPopout.x
             y: unifiedPopout.y
             implicitWidth: unifiedPopout.drawerWidth
             implicitHeight: unifiedPopout.drawerHeight
             visible: session.sidebarCollapsed
             radius: Tokens.rounding.normal
-            topLeftRadius: 0
-            topRightRadius: 0
-            bottomLeftRadius: 0
+            // topLeftRadius: 0
+            // topRightRadius: 0
+            // bottomLeftRadius: 0
             deformScale: 0.00001
             stiffness: 200
             damping: 16
+        }
+    }
+
+    Sidebar {
+        id: sidebar
+
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        implicitWidth: session.sidebarCollapsed ? 100 : 250
+
+        session: root.session
+
+        Behavior on implicitWidth {
+            Anim {
+                type: Anim.DefaultSpatial
+            }
         }
     }
 
@@ -252,14 +228,12 @@ Item {
         flyoutCategory: sidebar.flyoutCategory
         open: session.sidebarCollapsed && sidebar.flyoutCategory !== ""
 
-        x: sidebarContainer.width
+        x: sidebar.width
         y: sidebar.flyoutTop
 
         onHoverEntered: sidebar.cancelFlyoutClose()
         onHoverExited: sidebar.scheduleFlyoutClose()
-        onChildClicked: function (id) {
-            session.setCategory(id);
-        }
+        onChildClicked: id => session.setCategory(id)
 
         Behavior on y {
             enabled: flyout.open
@@ -289,7 +263,7 @@ Item {
     SidebarPopout {
         id: unifiedPopout
 
-        x: sidebarContainer.width
+        x: sidebar.width
         y: 0
         visible: session.sidebarCollapsed
         touchingTop: true
@@ -307,9 +281,9 @@ Item {
     }
 
     MouseArea {
-        x: sidebarContainer.width
+        x: sidebar.width
         y: 0
-        width: parent.width - sidebarContainer.width
+        width: parent.width - sidebar.width
         height: parent.height
         z: -1
         visible: session.sidebarCollapsed && (session.searchPopoutOpen || session.configPopoutOpen)

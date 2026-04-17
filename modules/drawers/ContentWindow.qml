@@ -124,6 +124,10 @@ StyledWindow {
             shadowColor: Qt.alpha(Colours.palette.m3shadow, Math.max(0, root.shadowOpacity))
         }
 
+        Behavior on opacity {
+            Anim {}
+        }
+
         BlobGroup {
             id: blobGroup
 

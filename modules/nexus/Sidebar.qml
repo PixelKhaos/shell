@@ -60,6 +60,8 @@ Item {
         id: layout
 
         anchors.fill: parent
+        anchors.leftMargin: Tokens.padding.small
+        anchors.rightMargin: Tokens.padding.small
         anchors.topMargin: Tokens.padding.large
         anchors.bottomMargin: Tokens.padding.smaller
         spacing: 0
