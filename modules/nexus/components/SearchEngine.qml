@@ -63,14 +63,13 @@ ColumnLayout {
                     color: Qt.alpha(Colours.palette.m3onSurface, 0.5)
 
                     StateLayer {
-                        function onClicked() {
+                        radius: Tokens.rounding.full
+                        color: Colours.palette.m3onSurface
+                        onClicked: {
                             searchField.text = "";
                             root.session.searchQuery = "";
                             searchField.forceActiveFocus();
                         }
-
-                        radius: Tokens.rounding.full
-                        color: Colours.palette.m3onSurface
                     }
                 }
             }
@@ -113,14 +112,12 @@ ColumnLayout {
                     height: 56
 
                     StateLayer {
-                        function onClicked() {
+                        radius: Tokens.rounding.normal
+                        color: Colours.palette.m3onSurface
+                        onClicked: {
                             root.session.setSearchNavigate(resultDelegate.modelData.categoryId, resultDelegate.modelData.tab || "");
                             root.session.searchPopoutOpen = false;
                         }
-
-                        anchors.fill: parent
-                        radius: Tokens.rounding.normal
-                        color: Colours.palette.m3onSurface
                     }
 
                     Row {

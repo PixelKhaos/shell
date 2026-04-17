@@ -173,11 +173,8 @@ Item {
                 }
 
                 StateLayer {
-                    function onClicked() {
-                        root.session.toggleSidebar();
-                    }
-
                     color: Colours.palette.m3onSurface
+                    onClicked: root.session.toggleSidebar()
                 }
 
                 MaterialIcon {

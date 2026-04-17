@@ -41,11 +41,8 @@ Item {
         }
 
         StateLayer {
-            function onClicked() {
-                root.session.setCategory(root.modelData.id);
-            }
-
             color: root.isActive ? Colours.palette.m3onSecondaryContainer : Colours.palette.m3onSurface
+            onClicked: root.session.setCategory(root.modelData.id)
         }
 
         MaterialIcon {

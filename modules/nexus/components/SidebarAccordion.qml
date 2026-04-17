@@ -72,11 +72,8 @@ Item {
                     }
 
                     StateLayer {
-                        function onClicked() {
-                            root.session.setCategory(childDelegate.modelData.id);
-                        }
-
                         color: childDelegate.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                        onClicked: root.session.setCategory(childDelegate.modelData.id)
                     }
 
                     Row {

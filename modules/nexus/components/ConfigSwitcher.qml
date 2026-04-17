@@ -119,13 +119,12 @@ ColumnLayout {
                 }
 
                 StateLayer {
-                    function onClicked() {
+                    radius: parent.radius
+                    color: Colours.palette.m3onSurface
+                    onClicked: {
                         root.session.activeConfig = configDelegate.modelData.id;
                         root.session.configPopoutOpen = false;
                     }
-
-                    radius: parent.radius
-                    color: Colours.palette.m3onSurface
                 }
             }
         }

@@ -156,12 +156,9 @@ Item {
                             }
 
                             StateLayer {
-                                function onClicked() {
-                                    root.childClicked(flyoutChild.modelData.id);
-                                }
-
                                 radius: Tokens.rounding.normal
                                 color: flyoutChild.isActive ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                                onClicked: root.childClicked(flyoutChild.modelData.id)
                             }
 
                             Column {

@@ -254,12 +254,9 @@ Item {
                         }
 
                         StateLayer {
-                            function onClicked() {
-                                root.activeTabIndex = tabItem.index;
-                            }
-
                             radius: Tokens.rounding.small
                             color: root.activeTabIndex === tabItem.index ? Colours.palette.m3primary : Colours.palette.m3onSurface
+                            onClicked: root.activeTabIndex = tabItem.index
                         }
                     }
                 }
