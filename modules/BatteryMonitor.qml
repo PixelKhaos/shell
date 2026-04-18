@@ -22,7 +22,7 @@ Scope {
     property bool settingsModified: false
     property bool initialized: false
 
-        function applyVisualEffects(settings): void {
+    function applyVisualEffects(settings): void {
         const options = {};
         if (settings.disableAnimations === "disable")
             options["animations:enabled"] = 0;
@@ -186,7 +186,6 @@ Scope {
     }
 
     Component.onCompleted: initTimer.start()
-    
 
     Timer {
         id: initTimer
