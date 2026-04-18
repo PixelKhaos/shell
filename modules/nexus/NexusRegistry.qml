@@ -1,6 +1,7 @@
 pragma Singleton
 
 import QtQuick
+import Quickshell.Services.UPower
 
 QtObject {
     id: root
@@ -196,8 +197,8 @@ QtObject {
         {
             label: "Power Mode",
             category: "power",
-            tab: "Power Modes & Inhibit",
-            keywords: ["power", "mode", "balanced", "performance"]
+            tab: "Inhibit and idle",
+            keywords: ["inhibit", "idle", "timeout", "sleep", "suspend", "lock"]
         },
         {
             label: "Battery Behavior",
@@ -400,7 +401,7 @@ QtObject {
                 label: "Power",
                 icon: "power_settings_new",
                 isDirect: true,
-                tabs: ["Power Modes & Inhibit", "Battery Behavior"],
+                tabs: ["Inhibit and idle", "Battery Behavior"],
                 title: "Power",
                 description: "Power management and battery settings",
                 children: []
@@ -487,7 +488,10 @@ QtObject {
     }
 
     function getCategoryTabs(id) {
-        return getById(id)?.tabs ?? [];
+        const tabs = getById(id)?.tabs ?? [];
+        if (id === "power" && !(UPower.displayDevice?.isLaptopBattery ?? false))
+            return tabs.filter(t => t !== "Battery Behavior");
+        return tabs;
     }
 
     function isChildActive(parentId, activeId) {

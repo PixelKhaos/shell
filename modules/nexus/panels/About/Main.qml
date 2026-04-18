@@ -152,13 +152,13 @@ Item {
 
         ColumnLayout {
             width: scrollView.width
-            spacing: Tokens.spacing.large * 2
 
             // Header Section
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignHCenter
                 spacing: Tokens.spacing.small
+                Layout.bottomMargin: Tokens.padding.large * 3
 
                 RowLayout {
                     Layout.alignment: Qt.AlignHCenter
@@ -178,12 +178,12 @@ Item {
                     ColumnLayout {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignLeft
-                        Layout.bottomMargin: -30
+                        Layout.bottomMargin: -35
 
                         StyledText {
                             text: "Caelestia"
                             Layout.alignment: Qt.AlignLeft
-                            Layout.bottomMargin: -15
+                            Layout.bottomMargin: -10
                             font.pointSize: Tokens.font.size.extraLarge + 8
                             font.weight: Font.Light
                             color: Colours.palette.m3onSurface
@@ -203,7 +203,6 @@ Item {
                 id: infoGrid
 
                 Layout.fillWidth: true
-                Layout.margins: Tokens.padding.large * 2
                 columns: width < 500 ? 1 : 2
                 columnSpacing: Tokens.spacing.large * 2
                 rowSpacing: Tokens.spacing.large
@@ -272,7 +271,7 @@ Item {
             // Links
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.margins: Tokens.padding.large * 2
+                Layout.topMargin: Tokens.padding.large * 2
                 spacing: Tokens.spacing.normal
 
                 RowLayout {
@@ -304,7 +303,6 @@ Item {
                     color: Qt.alpha(Colours.palette.m3onSurface, 0.12)
                 }
 
-                // Link buttons in a Flow for responsiveness
                 Flow {
                     Layout.fillWidth: true
                     spacing: Tokens.spacing.normal
@@ -313,21 +311,21 @@ Item {
                         implicitWidth: 140
                         icon: "chat"
                         text: "Discord"
-                        url: "https://discord.gg/caelestia"
+                        url: "https://discord.gg/BGDCFCmMBk"
                     }
 
                     LinkButton {
                         implicitWidth: 140
                         icon: "code"
                         text: "Shell Repo"
-                        url: "https://github.com/caelestia-dev/shell"
+                        url: "https://github.com/caelestia-dots/shell"
                     }
 
                     LinkButton {
                         implicitWidth: 140
                         icon: "terminal"
                         text: "CLI Repo"
-                        url: "https://github.com/caelestia-dev/cli"
+                        url: "https://github.com/caelestia-dots/cli"
                     }
                 }
             }

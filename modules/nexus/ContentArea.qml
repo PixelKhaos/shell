@@ -1,12 +1,14 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Caelestia.Config
 import qs.components
 import qs.services
 import qs.modules.nexus
+import qs.modules.nexus.components //qmllint disable unused-imports
+import qs.modules.nexus.components.power //qmllint disable unused-imports
+import qs.modules.nexus.components.common //qmllint disable unused-imports
 
 Item {
     id: root
@@ -14,7 +16,7 @@ Item {
     required property NexusSession session
 
     readonly property var activeConfig: NexusRegistry.getById(session.activeCategory)
-    readonly property var tabs: activeConfig ? activeConfig.tabs : []
+    readonly property var tabs: activeConfig ? NexusRegistry.getCategoryTabs(activeConfig.id) : []
 
     property int activeTabIndex: 0
     property string _prevCategory: ""
@@ -53,7 +55,6 @@ Item {
             _prevConfig = null;
             _prevTabs = [];
             activeTabIndex = 0;
-            tabSwipeView.currentIndex = 0;
             contentContainer.opacity = 0;
             _slideOffset = 0;
             _categoryTransitioning = false;
@@ -62,15 +63,12 @@ Item {
             _prevConfig = activeConfig;
             _prevTabs = tabs;
             activeTabIndex = 0;
-            tabSwipeView.currentIndex = 0;
             contentFadeOut.stop();
             contentContainer.opacity = 0;
             _slideOffset = contentContainer.height * 0.15;
             contentFadeIn.restart();
             _categoryTransitioning = false;
         } else {
-            activeTabIndex = 0;
-            tabSwipeView.currentIndex = 0;
             _categoryTransitioning = true;
             contentFadeOut.start();
         }
@@ -78,9 +76,6 @@ Item {
     }
 
     onActiveTabIndexChanged: {
-        if (!_categoryTransitioning && _prevCategory === session.activeCategory && _prevCategory !== "") {
-            tabSwipeView.currentIndex = activeTabIndex;
-        }
         tabIndicatorUpdate.restart();
     }
 
@@ -106,7 +101,7 @@ Item {
             root._prevCategory = root.session.activeCategory;
             root._prevConfig = root.activeConfig;
             root._prevTabs = root.tabs;
-            tabSwipeView.currentIndex = 0;
+            root.activeTabIndex = 0;
             root._slideOffset = contentContainer.height * 0.15;
             contentFadeIn.start();
         }
@@ -160,11 +155,9 @@ Item {
         id: contentContainer
 
         anchors.fill: parent
-        anchors.rightMargin: Tokens.padding.large * 2
-        anchors.leftMargin: Tokens.padding.large * 2
-        anchors.topMargin: Tokens.padding.large
-        anchors.bottomMargin: Tokens.padding.large
+        anchors.margins: Tokens.padding.large * 3
         spacing: Tokens.spacing.normal
+
         opacity: 1
 
         transform: Translate {
@@ -198,6 +191,7 @@ Item {
 
             Layout.fillWidth: true
             Layout.topMargin: Tokens.spacing.smaller
+            Layout.bottomMargin: Tokens.spacing.large
             Layout.preferredHeight: 48
             visible: root._prevTabs.length > 0
 
@@ -291,54 +285,36 @@ Item {
             }
         }
 
-        // Panel content
-        SwipeView {
-            id: tabSwipeView
+        // Panel content - single loader, panel manages its own tabs
+        Loader {
+            id: panelLoader
 
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.topMargin: Tokens.spacing.normal
 
-            interactive: false
-            currentIndex: root.activeTabIndex
-            clip: true
+            readonly property string panelId: root._prevConfig ? root._prevConfig.id.charAt(0).toUpperCase() + root._prevConfig.id.slice(1) : ""
+            readonly property string targetSource: panelId ? "panels/" + panelId + "/Main.qml" : ""
+            property string resolvedSource: targetSource
 
-            Repeater {
-                model: root._prevTabs.length > 0 ? root._prevTabs.length : 1
+            asynchronous: true
+            source: resolvedSource
 
-                delegate: Item {
-                    required property int index
+            onTargetSourceChanged: resolvedSource = targetSource
 
-                    Loader {
-                        id: tabPanelLoader
-
-                        readonly property string panelId: root._prevConfig ? root._prevConfig.id.charAt(0).toUpperCase() + root._prevConfig.id.slice(1) : ""
-                        readonly property string targetSource: panelId ? "panels/" + panelId + "/Main.qml" : ""
-                        property string resolvedSource: targetSource
-
-                        anchors.centerIn: parent
-                        width: parent.width
-                        height: parent.height
-                        asynchronous: true
-                        source: resolvedSource
-
-                        onTargetSourceChanged: resolvedSource = targetSource
-
-                        onStatusChanged: {
-                            if (status === Loader.Error && resolvedSource !== "panels/PlaceholderPanel.qml") {
-                                Qt.callLater(() => {
-                                    resolvedSource = "panels/PlaceholderPanel.qml";
-                                });
-                            }
-                        }
-
-                        onLoaded: {
-                            if (item && item.hasOwnProperty("activeTabIndex")) {
-                                item.activeTabIndex = parent.index;
-                            }
-                        }
-                    }
+            onStatusChanged: {
+                if (status === Loader.Error && resolvedSource !== "panels/PlaceholderPanel.qml") {
+                    Qt.callLater(() => {
+                        resolvedSource = "panels/PlaceholderPanel.qml";
+                    });
                 }
+            }
+
+            Binding {
+                target: panelLoader.item
+                property: "activeTabIndex"
+                value: root.activeTabIndex
+                when: panelLoader.item && panelLoader.item.hasOwnProperty("activeTabIndex")
             }
         }
     }

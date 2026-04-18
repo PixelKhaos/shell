@@ -42,8 +42,6 @@ Item {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.margins: 10
-        anchors.leftMargin: 0
 
         clip: true
         session: root.session
