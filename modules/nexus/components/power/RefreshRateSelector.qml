@@ -72,6 +72,6 @@ SplitButtonRow {
             }
         }
     }
-
-    onSelected: item => root.rateChanged(item.val) //qmllint disable missing-property
+    //qmllint disable missing-property
+    onSelected: item => root.rateChanged(item.val)
 }

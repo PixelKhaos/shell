@@ -36,6 +36,6 @@ SplitButtonRow {
             }
         }
     }
-
-    onSelected: item => root.profileChanged(item.val) //qmllint disable missing-property
+    //qmllint disable missing-property
+    onSelected: item => root.profileChanged(item.val)
 }

@@ -97,54 +97,97 @@ ColumnLayout {
         id: thresholdsModel
     }
 
-    // Add threshold button
-    StyledRect {
+    ListView {
+        id: listView
+
         Layout.fillWidth: true
-        Layout.preferredHeight: 56
-        radius: Tokens.rounding.normal
-        color: Colours.palette.m3primary
-        opacity: root.enabled ? 1 : 0.4
-
-        TapHandler {
-            onTapped: root.addThreshold()
-        }
-
-        HoverHandler {
-            id: addBtnHover
-
-            onHoveredChanged: parent.color = hovered ? Qt.lighter(Colours.palette.m3primary, 1.1) : Colours.palette.m3primary
-        }
-
-        RowLayout {
-            anchors.centerIn: parent
-            spacing: Tokens.spacing.normal
-
-            MaterialIcon {
-                text: "add_circle"
-                font.pointSize: Tokens.font.size.large
-                color: Colours.palette.m3onPrimary
-            }
-
-            StyledText {
-                text: qsTr("Add threshold")
-                font.pointSize: Tokens.font.size.normal
-                color: Colours.palette.m3onPrimary
-            }
-        }
-    }
-
-    StyledText {
-        visible: thresholdsModel.count === 0
-        Layout.fillWidth: true
-        Layout.topMargin: Tokens.spacing.normal
-        horizontalAlignment: Text.AlignHCenter
-        text: qsTr("No thresholds configured")
-        color: Qt.alpha(Colours.palette.m3onSurface, 0.6)
-        font.pointSize: Tokens.font.size.small
-    }
-
-    Repeater {
+        Layout.preferredHeight: contentHeight
+        spacing: Tokens.spacing.normal
         model: thresholdsModel
+        clip: true
+
+        add: Transition {
+            ParallelAnimation {
+                Anim {
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                }
+                Anim {
+                    property: "scale"
+                    from: 0.80
+                    to: 1
+                }
+            }
+        }
+        remove: Transition {
+            ParallelAnimation {
+                Anim {
+                    property: "opacity"
+                    from: 1
+                    to: 0
+                }
+                Anim {
+                    property: "scale"
+                    from: 1
+                    to: 0.80
+                }
+            }
+        }
+        removeDisplaced: Transition {
+            Anim {
+                property: "y"
+            }
+        }
+
+        footer: StyledText {
+            visible: thresholdsModel.count === 0
+            width: ListView.view.width
+            horizontalAlignment: Text.AlignHCenter
+            text: qsTr("No thresholds configured")
+            color: Qt.alpha(Colours.palette.m3onSurface, 0.6)
+            font.pointSize: Tokens.font.size.small
+        }
+
+        header: Item {
+            width: ListView.view.width
+            height: 56 + Tokens.spacing.normal
+
+            StyledRect {
+                anchors.fill: parent
+                anchors.bottomMargin: Tokens.spacing.normal
+                radius: Tokens.rounding.normal
+                color: Colours.palette.m3primary
+                opacity: root.enabled ? 1 : 0.4
+
+                TapHandler {
+                    onTapped: root.addThreshold()
+                }
+
+                HoverHandler {
+                    id: addBtnHover
+
+                    onHoveredChanged: parent.color = hovered ? Qt.lighter(Colours.palette.m3primary, 1.1) : Colours.palette.m3primary
+                }
+
+                RowLayout {
+                    anchors.centerIn: parent
+                    spacing: Tokens.spacing.normal
+
+                    MaterialIcon {
+                        text: "add_circle"
+                        font.pointSize: Tokens.font.size.large
+                        color: Colours.palette.m3onPrimary
+                    }
+
+                    StyledText {
+                        text: qsTr("Add threshold")
+                        font.pointSize: Tokens.font.size.normal
+                        color: Colours.palette.m3onPrimary
+                    }
+                }
+            }
+        }
 
         delegate: StyledRect {
             id: card
@@ -160,6 +203,7 @@ ColumnLayout {
 
             property bool editing: false
 
+            width: ListView.view.width
             Layout.fillWidth: true
             implicitHeight: (editing ? cardCol.implicitHeight : headerRow.implicitHeight) + Tokens.padding.large * 2
             radius: Tokens.rounding.normal

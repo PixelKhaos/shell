@@ -110,53 +110,96 @@ ColumnLayout {
         id: timeoutsModel
     }
 
-    // Add timeout button
-    StyledRect {
+    ListView {
+        id: listView
+
         Layout.fillWidth: true
-        Layout.preferredHeight: 56
-        radius: Tokens.rounding.normal
-        color: Colours.palette.m3primary
-
-        TapHandler {
-            onTapped: root.addTimeout()
-        }
-
-        HoverHandler {
-            id: addBtnHover
-
-            onHoveredChanged: parent.color = hovered ? Qt.lighter(Colours.palette.m3primary, 1.1) : Colours.palette.m3primary
-        }
-
-        RowLayout {
-            anchors.centerIn: parent
-            spacing: Tokens.spacing.normal
-
-            MaterialIcon {
-                text: "add_circle"
-                font.pointSize: Tokens.font.size.large
-                color: Colours.palette.m3onPrimary
-            }
-
-            StyledText {
-                text: qsTr("Add idle timeout")
-                font.pointSize: Tokens.font.size.normal
-                color: Colours.palette.m3onPrimary
-            }
-        }
-    }
-
-    StyledText {
-        visible: timeoutsModel.count === 0
-        Layout.fillWidth: true
-        Layout.topMargin: Tokens.spacing.normal
-        horizontalAlignment: Text.AlignHCenter
-        text: qsTr("No idle timeouts configured")
-        color: Qt.alpha(Colours.palette.m3onSurface, 0.6)
-        font.pointSize: Tokens.font.size.small
-    }
-
-    Repeater {
+        Layout.preferredHeight: contentHeight
+        spacing: Tokens.spacing.normal
         model: timeoutsModel
+        clip: true
+
+        header: Item {
+            width: ListView.view.width
+            height: 56 + Tokens.spacing.normal
+
+            StyledRect {
+                anchors.fill: parent
+                anchors.bottomMargin: Tokens.spacing.normal
+                radius: Tokens.rounding.normal
+                color: Colours.palette.m3primary
+
+                TapHandler {
+                    onTapped: root.addTimeout()
+                }
+
+                HoverHandler {
+                    id: addBtnHover
+
+                    onHoveredChanged: parent.color = hovered ? Qt.lighter(Colours.palette.m3primary, 1.1) : Colours.palette.m3primary
+                }
+
+                RowLayout {
+                    anchors.centerIn: parent
+                    spacing: Tokens.spacing.normal
+
+                    MaterialIcon {
+                        text: "add_circle"
+                        font.pointSize: Tokens.font.size.large
+                        color: Colours.palette.m3onPrimary
+                    }
+
+                    StyledText {
+                        text: qsTr("Add idle timeout")
+                        font.pointSize: Tokens.font.size.normal
+                        color: Colours.palette.m3onPrimary
+                    }
+                }
+            }
+        }
+
+        add: Transition {
+            ParallelAnimation {
+                Anim {
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                }
+                Anim {
+                    property: "scale"
+                    from: 0.80
+                    to: 1
+                }
+            }
+        }
+        remove: Transition {
+            ParallelAnimation {
+                Anim {
+                    property: "opacity"
+                    from: 1
+                    to: 0
+                }
+                Anim {
+                    property: "scale"
+                    from: 1
+                    to: 0.80
+                }
+            }
+        }
+        removeDisplaced: Transition {
+            Anim {
+                property: "y"
+            }
+        }
+
+        footer: StyledText {
+            visible: timeoutsModel.count === 0
+            width: ListView.view.width
+            horizontalAlignment: Text.AlignHCenter
+            text: qsTr("No idle timeouts configured")
+            color: Qt.alpha(Colours.palette.m3onSurface, 0.6)
+            font.pointSize: Tokens.font.size.small
+        }
 
         delegate: StyledRect {
             id: card
@@ -168,7 +211,7 @@ ColumnLayout {
 
             property bool editing: false
 
-            Layout.fillWidth: true
+            width: ListView.view.width
             implicitHeight: (editing ? cardCol.implicitHeight : headerRow.implicitHeight) + Tokens.padding.large * 2
             radius: Tokens.rounding.normal
             color: Colours.layer(Colours.palette.m3surfaceContainer, 2)
